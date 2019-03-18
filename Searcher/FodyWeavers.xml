@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Weavers>
+  <!--Disable the "Costura" node to allow for debugging. This will then, not embed the dll files into the exe.-->
+  <Costura />
+</Weavers>

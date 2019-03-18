@@ -1,0 +1,14 @@
+﻿<Window x:Class="Searcher.ResultsPopout"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="Searcher.ico"
+        Title="ResultsPopout" Height="300" Width="300">
+    <Grid>
+        <RichTextBox Name="TxtResults" IsReadOnly="True" IsReadOnlyCaretVisible="True" 
+                         HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <RichTextBox.LayoutTransform>
+                <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
+            </RichTextBox.LayoutTransform>
+        </RichTextBox>
+    </Grid>
+</Window>

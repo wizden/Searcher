@@ -1,0 +1,54 @@
+﻿<!--
+    * Searcher - Utility to search file content
+     * Copyright (C) 2018  Dennis Joseph
+     * 
+     * This file is part of Searcher.
+
+     * Searcher is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, either version 3 of the License, or
+     * (at your option) any later version.
+     * 
+     * Searcher is distributed in the hope that it will be useful,
+     * but WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     * GNU General Public License for more details.
+     * 
+     * You should have received a copy of the GNU General Public License
+     * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
+    -->
+<Window x:Class="Searcher.SearchedFileList"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Searched File List" Height="300" Width="600" 
+        ShowInTaskbar="False" WindowStyle="ToolWindow"
+        MinHeight="300" MinWidth="500"
+        KeyDown="SearchedFileList_KeyDown" Topmost="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Button Name="BtnCopyList" Content="Copy All" HorizontalAlignment="Left" Margin="1"
+                    Click="BtnCopyList_Click"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <ListBox Name="LstFileList" SelectionMode="Extended" PreviewMouseRightButtonDown="LstFileList_PreviewMouseRightButtonDown"  />
+        </Grid>
+        <Grid Grid.Row="2" Name="GrdFilesExcluded" MaxHeight="80" Visibility="Collapsed">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" Text="Temporarily Excluded" Margin="2" TextWrapping="Wrap" Width="70"/>
+                <ListBox Name="LstFilesExcluded" KeyDown="LstFilesExcluded_KeyDown" SelectionMode="Extended" ToolTip="Press Delete to remove item(s)." />
+            </DockPanel>
+        </Grid>
+        <Grid Grid.Row="3" Name="GrdFilesExcludedAlways" MaxHeight="80" Visibility="Collapsed">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" Text="Always Excluded" Margin="2" TextWrapping="Wrap" Width="70"/>
+                <ListBox Name="LstFilesAlwaysExcluded" KeyDown="LstFilesAlwaysExcluded_KeyDown" SelectionMode="Extended" ToolTip="Press Delete to remove item(s)." />
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Window>

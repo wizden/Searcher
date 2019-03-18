@@ -1,0 +1,44 @@
+﻿<!--
+    * Searcher - Utility to search file content
+     * Copyright (C) 2018  Dennis Joseph
+     * 
+     * This file is part of Searcher.
+
+     * Searcher is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, either version 3 of the License, or
+     * (at your option) any later version.
+     * 
+     * Searcher is distributed in the hope that it will be useful,
+     * but WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     * GNU General Public License for more details.
+     * 
+     * You should have received a copy of the GNU General Public License
+     * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
+    -->
+<Window x:Class="Searcher.ContentPopup"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Searcher"
+        mc:Ignorable="d" ShowInTaskbar="False" ShowActivated="True"
+        WindowStyle="None" ResizeMode="CanResize" Name="ContentPopupWindow"
+        MouseEnter="ContentPopupWindow_MouseEnter" MouseLeave="ContentPopup_MouseLeave"
+        Title="ContentPopup" Height="300" Width="500"
+        MinHeight="200" MinWidth="400"
+        MaxHeight="600" MaxWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Name="GrdColLineNumber" Width="30" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <TextBox Grid.Column="0" IsEnabled="False" Name="TxtLineNumbers" Margin="0" AcceptsReturn="True" IsReadOnly="True" />
+        <TextBox Grid.Column="1" Margin="0" Name="TxtContent" AcceptsReturn="True" IsReadOnly="True"
+                 IsReadOnlyCaretVisible="True" ScrollViewer.ScrollChanged="TxtContent_ScrollChanged"
+                 HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                 KeyDown="TxtContent_KeyDown">
+        </TextBox>
+    </Grid>
+</Window>
