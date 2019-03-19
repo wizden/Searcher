@@ -16,5 +16,16 @@ This utility is intended to help in search/grep for multiple content in multiple
 * Customise the UI based on settings in the preferences file (if set)
 * No installer. Setup / installation not required.
 
+Searcher  is free software distributed under the GNU GPL. Ensure that the distribution package contains the following files:
+* Searcher.exe  - File content search utility
+* COPYING.txt   - License information
+* README.txt    - README file
+
+Special thanks to the creators of the following libraries that is used by Searcher:
+   - Costura Fody  - combine libraries into executable
+   - iTextSharp    - reading pdf files.
+   - OpenXml       - reading files saved using openxml format.
+- SharpCompress - library to deal with many compression types and formats.
+
 ## Additional Links
 [Using Searcher](https://github.com/wizden/Searcher/wiki/Using-Searcher)
