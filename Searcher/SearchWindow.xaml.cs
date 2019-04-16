@@ -145,6 +145,11 @@ namespace Searcher
         private List<string> filesSearched;
 
         /// <summary>
+        /// Track count of number of files already searched.
+        /// </summary>
+        private int filesSearchedCounter = 0;
+
+        /// <summary>
         /// Private store for the list of files that will not be searched (temporarily or always).
         /// </summary>
         private List<string> filesToExclude = new List<string>();
@@ -701,11 +706,11 @@ namespace Searcher
                 this.executionTime.Start();
                 this.searchTimer.Start();
                 Task.Factory.StartNew(
-                () =>
+                async () =>
                 {
                     try
                     {
-                        this.PerformSearch(searchText, searchPath, filters);
+                        await this.PerformSearch(searchText, searchPath, filters);
                     }
                     catch (Exception ex)
                     {
@@ -724,27 +729,27 @@ namespace Searcher
                             this.SetSearchError(ex.Message);
                         }
                     }
-                },
-                this.cancellationTokenSource.Token)
-                .ContinueWith((t) =>
-                {
-                    this.Dispatcher.Invoke(() =>
+                    finally
                     {
-                        this.executionTime.Stop();
-                        this.searchTimer.Stop();
-                        this.BtnCancel.IsEnabled = false;
-                        this.BtnSearch.IsEnabled = true;
-                        this.EnableSearchControls(true);
-                        this.CmbFindWhat.Focus();
-                        string elapsedTime = this.executionTime.Elapsed.ToString();
-                        this.executionTime.Reset();
-
-                        if (this.showExecutionTime)
+                        this.Dispatcher.Invoke(() =>
                         {
-                            MessageBox.Show(string.Format("Time taken for search: {0}", elapsedTime), "Search complete", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
-                        }
-                    });
-                });
+                            this.executionTime.Stop();
+                            this.searchTimer.Stop();
+                            this.BtnCancel.IsEnabled = false;
+                            this.BtnSearch.IsEnabled = true;
+                            this.EnableSearchControls(true);
+                            this.CmbFindWhat.Focus();
+                            string elapsedTime = this.executionTime.Elapsed.ToString();
+                            this.executionTime.Reset();
+
+                            if (this.showExecutionTime)
+                            {
+                                MessageBox.Show(string.Format("Time taken for search: {0}", elapsedTime), "Search complete", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                            }
+                        });
+                    }
+                },
+                this.cancellationTokenSource.Token);
             }
         }
 
@@ -1161,7 +1166,7 @@ namespace Searcher
         }
 
         /// <summary>
-        /// Sets up a directory to be exlcuded.
+        /// Sets up a directory to be excluded.
         /// </summary>
         /// <param name="sender">The sender object to get the file path.</param>
         /// <param name="e">The parameter is not used.</param>
@@ -1418,7 +1423,7 @@ namespace Searcher
         /// <param name="e">The MouseButtonEventArgs object.</param>
         private void Grid_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (this.distinctFilesFound && this.filesToSearch != null && this.filesToSearch.Count > 0 || (this.filesToExclude.Count > 0 || this.directoriesToExclude.Count > 0))
+            if ((this.distinctFilesFound && this.filesToSearch != null && this.filesToSearch.Count > 0) || (this.filesToExclude.Count > 0 || this.directoriesToExclude.Count > 0))
             {
                 SearchedFileList searchedFileList;
                 List<string> filesToAlwaysExclude = new List<string>();
@@ -1468,7 +1473,7 @@ namespace Searcher
                         this.directoriesToExclude.RemoveAll(tde => searchedFileList.FilesToInclude.Any(fi => Directory.Exists(fi) && fi == tde));
                         filesToAlwaysExclude.RemoveAll(fae => searchedFileList.FilesToInclude.Any(fi => File.Exists(fi) && fi == fae));
                         directoriesToAlwaysExclude.RemoveAll(fae => searchedFileList.FilesToInclude.Any(fi => Directory.Exists(fi) && fi == fae));
-                        SavePathsToAlwaysExclude(filesToAlwaysExclude, directoriesToAlwaysExclude);
+                        this.SavePathsToAlwaysExclude(filesToAlwaysExclude, directoriesToAlwaysExclude);
                     }
                 }
             }
@@ -1639,7 +1644,7 @@ namespace Searcher
                 MenuItem excludeDirectory = new MenuItem();
                 excludeDirectory.Header = "Exclude directory from search";
                 excludeDirectory.Tag = sender;
-                excludeDirectory.Click += ExcludeDirectory_Click;
+                excludeDirectory.Click += this.ExcludeDirectory_Click;
                 mnu.Items.Add(excludeDirectory);
 
                 ((Hyperlink)sender).ContextMenu = mnu;
@@ -1726,7 +1731,8 @@ namespace Searcher
         /// <param name="searchText">The text containing terms to search.</param>
         /// <param name="searchPath">The text containing paths to search.</param>
         /// <param name="filters">The text containing filters to use for the search.</param>
-        private void PerformSearch(string searchText, string searchPath, string filters)
+        /// <returns>Task object that performs the search.</returns>
+        private async Task PerformSearch(string searchText, string searchPath, string filters)
         {
             List<string> filtersToUse = filters.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList();
             List<string> searchPaths = searchPath.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList();
@@ -1761,7 +1767,7 @@ namespace Searcher
                 Task<List<string>[]> result = Task.WhenAll(pathsListTask);
                 result.Wait();
                 pathsListTask.ForEach(task => { this.filesToSearch.AddRange(task.Result); });
-                RemoveExclusionPaths();
+                this.RemoveExclusionPaths();
                 this.SetFileCounterProgressInformation(0, string.Format("Files found: {0}", this.filesToSearch.Count));
                 this.filesToSearch = this.filesToSearch.Distinct().OrderBy(f => f).ToList();      // Remove duplicates that could be added via path filters that cover the same item mulitple times.
                 this.distinctFilesFound = true;
@@ -1769,7 +1775,7 @@ namespace Searcher
 
                 if (this.searchModeParallel)
                 {
-                    this.SearchParallel(this.filesToSearch, termsToSearch);
+                    await this.SearchParallelAsync(this.filesToSearch, termsToSearch);
                 }
                 else
                 {
@@ -1863,7 +1869,7 @@ namespace Searcher
             foreach (string dirToExclude in this.directoriesToExclude)
             {
                 string exclDir = dirToExclude.ToUpper();
-                filesToSearch.RemoveAll(f => 
+                this.filesToSearch.RemoveAll(f => 
                 {
                     try
                     {
@@ -1991,45 +1997,79 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Get the search result and display in text box.
+        /// </summary>
+        /// <param name="fileName">The file name to search.</param>
+        /// <param name="matcher">The matcher object with configuration to determine how to search.</param>
+        /// <param name="termsToSearch">The terms to search.</param>
+        /// <returns>Task object that searches and displays the result.</returns>
+        private async Task SearchAndDisplayResultAsync(string fileName, Matcher matcher, IEnumerable<string> termsToSearch)
+        {
+            this.SetProgressInformation(string.Format("Searching: {0}", fileName));
+            Task<List<MatchedLine>> tskMatchedLines = Task.Run<List<MatchedLine>>(() => 
+            {
+                return matcher.GetMatch(fileName, termsToSearch);
+            });
+            
+            List<MatchedLine> matchedLines = await tskMatchedLines;
+            Interlocked.Increment(ref this.filesSearchedCounter);
+            this.SetFileCounterProgressInformation(this.filesSearchedCounter, string.Format("Processed Files {0} of {1} ({2} %)", this.filesSearchedCounter, this.filesToSearch.Count(), (int)(this.filesSearchedCounter * 100) / this.filesToSearch.Count()));
+
+            if (matchedLines != null && matchedLines.Count > 0)
+            {
+                // If a file returned multiple results (i.e. zip file with content), handle differently.
+                if (matchedLines.Select(ml => ml.FileName).Distinct().Count() > 1)
+                {
+                    var groupedMatches = matchedLines.GroupBy(f => f.FileName, (key, g) => new { FileName = key, MatchLine = g.ToList() });
+
+                    foreach (var groupedMatch in groupedMatches)
+                    {
+                        foreach (MatchedLine matchLine in groupedMatch.MatchLine)
+                        {
+                            matchLine.FileName = string.Empty;
+                        }
+
+                        groupedMatch.MatchLine[0].FileName = groupedMatch.FileName;
+                        this.AddResult(groupedMatch.MatchLine);
+                    }
+                }
+                else
+                {
+                    matchedLines = matchedLines.OrderBy(ml => ml.LineNumber).ThenBy(ml => ml.StartIndex).ToList();
+                    matchedLines.ForEach(ml => ml.FileName = string.Empty);
+                    matchedLines[0].FileName = fileName;
+                    this.AddResult(matchedLines);
+                }
+            }
+        }
+
+        /// <summary>
         /// Search for matches using parallel processing.
         /// </summary>
         /// <param name="fileNamePaths">The filenames with path to search for.</param>
         /// <param name="termsToSearch">The terms to search for.</param>
-        private void SearchParallel(IEnumerable<string> fileNamePaths, IEnumerable<string> termsToSearch)
+        /// <returns>Task object to search files asynchronously</returns>
+        private async Task SearchParallelAsync(IEnumerable<string> fileNamePaths, IEnumerable<string> termsToSearch)
         {
-            int counter = 0;
+            this.filesSearchedCounter = 0;
             ParallelOptions parallelOptions = new ParallelOptions();
             parallelOptions.CancellationToken = this.cancellationTokenSource.Token;
             Matcher matcher = new Matcher(this.matchWholeWord, this.searchModeRegex, this.multilineRegex, this.searchTypeAll, this.cancellationTokenSource, this.regexOptions);
-            parallelOptions.MaxDegreeOfParallelism = 4;     // Not dependant on CPU cores. The value 4 seems good enough for the algorithm.
-            Parallel.ForEach(
-                fileNamePaths,
-                parallelOptions,
-                (string fileName, ParallelLoopState state) =>
+            List<Task> searchTasks = new List<Task>();
+
+            try
+            {
+                fileNamePaths.ToList().ForEach((f) =>
                 {
-                    if (!string.IsNullOrWhiteSpace(fileName))
-                    {
-                        try
-                        {
-                            this.SearchAndDisplayResult(fileName, matcher, termsToSearch);
-                        }
-                        catch (Exception ex)
-                        {
-                            this.SetSearchError(ex.Message);
-                        }
-
-                        counter += 1;
-                        this.SetFileCounterProgressInformation(counter, string.Format("Processed Files {0} of {1} ({2} %)", counter, fileNamePaths.Count(), (int)(counter * 100) / fileNamePaths.Count()));
-
-                        if (this.cancellationTokenSource.IsCancellationRequested)
-                        {
-                            state.Stop();
-                        }
-                    }
+                    searchTasks.Add(Task.Run(() => this.SearchAndDisplayResultAsync(f, matcher, termsToSearch), this.cancellationTokenSource.Token));
                 });
 
-            counter = this.cancellationTokenSource.IsCancellationRequested ? counter : fileNamePaths.Count();     // If task cancelled, show the actual file processed count, else all files are processed.
-            this.SetSearchCompletedDetails(counter, fileNamePaths.Count(), this.matchesFound, this.filesWithMatch);
+                await Task.WhenAll(searchTasks);
+            }
+            finally
+            {
+                this.SetSearchCompletedDetails(this.filesSearchedCounter, fileNamePaths.Count(), this.matchesFound, this.filesWithMatch);
+            }
         }
 
         /// <summary>
