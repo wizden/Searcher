@@ -630,16 +630,23 @@ namespace SearcherLibrary
             {
                 if (!reader.Entry.IsDirectory)
                 {
-                    reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                    string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key);
-                    matchedLines.AddRange(this.localMatcherObj.GetMatch(fullFilePath, searchTerms));
-
-                    if (matchedLines != null && matchedLines.Count > 0)
+                    try
                     {
-                        // Want the exact path of the file - without the .extract part.
-                        string dirNameToDisplay = fullFilePath.Replace(TempExtractDirectoryName, string.Empty);
-                        matchedLines.Where(ml => string.IsNullOrEmpty(ml.FileName) || ml.FileName.Contains(TempExtractDirectoryName)).ToList()
-                            .ForEach(ml => ml.FileName = dirNameToDisplay);
+                        reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                        string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key);
+                        matchedLines.AddRange(this.localMatcherObj.GetMatch(fullFilePath, searchTerms));
+
+                        if (matchedLines != null && matchedLines.Count > 0)
+                        {
+                            // Want the exact path of the file - without the .extract part.
+                            string dirNameToDisplay = fullFilePath.Replace(TempExtractDirectoryName, string.Empty);
+                            matchedLines.Where(ml => string.IsNullOrEmpty(ml.FileName) || ml.FileName.Contains(TempExtractDirectoryName)).ToList()
+                                .ForEach(ml => ml.FileName = dirNameToDisplay);
+                        }
+                    }
+                    catch (PathTooLongException ptlex)
+                    {
+                        throw new PathTooLongException(string.Format("Error accessing entry {0} in archive {1} - {2}", reader.Entry.Key, fileName, ptlex.Message));
                     }
                 }
             }

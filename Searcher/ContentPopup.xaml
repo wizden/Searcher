@@ -24,7 +24,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Searcher"
         mc:Ignorable="d" ShowInTaskbar="False" ShowActivated="True"
-        WindowStyle="None" ResizeMode="CanResize" Name="ContentPopupWindow"
+        WindowStyle="ToolWindow" ResizeMode="CanResize" Name="ContentPopupWindow"
         MouseEnter="ContentPopupWindow_MouseEnter" MouseLeave="ContentPopup_MouseLeave"
         Title="ContentPopup" Height="300" Width="500"
         MinHeight="200" MinWidth="400"

@@ -53,7 +53,7 @@ namespace Searcher
     public partial class SearchWindow : Window, INotifyPropertyChanged
     {
         #region Private Fields
-        
+
         /// <summary>
         /// The maximum scale value allowed.
         /// </summary>
@@ -83,12 +83,12 @@ namespace Searcher
         /// Private store for setting the end index for strings where the length exceeds MaxStringLengthCheck.
         /// </summary>
         private const int MaxStringLengthDisplayIndexEnd = 200;
-        
+
         /// <summary>
         /// Private store for setting the start index for strings where the length exceeds MaxStringLengthCheck.
         /// </summary>
         private const int MaxStringLengthDisplayIndexStart = 100;
-        
+
         /// <summary>
         /// The minimum scale value allowed.
         /// </summary>
@@ -173,6 +173,11 @@ namespace Searcher
         /// Boolean indicating whether results are to be highlighted.
         /// </summary>
         private bool highlightResults = false;
+
+        /// <summary>
+        /// Private store for the default file name when downloading the latest release.
+        /// </summary>
+        private string latestReleaseDefaultFileName = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher_new.zip");
 
         /// <summary>
         /// Boolean indicating whether the search is case sensitive.
@@ -268,7 +273,7 @@ namespace Searcher
         /// Private store for the time the search was started.
         /// </summary>
         private DateTime searchStartTime = DateTime.Now;
-        
+
         /// <summary>
         /// Boolean indicating whether the search should look in sub folders.
         /// </summary>
@@ -293,6 +298,11 @@ namespace Searcher
         /// Boolean indicating whether the search should show the execution time.
         /// </summary>
         private bool showExecutionTime = false;
+
+        /// <summary>
+        /// Private store for the site that contains the latest update.
+        /// </summary>
+        private string siteWithLatestUpdate = string.Empty;
 
         /// <summary>
         /// Private store for the window height.
@@ -345,7 +355,7 @@ namespace Searcher
         /// <summary>
         /// Gets or sets the scale for the results window.
         /// </summary>
-        public double Scale 
+        public double Scale
         {
             get
             {
@@ -744,7 +754,7 @@ namespace Searcher
 
                             if (this.showExecutionTime)
                             {
-                                MessageBox.Show(string.Format("Time taken for search: {0}", elapsedTime), "Search complete", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                MessageBox.Show(string.Format("Time taken to get files and search: {0}", elapsedTime), "Search complete", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                             }
                         });
                     }
@@ -1078,12 +1088,11 @@ namespace Searcher
                             {
                                 if (await this.NewReleaseExistsAsync())
                                 {
-                                    string newProgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg");
-                                    if (!System.IO.Directory.Exists(newProgPath))
+                                    if (System.IO.File.Exists(this.latestReleaseDefaultFileName))
                                     {
-                                        string downloadedFile = await this.GetDownloadedUpdateFilenameAsync();
-                                        System.IO.Compression.ZipFile.ExtractToDirectory(downloadedFile, newProgPath);
-                                        System.IO.File.Delete(downloadedFile);
+                                        string newProgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg");
+                                        System.IO.Compression.ZipFile.ExtractToDirectory(this.latestReleaseDefaultFileName, newProgPath);
+                                        System.IO.File.Delete(this.latestReleaseDefaultFileName);
                                     }
                                 }
                             }
@@ -1226,30 +1235,37 @@ namespace Searcher
         /// <summary>
         /// Get the name of the updated application download file.
         /// </summary>
+        /// <param name="downloadUrl">The url path for the latest executable.</param>
         /// <returns>The name of the updated application download file.</returns>
-        private async Task<string> GetDownloadedUpdateFilenameAsync()
+        private async Task<string> GetDownloadedUpdateFilenameAsync(string downloadUrl)
         {
             string retVal = string.Empty;
 
             retVal = await Task.Run<string>(() =>
             {
-                string downloadUrl = "https://sourceforge.net/projects/searcher/files/latest/download";
+                string newFileName = string.Empty;
 
-                try
+                if (!string.IsNullOrEmpty(this.siteWithLatestUpdate))
                 {
-                    string newFileName = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher_new.zip");
-
-                    using (WebClient client = new WebClient())
+                    if (!string.IsNullOrEmpty(downloadUrl))
                     {
-                        client.DownloadFile(new Uri(downloadUrl), newFileName);
+                        try
+                        {
+                            using (WebClient client = new WebClient())
+                            {
+                                client.DownloadFile(new Uri(downloadUrl), this.latestReleaseDefaultFileName);
+                                newFileName = this.latestReleaseDefaultFileName;
+                            }
+                        }
+                        catch
+                        {
+                            // If the exception occurs after newFileName is set, set newFileName to empty string.
+                            newFileName = string.Empty;
+                        }
                     }
+                }
 
-                    return newFileName;
-                }
-                catch
-                {
-                    return string.Empty;
-                }
+                return newFileName;
             });
 
             return retVal;
@@ -1342,6 +1358,24 @@ namespace Searcher
             }
 
             return filesToSearch;
+        }
+
+        /// <summary>
+        /// Gets the download path of the latest release in GitHub.
+        /// </summary>
+        /// <returns>The download path of the latest release in GitHub.</returns>
+        private async Task<string> GetLatestReleaseDownloadPathInGitHub()
+        {
+            string downloadUrl = string.Empty;
+            Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("searcher"));
+            Octokit.Release latestRelease = await client.Repository.Release.GetLatest("wizden", "searcher");
+
+            if (latestRelease != null && latestRelease.Assets != null && latestRelease.Assets.Count > 0)
+            {
+                downloadUrl = latestRelease.Assets[0].BrowserDownloadUrl;
+            }
+
+            return downloadUrl;
         }
 
         /// <summary>
@@ -1683,20 +1717,97 @@ namespace Searcher
             }
             else
             {
-                retVal = await Task.Run<string>(async () =>
+                string downloadedFile = string.Empty;
+                string downloadUrl = string.Empty;
+
+                if (await this.NewReleaseExistsInSourceForge())
                 {
-                    string path = @"https://sourceforge.net/projects/searcher/best_release.json";
-                    using (HttpClient client = new HttpClient())
+                    this.siteWithLatestUpdate = "SourceForge";
+                    downloadUrl = "https://sourceforge.net/projects/searcher/files/latest/download";
+                    downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
+                    retVal = !string.IsNullOrEmpty(downloadedFile);
+                }
+
+                if (!retVal && await this.NewReleaseExistsInGitHub())
+                {
+                    this.siteWithLatestUpdate = "GitHub";
+                    downloadUrl = await this.GetLatestReleaseDownloadPathInGitHub();
+                    downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
+                    retVal = !string.IsNullOrEmpty(downloadedFile);
+                }
+            }
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// Check if a new version exists on GitHub.
+        /// </summary>
+        /// <returns>Boolean indicating whether a new version exists.</returns>
+        private async Task<bool> NewReleaseExistsInGitHub()
+        {
+            bool retVal = false;
+
+            retVal = await Task.Run<bool>(async () =>
+            {
+                bool newReleaseExists = false;
+                string latestReleaseDownloadUrl = string.Empty;
+
+                try
+                {
+                    latestReleaseDownloadUrl = await this.GetLatestReleaseDownloadPathInGitHub();
+                }
+                catch
+                {
+                    // Cannot do much. Failed to access/retrieve data from the website.
+                }
+
+                if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
+                {
+                    string searchValue = "/Searcher_v";
+                    string strSiteVersion = latestReleaseDownloadUrl.Substring(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length).Replace(".zip", string.Empty);
+                    Version appVersion = new Version(Common.VersionNumber);
+                    Version siteVersion;
+
+                    if (Version.TryParse(strSiteVersion, out siteVersion))
                     {
-                        client.Timeout = new TimeSpan(0, 0, 0, 30);
-                        return await client.GetStringAsync(new Uri(path));
+                        newReleaseExists = siteVersion > appVersion;
                     }
-                })
-                .ContinueWith((s) =>
+                }
+
+                return newReleaseExists;
+            });
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// Check if a new version exists on SourceForge.
+        /// </summary>
+        /// <returns>Boolean indicating whether a new version exists.</returns>
+        private async Task<bool> NewReleaseExistsInSourceForge()
+        {
+            bool retVal = await Task.Run<bool>(async () =>
+            {
+                bool newReleaseExists = false;
+                string path = @"https://sourceforge.net/projects/searcher/best_release.json";
+                using (HttpClient client = new HttpClient())
                 {
-                    if (s.Status == TaskStatus.RanToCompletion)
+                    client.Timeout = new TimeSpan(0, 0, 0, 30);
+                    string latestReleaseDownloadUrl = string.Empty;
+
+                    try
                     {
-                        Newtonsoft.Json.Linq.JObject jsonSiteVersion = Newtonsoft.Json.Linq.JObject.Parse(s.Result);
+                        latestReleaseDownloadUrl = await client.GetStringAsync(new Uri(path));
+                    }
+                    catch
+                    {
+                        // Cannot do much. Failed to access/retrieve data from the website.
+                    }
+
+                    if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
+                    {
+                        Newtonsoft.Json.Linq.JObject jsonSiteVersion = Newtonsoft.Json.Linq.JObject.Parse(latestReleaseDownloadUrl);
                         string fileName = jsonSiteVersion["release"]["filename"].ToString();
                         string strSiteVersion = fileName.Replace("/Searcher_v", string.Empty).Replace(".zip", string.Empty);
                         Version appVersion = new Version(Common.VersionNumber);
@@ -1704,13 +1815,13 @@ namespace Searcher
 
                         if (Version.TryParse(strSiteVersion, out siteVersion))
                         {
-                            retVal = siteVersion > appVersion;
+                            newReleaseExists = siteVersion > appVersion;
                         }
                     }
 
-                    return retVal;
-                });
-            }
+                    return newReleaseExists;
+                }
+            });
 
             return retVal;
         }
@@ -1926,7 +2037,7 @@ namespace Searcher
         /// </summary>
         /// <param name="fileNamePaths">The filenames with path to search for.</param>
         /// <param name="termsToSearch">The terms to search for.</param>
-        private void Search(IEnumerable<string> fileNamePaths, IEnumerable<string> termsToSearch)
+        private async void Search(IEnumerable<string> fileNamePaths, IEnumerable<string> termsToSearch)
         {
             int fileCounter = 0;
             Matcher matcher = new Matcher(this.matchWholeWord, this.searchModeRegex, this.multilineRegex, this.searchTypeAll, this.cancellationTokenSource, this.regexOptions);
@@ -1938,7 +2049,7 @@ namespace Searcher
                 {
                     try
                     {
-                        this.SearchAndDisplayResult(fileName, matcher, termsToSearch);
+                        await this.SearchAndDisplayResultAsync(fileName, matcher, termsToSearch);
                     }
                     catch (Exception ex)
                     {
@@ -1955,45 +2066,6 @@ namespace Searcher
             }
 
             this.SetSearchCompletedDetails(fileCounter, fileNamePaths.Count(), this.matchesFound, this.filesWithMatch);
-        }
-
-        /// <summary>
-        /// Get the search result and display in text box.
-        /// </summary>
-        /// <param name="fileName">The file name to search.</param>
-        /// <param name="matcher">The matcher object with configuration to determine how to search.</param>
-        /// <param name="termsToSearch">The terms to search.</param>
-        private void SearchAndDisplayResult(string fileName, Matcher matcher, IEnumerable<string> termsToSearch)
-        {
-            this.SetProgressInformation(string.Format("Searching: {0}", fileName));
-            List<MatchedLine> matchedLines = matcher.GetMatch(fileName, termsToSearch);
-
-            if (matchedLines != null && matchedLines.Count > 0)
-            {
-                // If a file returned multiple results (i.e. zip file with content), handle differently.
-                if (matchedLines.Select(ml => ml.FileName).Distinct().Count() > 1)
-                {
-                    var groupedMatches = matchedLines.GroupBy(f => f.FileName, (key, g) => new { FileName = key, MatchLine = g.ToList() });
-
-                    foreach (var groupedMatch in groupedMatches)
-                    {
-                        foreach (MatchedLine matchLine in groupedMatch.MatchLine)
-                        {
-                            matchLine.FileName = string.Empty;
-                        }
-
-                        groupedMatch.MatchLine[0].FileName = groupedMatch.FileName;
-                        this.AddResult(groupedMatch.MatchLine);
-                    }
-                }
-                else
-                {
-                    matchedLines = matchedLines.OrderBy(ml => ml.LineNumber).ThenBy(ml => ml.StartIndex).ToList();
-                    matchedLines.ForEach(ml => ml.FileName = string.Empty);
-                    matchedLines[0].FileName = fileName;
-                    this.AddResult(matchedLines);
-                }
-            }
         }
 
         /// <summary>
@@ -2052,14 +2124,12 @@ namespace Searcher
         private async Task SearchParallelAsync(IEnumerable<string> fileNamePaths, IEnumerable<string> termsToSearch)
         {
             this.filesSearchedCounter = 0;
-            ParallelOptions parallelOptions = new ParallelOptions();
-            parallelOptions.CancellationToken = this.cancellationTokenSource.Token;
             Matcher matcher = new Matcher(this.matchWholeWord, this.searchModeRegex, this.multilineRegex, this.searchTypeAll, this.cancellationTokenSource, this.regexOptions);
             List<Task> searchTasks = new List<Task>();
 
             try
             {
-                fileNamePaths.ToList().ForEach((f) =>
+                fileNamePaths.AsParallel().ToList().ForEach((f) =>
                 {
                     searchTasks.Add(Task.Run(() => this.SearchAndDisplayResultAsync(f, matcher, termsToSearch), this.cancellationTokenSource.Token));
                 });
@@ -2276,7 +2346,7 @@ namespace Searcher
         {
             if (filesProcessedCountOriginal > 0)
             {
-                this.SetFileCounterProgressInformation(filesProcessedCount, string.Format("Processed Files {0} of {1} ({2} %)", filesProcessedCount, filesProcessedCountOriginal, ((int)filesProcessedCount / filesProcessedCountOriginal) * 100));
+                this.SetFileCounterProgressInformation(filesProcessedCount, string.Format("Processed Files {0} of {1} ({2} %)", filesProcessedCount, filesProcessedCountOriginal, (int)(filesProcessedCount * 100) / filesProcessedCountOriginal));
             }
 
             this.SetProgressInformation(string.Format("Found {0} match(es) in {1} file(s)", matchesFound, filesWithMatches));
