@@ -113,7 +113,7 @@
                                             IsChecked="True" Name="RbtnNormalSearch" />
                                 <RadioButton GroupName="GrpSearchMode" Content="_Regex" Name="RbtnRegexSearch" ToolTip="Search using regular expressions"
                                             Checked="RbtnRegexSearch_Checked" Unchecked="RbtnRegexSearch_Checked"/>
-                                <CheckBox  Name="ChkRegexMultiline" Content="_Multiline?" Margin="20, 0" IsChecked="False" IsEnabled="False" ToolTip="Regular expression search over multiple lines" />
+                                <CheckBox  Name="ChkRegexMultiline" Content="_Multiline?" Margin="15, 0" IsChecked="False" IsEnabled="False" ToolTip="Regular expression search over multiple lines" />
                             </StackPanel>
                         </GroupBox>
 
@@ -153,14 +153,7 @@
             </Expander>
 
             <Button Grid.Row="4" Grid.Column="0" Content="Search" Name="BtnSearch" 
-                    HorizontalAlignment="Left" Click="BtnSearch_Click" IsDefault="True">
-                <Button.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Name="CtxSearch" Header="Search" Click="CtxSearch_Click" />
-                        <MenuItem Name="CtxSearchParallel" FontWeight="Bold" Header="Search Parallel" Click="CtxSearchParallel_Click" />
-                    </ContextMenu>
-                </Button.ContextMenu>
-            </Button>
+                    HorizontalAlignment="Left" Click="BtnSearch_Click" IsDefault="True" />
             
             <Button Grid.Row="4" Grid.Column="1" Content="Cancel" Name="BtnCancel" 
                     HorizontalAlignment="Right" IsEnabled="False" Click="BtnCancel_Click" IsCancel="True" />

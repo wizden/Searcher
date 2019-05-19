@@ -260,11 +260,6 @@ namespace Searcher
         private bool searchModeNormal = false;
 
         /// <summary>
-        /// Boolean indicating whether the search should use parallel processing.
-        /// </summary>
-        private bool searchModeParallel = true;
-
-        /// <summary>
         /// Boolean indicating whether the search mode uses regex.
         /// </summary>
         private bool searchModeRegex = false;
@@ -1034,27 +1029,6 @@ namespace Searcher
 
             XDocument retVal = XDocument.Parse(new XElement("SearcherPreferences", initialPreferences).ToString(), LoadOptions.None);
             return retVal;
-        }
-
-        /// <summary>
-        /// Event handler for the context menu to search button.
-        /// </summary>
-        /// <param name="sender">The sender object.</param>
-        /// <param name="e">The RoutedEventArgs object.</param>
-        private void CtxSearch_Click(object sender, RoutedEventArgs e)
-        {
-            this.searchModeParallel = false;
-            this.BtnSearch_Click(sender, e);
-        }
-
-        /// <summary>
-        /// Event handler for the context menu to parallel search button.
-        /// </summary>
-        /// <param name="sender">The sender object.</param>
-        /// <param name="e">The RoutedEventArgs object.</param>
-        private void CtxSearchParallel_Click(object sender, RoutedEventArgs e)
-        {
-            this.BtnSearch_Click(sender, e);
         }
 
         /// <summary>
@@ -1883,16 +1857,7 @@ namespace Searcher
                 this.filesToSearch = this.filesToSearch.Distinct().OrderBy(f => f).ToList();      // Remove duplicates that could be added via path filters that cover the same item mulitple times.
                 this.distinctFilesFound = true;
                 this.SetProgressMaxValue(this.filesToSearch.Count);
-
-                if (this.searchModeParallel)
-                {
-                    await this.SearchParallelAsync(this.filesToSearch, termsToSearch);
-                }
-                else
-                {
-                    this.searchModeParallel = true;
-                    this.Search(this.filesToSearch, termsToSearch);
-                }
+                await this.SearchParallelAsync(this.filesToSearch, termsToSearch);
             }
             catch (Exception ex)
             {
@@ -2033,42 +1998,6 @@ namespace Searcher
         }
 
         /// <summary>
-        /// Search for matches.
-        /// </summary>
-        /// <param name="fileNamePaths">The filenames with path to search for.</param>
-        /// <param name="termsToSearch">The terms to search for.</param>
-        private async void Search(IEnumerable<string> fileNamePaths, IEnumerable<string> termsToSearch)
-        {
-            int fileCounter = 0;
-            Matcher matcher = new Matcher(this.matchWholeWord, this.searchModeRegex, this.multilineRegex, this.searchTypeAll, this.cancellationTokenSource, this.regexOptions);
-
-            foreach (string fileName in fileNamePaths)
-            {
-                fileCounter++;
-                if (!string.IsNullOrWhiteSpace(fileName))
-                {
-                    try
-                    {
-                        await this.SearchAndDisplayResultAsync(fileName, matcher, termsToSearch);
-                    }
-                    catch (Exception ex)
-                    {
-                        this.SetSearchError(string.Format("Error reading file: {0}. {1}", fileName, ex.Message));
-                    }
-
-                    this.SetFileCounterProgressInformation(fileCounter, string.Format("Processed Files {0} of {1} ({2} %)", fileCounter + 1, fileNamePaths.Count(), ((fileCounter + 1) * 100) / fileNamePaths.Count()));
-
-                    if (this.cancellationTokenSource.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            this.SetSearchCompletedDetails(fileCounter, fileNamePaths.Count(), this.matchesFound, this.filesWithMatch);
-        }
-
-        /// <summary>
         /// Get the search result and display in text box.
         /// </summary>
         /// <param name="fileName">The file name to search.</param>
@@ -2078,13 +2007,23 @@ namespace Searcher
         private async Task SearchAndDisplayResultAsync(string fileName, Matcher matcher, IEnumerable<string> termsToSearch)
         {
             this.SetProgressInformation(string.Format("Searching: {0}", fileName));
+            Interlocked.Increment(ref this.filesSearchedCounter);
+            List<MatchedLine> matchedLines = new List<MatchedLine>();
+
             Task<List<MatchedLine>> tskMatchedLines = Task.Run<List<MatchedLine>>(() => 
             {
                 return matcher.GetMatch(fileName, termsToSearch);
             });
+
+            try
+            {
+                matchedLines = await tskMatchedLines;
+            }
+            catch (Exception ex)
+            {
+                this.SetSearchError(ex.Message);
+            }
             
-            List<MatchedLine> matchedLines = await tskMatchedLines;
-            Interlocked.Increment(ref this.filesSearchedCounter);
             this.SetFileCounterProgressInformation(this.filesSearchedCounter, string.Format("Processed Files {0} of {1} ({2} %)", this.filesSearchedCounter, this.filesToSearch.Count(), (int)(this.filesSearchedCounter * 100) / this.filesToSearch.Count()));
 
             if (matchedLines != null && matchedLines.Count > 0)

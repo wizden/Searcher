@@ -625,32 +625,47 @@ namespace SearcherLibrary
         {
             List<MatchedLine> matchedLines = new List<MatchedLine>();
 
-            IReader reader = archive.ExtractAllEntries();
-            while (reader.MoveToNextEntry())
+            try
             {
-                if (!reader.Entry.IsDirectory)
-                {
-                    try
-                    {
-                        reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                        string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key);
-                        matchedLines.AddRange(this.localMatcherObj.GetMatch(fullFilePath, searchTerms));
 
-                        if (matchedLines != null && matchedLines.Count > 0)
-                        {
-                            // Want the exact path of the file - without the .extract part.
-                            string dirNameToDisplay = fullFilePath.Replace(TempExtractDirectoryName, string.Empty);
-                            matchedLines.Where(ml => string.IsNullOrEmpty(ml.FileName) || ml.FileName.Contains(TempExtractDirectoryName)).ToList()
-                                .ForEach(ml => ml.FileName = dirNameToDisplay);
-                        }
-                    }
-                    catch (PathTooLongException ptlex)
+
+                IReader reader = archive.ExtractAllEntries();
+                while (reader.MoveToNextEntry())
+                {
+                    if (!reader.Entry.IsDirectory)
                     {
-                        throw new PathTooLongException(string.Format("Error accessing entry {0} in archive {1} - {2}", reader.Entry.Key, fileName, ptlex.Message));
+                        try
+                        {
+                            reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                            string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key);
+                            matchedLines.AddRange(this.localMatcherObj.GetMatch(fullFilePath, searchTerms));
+
+                            if (matchedLines != null && matchedLines.Count > 0)
+                            {
+                                // Want the exact path of the file - without the .extract part.
+                                string dirNameToDisplay = fullFilePath.Replace(TempExtractDirectoryName, string.Empty);
+                                matchedLines.Where(ml => string.IsNullOrEmpty(ml.FileName) || ml.FileName.Contains(TempExtractDirectoryName)).ToList()
+                                    .ForEach(ml => ml.FileName = dirNameToDisplay);
+                            }
+                        }
+                        catch (PathTooLongException ptlex)
+                        {
+                            throw new PathTooLongException(string.Format("Error accessing entry {0} in archive {1} - {2}", reader.Entry.Key, fileName, ptlex.Message));
+                        }
                     }
                 }
             }
-
+            catch (ArgumentNullException ane)
+            {
+                if (ane.Message.Contains("String reference not set to an instance of a String."))
+                {
+                    throw new NotSupportedException(string.Format("Unable to access {0}. The file may be encrypted.", fileName));
+                }
+                else
+                {
+                    throw;
+                }
+            }
             return matchedLines;
         }
 
