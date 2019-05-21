@@ -325,13 +325,7 @@ namespace Searcher
         {
             this.InitializeComponent();
             this.InitialiseControls();
-            bool allowDummySearch = false;
             this.DataContext = this;
-
-            if (allowDummySearch)
-            {
-                this.SetDummySearch();
-            }
         }
 
         #endregion Public Constructors
@@ -2134,16 +2128,6 @@ namespace Searcher
                 // Do nothing. Leave the background colour as default.
                 this.preferenceFile.Descendants("HighlightResultsColour").FirstOrDefault().Value = "#FFFFFF";
             }
-        }
-
-        /// <summary>
-        /// Dummy search for testing.
-        /// </summary>
-        private void SetDummySearch()
-        {
-            this.CmbDirectory.Text = @"D:\Code\SvnCode\SQL Server\Stored Procedures";
-            this.CmbFindWhat.Text = @"t_new_material; insert";
-            this.CmbFilters.Text = @"*.sql";
         }
 
         /// <summary>
