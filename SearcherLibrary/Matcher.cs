@@ -254,6 +254,11 @@ namespace SearcherLibrary
             string allContent = string.Join(Environment.NewLine, content);
             foreach (string searchTerm in searchTerms)
             {
+                if (this.CancellationTokenSource.IsCancellationRequested)
+                {
+                    break;
+                }
+
                 string termToSearch = searchTerm.Replace(".*", "(.|\n)*");        // Convert the .* to ((.|\n)*) for multiline regex.
                 MatchCollection matches = Regex.Matches(allContent, termToSearch, this.RegexOptions);
 

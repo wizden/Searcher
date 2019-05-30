@@ -94,11 +94,6 @@ namespace SearcherLibrary
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the cancellation token source object to cancel file search.
-        /// </summary>
-        public CancellationTokenSource CancellationTokenSource { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the search mode uses regex.
         /// </summary>
         public bool IsRegexSearch { get; set; }
@@ -127,7 +122,6 @@ namespace SearcherLibrary
             {
                 this.RegexOptions = matcher.RegexOptions;
                 this.IsRegexSearch = matcher.IsRegexSearch;
-                this.CancellationTokenSource = matcher.CancellationTokenSource;
                 this.localMatcherObj = matcher;
             }
 
@@ -232,8 +226,13 @@ namespace SearcherLibrary
                     {
                         StringBuilder contentText = new StringBuilder();                                                                                 // Set content for each paragraph and detect page breaks (dependant on word processing application).
 
-                        bce.Descendants().Where(r => r is DocumentFormat.OpenXml.Wordprocessing.Run && r.HasChildren).ToList().ForEach(r =>
+                        foreach (OpenXmlElement r in bce.Descendants().Where(r => r is DocumentFormat.OpenXml.Wordprocessing.Run && r.HasChildren))
                         {
+                            if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                            {
+                                break;
+                            }
+
                             r.Descendants().ToList().ForEach(rce =>
                             {
                                 if (rce is DocumentFormat.OpenXml.Wordprocessing.Text)
@@ -246,7 +245,7 @@ namespace SearcherLibrary
                                     pageNumber++;
                                 }
                             });
-                        });
+                        }
 
                         string content = contentText.ToString();
                         allContent = content;
@@ -255,6 +254,11 @@ namespace SearcherLibrary
                         {
                             foreach (string searchTerm in searchTerms)
                             {
+                                if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                                {
+                                    break;
+                                }
+
                                 try
                                 {
                                     content = content.Trim();
@@ -300,6 +304,11 @@ namespace SearcherLibrary
                         List<MatchedLine> allContentMatchedLines = new List<MatchedLine>();
                         foreach (string searchTerm in searchTerms)
                         {
+                            if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                            {
+                                break;
+                            }
+
                             try
                             {
                                 allContent = allContent.Trim();
@@ -330,6 +339,11 @@ namespace SearcherLibrary
                     }
 
                     document.Close();
+                }
+
+                if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    matchedLines.Clear();
                 }
             }
             catch (FileFormatException ffx)
@@ -367,6 +381,11 @@ namespace SearcherLibrary
             {
                 for (int pageCounter = 1; pageCounter <= reader.NumberOfPages; pageCounter++)
                 {
+                    if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
                     try
                     {
                         ////pdfPage = PdfTextExtractor.GetTextFromPage(reader, pageCounter);                                            // Shows the result with line breaks.
@@ -397,6 +416,11 @@ namespace SearcherLibrary
                 reader.Close();
             }
 
+            if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+            {
+                matchedLines.Clear();
+            }
+
             return matchedLines;
         }
 
@@ -422,8 +446,18 @@ namespace SearcherLibrary
 
                     foreach (string searchTerm in searchTerms)
                     {
+                        if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
                         for (int slideCounter = 0; slideCounter < slideAllText.Length; slideCounter++)
                         {
+                            if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                            {
+                                break;
+                            }
+
                             MatchCollection matches = Regex.Matches(slideAllText[slideCounter], searchTerm, this.RegexOptions);            // Use this match for getting the locations of the match.
 
                             if (matches.Count > 0)
@@ -449,6 +483,11 @@ namespace SearcherLibrary
                                 }
                             }
                         }
+                    }
+
+                    if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                    {
+                        matchedLines.Clear();
                     }
                 }
             }
@@ -497,19 +536,32 @@ namespace SearcherLibrary
 
                     foreach (Sheet sheet in sheets)
                     {
+                        if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
                         if (sheet == null)
                         {
                             throw new ArgumentException("Sheet Not Found");
                         }
 
-                        WorksheetPart workSheetPart = (WorksheetPart)wkbkPart.GetPartById(sheet.Id);
+                        WorksheetPart workSheetPart = wkbkPart.GetPartById(sheet.Id) as WorksheetPart;
 
-                        foreach (Cell cell in ((WorksheetPart)wkbkPart.GetPartById(sheet.Id)).Worksheet.Descendants<Cell>())
+                        if (workSheetPart != null)
                         {
-                            if (cell != null && !string.IsNullOrWhiteSpace(cell.InnerText))
+                            foreach (Cell cell in ((WorksheetPart)wkbkPart.GetPartById(sheet.Id)).Worksheet.Descendants<Cell>())
                             {
-                                cellValue = this.GetSpreadsheetCellValue(cell, sharedStringTable, cellFormats, numberingFormats);
-                                excelCellDetails.Add(new SpreadsheetCellDetail { CellContent = cellValue, CellReference = cell.CellReference.Value, SheetName = sheet.Name.Value });
+                                if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                                {
+                                    break;
+                                }
+
+                                if (cell != null && cell.CellReference != null && !string.IsNullOrWhiteSpace(cell.InnerText))
+                                {
+                                    cellValue = this.GetSpreadsheetCellValue(cell, sharedStringTable, cellFormats, numberingFormats);
+                                    excelCellDetails.Add(new SpreadsheetCellDetail { CellContent = cellValue, CellReference = cell.CellReference.Value, SheetName = sheet.Name.Value });
+                                }
                             }
                         }
                     }
@@ -519,10 +571,20 @@ namespace SearcherLibrary
 
                 foreach (string searchTerm in searchTerms)
                 {
+                    if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
                     try
                     {
-                        excelCellDetails.ForEach(ecd =>
+                        foreach (SpreadsheetCellDetail ecd in excelCellDetails)
                         {
+                            if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                            {
+                                break;
+                            }
+
                             MatchCollection matches = Regex.Matches(ecd.CellContent, searchTerm, this.RegexOptions);            // Use this match for getting the locations of the match.
                             if (matches.Count > 0)
                             {
@@ -531,12 +593,17 @@ namespace SearcherLibrary
                                     matchedLines.Add(new MatchedLine { Content = string.Format("{0}\\{1}\t\t{2}", ecd.SheetName, ecd.CellReference, ecd.CellContent), SearchTerm = searchTerm, FileName = fileName, LineNumber = 1, StartIndex = match.Index + (ecd.SheetName.Length + ecd.CellReference.Length + 3), Length = match.Length });
                                 }
                             }
-                        });
+                        }
                     }
                     catch (ArgumentException aex)
                     {
                         throw new ArgumentException(aex.Message + " If using Regex, try escaping using the \\ character. Regex failures - Search cancelled. Correct regular expression and retry.");
                     }
+                }
+
+                if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    matchedLines.Clear();
                 }
             }
             catch (FileFormatException ffx)
@@ -627,10 +694,8 @@ namespace SearcherLibrary
 
             try
             {
-
-
                 IReader reader = archive.ExtractAllEntries();
-                while (reader.MoveToNextEntry())
+                while (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested && reader.MoveToNextEntry())
                 {
                     if (!reader.Entry.IsDirectory)
                     {
@@ -654,6 +719,11 @@ namespace SearcherLibrary
                         }
                     }
                 }
+
+                if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    matchedLines.Clear();
+                }
             }
             catch (ArgumentNullException ane)
             {
@@ -666,6 +736,7 @@ namespace SearcherLibrary
                     throw;
                 }
             }
+
             return matchedLines;
         }
 
