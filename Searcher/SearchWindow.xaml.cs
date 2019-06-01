@@ -1153,6 +1153,7 @@ namespace Searcher
             {
                 DirectoryExclude dirExcludeWindow = new DirectoryExclude(fullFilePath);
                 dirExcludeWindow.PreferenceFileExists = this.preferenceFile != null;
+                dirExcludeWindow.Owner = this;
 
                 if (dirExcludeWindow.ShowDialog() == true)
                 {
@@ -1277,7 +1278,6 @@ namespace Searcher
 
             if (!this.cancellationTokenSource.Token.IsCancellationRequested)
             {
-
                 // Recurse directories to ensure permissions exist for accessing sub directories.
                 if (this.searchSubFolders)
                 {
@@ -1467,6 +1467,7 @@ namespace Searcher
                 Point windowLocation = this.PgBarSearch.PointToScreen(new Point(0, 0));
                 searchedFileList.Left = windowLocation.X + (this.PgBarSearch.ActualWidth / 4);
                 searchedFileList.Top = windowLocation.Y;
+                searchedFileList.Owner = this;
                 searchedFileList.ShowDialog();
 
                 if (this.preferenceFile != null)
@@ -2017,10 +2018,6 @@ namespace Searcher
             {
                 this.SetSearchError(ex.Message);
             }
-            finally
-            {
-                Interlocked.Increment(ref this.filesSearchedCounter);
-            }
             
             this.SetFileCounterProgressInformation(this.filesSearchedCounter, string.Format("Processed Files {0} of {1} ({2} %)", this.filesSearchedCounter, this.filesToSearch.Count(), (int)(this.filesSearchedCounter * 100) / this.filesToSearch.Count()));
 
@@ -2050,6 +2047,8 @@ namespace Searcher
                     this.AddResult(matchedLines);
                 }
             }
+
+            Interlocked.Increment(ref this.filesSearchedCounter);
         }
 
         /// <summary>
@@ -2611,7 +2610,6 @@ namespace Searcher
                 this.preferenceFile.Descendants("PopupWindowHeight").FirstOrDefault().Value = this.popupWindowHeight.ToString();
                 this.preferenceFile.Descendants("PopupWindowWidth").FirstOrDefault().Value = this.popupWindowWidth.ToString();
                 this.preferenceFile.Descendants("WindowWidth").FirstOrDefault().Value = this.Width.ToString();
-                
                 this.preferenceFile.Descendants("SearchContentMode").FirstOrDefault().Value = this.searchTypeAll ? "All" : "Any";
                 this.AddItemsToPreferences(this.CmbDirectory, "SearchDirectories");
                 this.AddItemsToPreferences(this.CmbFindWhat, "SearchContents");
