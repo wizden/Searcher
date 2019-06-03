@@ -2018,10 +2018,6 @@ namespace Searcher
             {
                 this.SetSearchError(ex.Message);
             }
-            finally
-            {
-                Interlocked.Increment(ref this.filesSearchedCounter);
-            }
             
             this.SetFileCounterProgressInformation(this.filesSearchedCounter, string.Format("Processed Files {0} of {1} ({2} %)", this.filesSearchedCounter, this.filesToSearch.Count(), (int)(this.filesSearchedCounter * 100) / this.filesToSearch.Count()));
 
