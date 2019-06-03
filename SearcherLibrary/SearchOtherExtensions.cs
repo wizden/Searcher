@@ -736,6 +736,10 @@ namespace SearcherLibrary
                     throw;
                 }
             }
+            catch (Exception)
+            {
+                throw;
+            }
 
             return matchedLines;
         }

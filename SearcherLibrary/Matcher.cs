@@ -148,9 +148,9 @@ namespace SearcherLibrary
                     matchedLines = this.FileSearchInNonASCII(fileName, searchTerms);
                 }
             }
-            catch (IOException ioe)
+            catch (Exception ex)
             {
-                throw new IOException(string.Format("Error accessing file {0}. {1}", fileName, ioe.Message));
+                throw new Exception(string.Format("Error accessing file {0}. {1}", fileName, ex.Message));
             }
 
             return matchedLines;
