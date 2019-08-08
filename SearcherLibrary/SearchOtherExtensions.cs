@@ -695,7 +695,7 @@ namespace SearcherLibrary
             try
             {
                 IReader reader = archive.ExtractAllEntries();
-                while (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested && reader.MoveToNextEntry())
+                while (reader.MoveToNextEntry())
                 {
                     if (!reader.Entry.IsDirectory)
                     {

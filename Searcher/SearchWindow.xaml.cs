@@ -95,6 +95,11 @@ namespace Searcher
         private const double MinScaleValue = 0.5;
 
         /// <summary>
+        /// Lock object to determine matches from which file will update the UI.
+        /// </summary>
+        private static object syncRoot = new object();
+
+        /// <summary>
         /// Private store for the background colour of the application
         /// </summary>
         private SolidColorBrush applicationBackColour = new SolidColorBrush();
@@ -133,6 +138,11 @@ namespace Searcher
         /// Variable to store stopwatch that calculates execution time.
         /// </summary>
         private Stopwatch executionTime = new Stopwatch();
+
+        /// <summary>
+        /// Private store for the file name that will be used to update the UI when lots of matches exist.
+        /// </summary>
+        private string fileBeingDisplayed = string.Empty;
 
         /// <summary>
         /// The full path of the preferences file.
@@ -415,104 +425,99 @@ namespace Searcher
         /// Add the result to the display.
         /// </summary>
         /// <param name="matchedLines">The list of match objects to display matches</param>
-        private void AddResult(List<MatchedLine> matchedLines)
+        /// <returns>List of Inline to be added to the results.</returns>
+        private List<Inline> AddResult(List<MatchedLine> matchedLines)
         {
-            try
+            List<Inline> retVal = new List<Inline>();
+            string currentFileName = string.Empty;
+            int matchCounter = 0;
+
+            foreach (MatchedLine ml in matchedLines)
             {
-                Dispatcher.Invoke(() =>
+                if (!ml.DisplayProcessed && !this.cancellationTokenSource.Token.IsCancellationRequested)
                 {
-                    InlineCollection inlines = new Paragraph().Inlines;
-                    string overlapFileName = string.Empty;
-
-                    matchedLines.ForEach(ml =>
+                    if (!string.IsNullOrEmpty(ml.FileName) && !this.filesSearched.Contains(ml.FileName))
                     {
-                        if (!ml.DisplayProcessed)
+                        this.filesWithMatch++;
+                        this.filesSearched.Add(ml.FileName);
+                        currentFileName = ml.FileName;
+
+                        Dispatcher.Invoke(() =>
                         {
-                            if (!string.IsNullOrEmpty(ml.FileName) && !this.filesSearched.Contains(ml.FileName))
+                            Hyperlink link = new Hyperlink(new Run(Environment.NewLine + ml.FileName + Environment.NewLine));
+                            link.NavigateUri = new Uri(ml.FileName);
+                            link.RequestNavigate += Link_RequestNavigate;
+                            link.PreviewMouseRightButtonDown += Link_PreviewMouseRightButtonDown;
+                            retVal.Add(new Bold(link)
                             {
-                                filesWithMatch++;
-                                filesSearched.Add(ml.FileName);
-                                overlapFileName = ml.FileName;
-                                Hyperlink link = new Hyperlink(new Run(Environment.NewLine + ml.FileName + Environment.NewLine));
-                                link.NavigateUri = new Uri(ml.FileName);
-                                link.RequestNavigate += Link_RequestNavigate;
-                                link.PreviewMouseRightButtonDown += Link_PreviewMouseRightButtonDown;
-                                inlines.Add(new Bold(link)
+                                Foreground = Brushes.CornflowerBlue
+                            });
+                        });
+                    }
+
+                    List<string> contentArray = new List<string>();
+                    contentArray.Add(ml.Content.Substring(0, ml.StartIndex));
+                    contentArray.Add(ml.Content.Substring(ml.StartIndex, ml.Length));
+                    contentArray.Add(ml.Content.Substring(ml.StartIndex + ml.Length, ml.Content.Length - (ml.StartIndex + ml.Length)));
+                    this.matchesFound++;
+
+                    for (int counter = 0; counter < contentArray.Count; counter++)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            if (counter % 2 == 1)
+                            {
+                                retVal.Add(new Run(Regex.Unescape(Regex.Escape(contentArray[counter])))
                                 {
-                                    Foreground = Brushes.CornflowerBlue
+                                    Background = this.highlightResults ? this.highlightResultBackColour : this.applicationBackColour
                                 });
-                            }
-
-                            List<string> contentArray = new List<string>();
-
-                            List<MatchedLine> otherMatches = matchedLines.Where(oml => oml.LineNumber == ml.LineNumber && oml.Content == ml.Content && oml.StartIndex != ml.StartIndex && oml.DisplayProcessed == false).OrderBy(oml => oml.StartIndex).ToList();
-
-                            contentArray.Add(ml.Content.Substring(0, ml.StartIndex));
-                            contentArray.Add(ml.Content.Substring(ml.StartIndex, ml.Length));
-
-                            if (otherMatches.Count > 0)
-                            {
-                                matchesFound += otherMatches.Count;
-
-                                while (otherMatches.Count > 0)
-                                {
-                                    try
-                                    {
-                                        contentArray.Add(otherMatches[0].Content.Substring(string.Join(string.Empty, contentArray).Length, otherMatches[0].StartIndex - string.Join(string.Empty, contentArray).Length));
-                                        contentArray.Add(otherMatches[0].Content.Substring(otherMatches[0].StartIndex, otherMatches[0].Length));
-
-                                        if (otherMatches.Count == 1)
-                                        {
-                                            contentArray.Add(otherMatches[0].Content.Substring(string.Join(string.Empty, contentArray).Length));
-                                        }
-                                    }
-                                    catch (ArgumentOutOfRangeException)
-                                    {
-                                        this.SetSearchError(string.Format("Search term overlap on line {0} in file {1}.", ml.LineNumber, overlapFileName));
-                                        contentArray.Add(otherMatches[0].Content.Substring(string.Join(string.Empty, contentArray).Length));
-                                    }
-
-                                    otherMatches[0].DisplayProcessed = true;
-                                    otherMatches.Remove(otherMatches[0]);
-                                }
                             }
                             else
                             {
-                                contentArray.Add(ml.Content.Substring(ml.StartIndex + ml.Length, ml.Content.Length - (ml.StartIndex + ml.Length)));
+                                retVal.Add(new Run(contentArray[counter]));
                             }
+                        });
+                    }
 
-                            matchesFound++;
+                    ml.DisplayProcessed = true;
+                    Dispatcher.Invoke(() =>
+                    {
+                        retVal.Add(new Run(Environment.NewLine));
+                        matchCounter++;
 
-                            for (int counter = 0; counter < contentArray.Count; counter++)
+                        if (matchCounter % 100 == 0 && matchedLines.Count() > 1000)         // If more than a 1000 matches exist, update the UI every 100 matches to keep it responsive.
+                        {
+                            if (string.IsNullOrEmpty(this.fileBeingDisplayed))              // If multiple files exist with excessive matches, lock the first file to display it's results.
                             {
-                                if (counter % 2 == 1)
+                                lock (syncRoot)
                                 {
-                                    inlines.Add(new Run(Regex.Unescape(Regex.Escape(contentArray[counter])))
-                                    {
-                                        Background = this.highlightResults ? this.highlightResultBackColour : this.applicationBackColour
-                                    });
-                                }
-                                else
-                                {
-                                    inlines.Add(contentArray[counter]);
+                                    this.fileBeingDisplayed = currentFileName;
                                 }
                             }
 
-                            ml.DisplayProcessed = true;
-                            inlines.Add(Environment.NewLine);
+                            if (this.fileBeingDisplayed == currentFileName)
+                            {
+                                this.AddResultsToTextbox(retVal);                           // Display the contents of only the first file with excessive matches. The others are added to the list of objects to be displayed later.
+                                retVal.Clear();
+                            }
                         }
                     });
-
-                    this.richTextboxParagraph.Inlines.AddRange(inlines.ToList());
-                });
-            }
-            catch (TaskCanceledException)
-            {
-                if (!this.cancellationTokenSource.IsCancellationRequested)
-                {
-                    this.cancellationTokenSource.Cancel();
                 }
             }
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// Adds the result matches to the textbox.
+        /// </summary>
+        /// <param name="resultsToAdd">The list of Inline to display.</param>
+        private void AddResultsToTextbox(List<Inline> resultsToAdd)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this.richTextboxParagraph.Inlines.AddRange(resultsToAdd);
+            });
         }
 
         /// <summary>
@@ -1568,22 +1573,6 @@ namespace Searcher
         }
 
         /// <summary>
-        /// Set up the list of files that will be excluded always when searching.
-        /// </summary>
-        private void LoadPathsToAlwaysExlude()
-        {
-            this.preferenceFile.Descendants("FilesToAlwaysExcludeFromSearch").Descendants("Value").ToList().ForEach(p =>
-            {
-                this.AddToSearchFileExclusionList(p.Value);
-            });
-
-            this.preferenceFile.Descendants("DirectoriesToAlwaysExcludeFromSearch").Descendants("Value").ToList().ForEach(p =>
-            {
-                this.directoriesToExclude.Add(p.Value);
-            });
-        }
-
-        /// <summary>
         /// Show right click menu options
         /// </summary>
         /// <param name="sender">The sender object.</param>
@@ -1672,6 +1661,22 @@ namespace Searcher
                 Process.Start("notepad", e.Uri.LocalPath);
                 this.editorNamePath = "notepad";
             }
+        }
+
+        /// <summary>
+        /// Set up the list of files that will be excluded always when searching.
+        /// </summary>
+        private void LoadPathsToAlwaysExlude()
+        {
+            this.preferenceFile.Descendants("FilesToAlwaysExcludeFromSearch").Descendants("Value").ToList().ForEach(p =>
+            {
+                this.AddToSearchFileExclusionList(p.Value);
+            });
+
+            this.preferenceFile.Descendants("DirectoriesToAlwaysExcludeFromSearch").Descendants("Value").ToList().ForEach(p =>
+            {
+                this.directoriesToExclude.Add(p.Value);
+            });
         }
 
         /// <summary>
@@ -1999,14 +2004,41 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Set the paths that will be always excluded.
+        /// </summary>
+        /// <param name="filesToAlwaysExclude">The list of file paths.</param>
+        /// <param name="directoriesToAlwaysExclude">The list of directory paths.</param>
+        private void SavePathsToAlwaysExclude(List<string> filesToAlwaysExclude, List<string> directoriesToAlwaysExclude)
+        {
+            this.preferenceFile.Descendants("FilesToAlwaysExcludeFromSearch").FirstOrDefault().RemoveAll();
+            this.preferenceFile.Descendants("DirectoriesToAlwaysExcludeFromSearch").FirstOrDefault().RemoveAll();
+
+            filesToAlwaysExclude.ForEach(fae =>
+            {
+                if (File.Exists(fae))
+                {
+                    this.preferenceFile.Descendants("FilesToAlwaysExcludeFromSearch").FirstOrDefault().Add(new XElement("Value", fae));
+                }
+            });
+
+            directoriesToAlwaysExclude.ForEach(fae =>
+            {
+                if (Directory.Exists(fae))
+                {
+                    this.preferenceFile.Descendants("DirectoriesToAlwaysExcludeFromSearch").FirstOrDefault().Add(new XElement("Value", fae));
+                }
+            });
+        }
+
+        /// <summary>
         /// Get the search result and display in text box.
         /// </summary>
         /// <param name="fileName">The file name to search.</param>
-        /// <param name="matcher">The matcher object with configuration to determine how to search.</param>
         /// <param name="termsToSearch">The terms to search.</param>
         /// <returns>Task object that searches and displays the result.</returns>
-        private void SearchAndDisplayResult(string fileName, IEnumerable<string> termsToSearch)
+        private List<Inline> SearchAndDisplayResult(string fileName, IEnumerable<string> termsToSearch)
         {
+            List<Inline> retVal = new List<Inline>();
             this.SetProgressInformation(string.Format("Searching: {0}", fileName));
             List<MatchedLine> matchedLines = new List<MatchedLine>();
 
@@ -2036,7 +2068,7 @@ namespace Searcher
                         }
 
                         groupedMatch.MatchLine[0].FileName = groupedMatch.FileName;
-                        this.AddResult(groupedMatch.MatchLine);
+                        retVal.AddRange(this.AddResult(groupedMatch.MatchLine));
                     }
                 }
                 else
@@ -2044,11 +2076,12 @@ namespace Searcher
                     matchedLines = matchedLines.OrderBy(ml => ml.LineNumber).ThenBy(ml => ml.StartIndex).ToList();
                     matchedLines.ForEach(ml => ml.FileName = string.Empty);
                     matchedLines[0].FileName = fileName;
-                    this.AddResult(matchedLines);
+                    retVal = this.AddResult(matchedLines);
                 }
             }
 
             Interlocked.Increment(ref this.filesSearchedCounter);
+            return retVal;
         }
 
         /// <summary>
@@ -2068,18 +2101,49 @@ namespace Searcher
             this.matcherObj.CancellationTokenSource = this.cancellationTokenSource;
 
             List<Task> searchTasks = new List<Task>();
+            List<Inline> pendingResultsToAdd = new List<Inline>();
 
             try
             {
-                fileNamePaths.AsParallel().ToList().ForEach((f) =>
+                foreach (string fileNamePath in fileNamePaths.AsParallel())
                 {
                     if (!this.cancellationTokenSource.Token.IsCancellationRequested)
                     {
-                        searchTasks.Add(Task.Run(() => this.SearchAndDisplayResult(f, termsToSearch), this.cancellationTokenSource.Token));
+                        searchTasks.Add(Task.Run(
+                            () =>
+                        {
+                            List<Inline> resultsToAdd = this.SearchAndDisplayResult(fileNamePath, termsToSearch);
+
+                            if (resultsToAdd.Count > 0)
+                            {
+                                if (string.IsNullOrEmpty(this.fileBeingDisplayed))
+                                {
+                                    this.AddResultsToTextbox(resultsToAdd);
+                                }
+                                else
+                                {
+                                    if (this.fileBeingDisplayed == fileNamePath)
+                                    {
+                                        this.AddResultsToTextbox(resultsToAdd);
+                                        this.fileBeingDisplayed = string.Empty;         // Clear the filename with excessive matches after all results have been displayed. If other similar files exist, one of them will acquire this via lock.
+                                    }
+                                    else
+                                    {
+                                        pendingResultsToAdd.AddRange(resultsToAdd);
+                                    }
+                                }
+                            }
+                        }, 
+                        this.cancellationTokenSource.Token));
                     }
-                });
+                }
 
                 await Task.WhenAll(searchTasks);
+
+                if (pendingResultsToAdd.Count > 0)
+                {
+                    this.AddResultsToTextbox(pendingResultsToAdd);
+                }
             }
             finally
             {
@@ -2186,33 +2250,6 @@ namespace Searcher
             jmpList.JumpItems.Add(jmpPreferences);
             JumpList.AddToRecentCategory(jmpPreferences);
             jmpList.Apply();
-        }
-
-        /// <summary>
-        /// Set the paths that will be always excluded.
-        /// </summary>
-        /// <param name="filesToAlwaysExclude">The list of file paths.</param>
-        /// <param name="directoriesToAlwaysExclude">The list of directory paths.</param>
-        private void SavePathsToAlwaysExclude(List<string> filesToAlwaysExclude, List<string> directoriesToAlwaysExclude)
-        {
-            this.preferenceFile.Descendants("FilesToAlwaysExcludeFromSearch").FirstOrDefault().RemoveAll();
-            this.preferenceFile.Descendants("DirectoriesToAlwaysExcludeFromSearch").FirstOrDefault().RemoveAll();
-
-            filesToAlwaysExclude.ForEach(fae =>
-            {
-                if (File.Exists(fae))
-                {
-                    this.preferenceFile.Descendants("FilesToAlwaysExcludeFromSearch").FirstOrDefault().Add(new XElement("Value", fae));
-                }
-            });
-
-            directoriesToAlwaysExclude.ForEach(fae =>
-            {
-                if (Directory.Exists(fae))
-                {
-                    this.preferenceFile.Descendants("DirectoriesToAlwaysExcludeFromSearch").FirstOrDefault().Add(new XElement("Value", fae));
-                }
-            });
         }
 
         /// <summary>
