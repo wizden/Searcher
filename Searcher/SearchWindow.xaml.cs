@@ -1573,6 +1573,35 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Determine whether the downloaded zip file is valid.
+        /// </summary>
+        /// <param name="fileName">The path to the zip file.</param>
+        /// <returns>Boolean indicating whether the downloaded zip file is valid.</returns>
+        private bool IsDownloadedZipValid(string fileName)
+        {
+            bool isArchiveValid = false;
+
+            try
+            {
+                System.IO.Compression.ZipArchive archive = System.IO.Compression.ZipFile.Open(fileName, System.IO.Compression.ZipArchiveMode.Read);
+                int itemCount = 0;
+                isArchiveValid = int.TryParse(archive.Entries.Count.ToString(), out itemCount);
+            }
+            catch (Exception)
+            {
+                // If the file cannot be read for any reason, then the archive is invalid.
+            }
+
+            // Remove archive since it is corrupt or empty.
+            if (isArchiveValid == false)
+            {
+                File.Delete(fileName);
+            }
+
+            return isArchiveValid;
+        }
+
+        /// <summary>
         /// Show right click menu options
         /// </summary>
         /// <param name="sender">The sender object.</param>
@@ -1701,7 +1730,7 @@ namespace Searcher
                     this.siteWithLatestUpdate = "SourceForge";
                     downloadUrl = "https://sourceforge.net/projects/searcher/files/latest/download";
                     downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
-                    retVal = !string.IsNullOrEmpty(downloadedFile);
+                    retVal = !string.IsNullOrEmpty(downloadedFile) && this.IsDownloadedZipValid(downloadedFile);
                 }
 
                 if (!retVal && await this.NewReleaseExistsInGitHub())
@@ -1709,7 +1738,7 @@ namespace Searcher
                     this.siteWithLatestUpdate = "GitHub";
                     downloadUrl = await this.GetLatestReleaseDownloadPathInGitHub();
                     downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
-                    retVal = !string.IsNullOrEmpty(downloadedFile);
+                    retVal = !string.IsNullOrEmpty(downloadedFile) && this.IsDownloadedZipValid(downloadedFile);
                 }
             }
 
@@ -1951,7 +1980,7 @@ namespace Searcher
             foreach (string dirToExclude in this.directoriesToExclude)
             {
                 string exclDir = dirToExclude.ToUpper();
-                this.filesToSearch.RemoveAll(f => 
+                this.filesToSearch.RemoveAll(f =>
                 {
                     try
                     {
@@ -2050,7 +2079,7 @@ namespace Searcher
             {
                 this.SetSearchError(ex.Message);
             }
-            
+
             this.SetFileCounterProgressInformation(this.filesSearchedCounter, string.Format("Processed Files {0} of {1} ({2} %)", this.filesSearchedCounter, this.filesToSearch.Count(), (int)(this.filesSearchedCounter * 100) / this.filesToSearch.Count()));
 
             if (matchedLines != null && matchedLines.Count > 0)
@@ -2074,8 +2103,9 @@ namespace Searcher
                 else
                 {
                     matchedLines = matchedLines.OrderBy(ml => ml.LineNumber).ThenBy(ml => ml.StartIndex).ToList();
+                    string resultFileName = matchedLines.Select(ml => ml.FileName).FirstOrDefault();
                     matchedLines.ForEach(ml => ml.FileName = string.Empty);
-                    matchedLines[0].FileName = fileName;
+                    matchedLines[0].FileName = (resultFileName != null && resultFileName.Length > fileName.Length) ? resultFileName : fileName;
                     retVal = this.AddResult(matchedLines);
                 }
             }
@@ -2111,29 +2141,29 @@ namespace Searcher
                     {
                         searchTasks.Add(Task.Run(
                             () =>
-                        {
-                            List<Inline> resultsToAdd = this.SearchAndDisplayResult(fileNamePath, termsToSearch);
-
-                            if (resultsToAdd.Count > 0)
                             {
-                                if (string.IsNullOrEmpty(this.fileBeingDisplayed))
+                                List<Inline> resultsToAdd = this.SearchAndDisplayResult(fileNamePath, termsToSearch);
+
+                                if (resultsToAdd.Count > 0)
                                 {
-                                    this.AddResultsToTextbox(resultsToAdd);
-                                }
-                                else
-                                {
-                                    if (this.fileBeingDisplayed == fileNamePath)
+                                    if (string.IsNullOrEmpty(this.fileBeingDisplayed))
                                     {
                                         this.AddResultsToTextbox(resultsToAdd);
-                                        this.fileBeingDisplayed = string.Empty;         // Clear the filename with excessive matches after all results have been displayed. If other similar files exist, one of them will acquire this via lock.
                                     }
                                     else
                                     {
-                                        pendingResultsToAdd.AddRange(resultsToAdd);
+                                        if (this.fileBeingDisplayed == fileNamePath)
+                                        {
+                                            this.AddResultsToTextbox(resultsToAdd);
+                                            this.fileBeingDisplayed = string.Empty;         // Clear the filename with excessive matches after all results have been displayed. If other similar files exist, one of them will acquire this via lock.
+                                        }
+                                        else
+                                        {
+                                            pendingResultsToAdd.AddRange(resultsToAdd);
+                                        }
                                     }
                                 }
-                            }
-                        }, 
+                            },
                         this.cancellationTokenSource.Token));
                     }
                 }
