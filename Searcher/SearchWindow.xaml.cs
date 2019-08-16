@@ -1054,23 +1054,40 @@ namespace Searcher
                     // Check for updates monthly. Why bother the user more frequently. Can look to make this configurable in the future.
                     if (lastUpdateCheckDate.AddMonths(1) < DateTime.Today)
                     {
+                        string nextCheckDate = lastUpdateCheckDate.ToShortDateString();
+
                         Task.Run(async () =>
                         {
+                            if (await this.NewReleaseExistsAsync())
                             {
-                                if (await this.NewReleaseExistsAsync())
+                                if (System.IO.File.Exists(this.latestReleaseDefaultFileName))
                                 {
-                                    if (System.IO.File.Exists(this.latestReleaseDefaultFileName))
+                                    string newProgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg");
+
+                                    try
                                     {
-                                        string newProgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg");
                                         System.IO.Compression.ZipFile.ExtractToDirectory(this.latestReleaseDefaultFileName, newProgPath);
-                                        System.IO.File.Delete(this.latestReleaseDefaultFileName);
+                                        nextCheckDate = DateTime.Today.ToShortDateString();
                                     }
+                                    catch (Exception ex)
+                                    {
+                                        if (ex is IOException || ex is InvalidDataException)
+                                        {
+                                            // Nothing to handle. Failed to extract, so either file is invalid (re-download) or the extract was reattempted (remove zip file). In either case, remove downloaded zip file.
+                                        }
+                                        else
+                                        {
+                                            throw;
+                                        }
+                                    }
+
+                                    System.IO.File.Delete(this.latestReleaseDefaultFileName);
                                 }
                             }
-                        });
 
-                        // Save the current date as when the last check for updates was performed. Next check must be after 1 month atleast.
-                        this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value = DateTime.Today.ToShortDateString();
+                            // Save the current date as when the last check for updates was performed. Next check must be after 1 month atleast.
+                            this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value = nextCheckDate;
+                        });
                     }
                 }
             }
@@ -1223,6 +1240,11 @@ namespace Searcher
                     {
                         try
                         {
+                            if (File.Exists(this.latestReleaseDefaultFileName))
+                            {
+                                File.Delete(this.latestReleaseDefaultFileName);
+                            }
+
                             using (WebClient client = new WebClient())
                             {
                                 client.DownloadFile(new Uri(downloadUrl), this.latestReleaseDefaultFileName);
@@ -1573,35 +1595,6 @@ namespace Searcher
         }
 
         /// <summary>
-        /// Determine whether the downloaded zip file is valid.
-        /// </summary>
-        /// <param name="fileName">The path to the zip file.</param>
-        /// <returns>Boolean indicating whether the downloaded zip file is valid.</returns>
-        private bool IsDownloadedZipValid(string fileName)
-        {
-            bool isArchiveValid = false;
-
-            try
-            {
-                System.IO.Compression.ZipArchive archive = System.IO.Compression.ZipFile.Open(fileName, System.IO.Compression.ZipArchiveMode.Read);
-                int itemCount = 0;
-                isArchiveValid = int.TryParse(archive.Entries.Count.ToString(), out itemCount);
-            }
-            catch (Exception)
-            {
-                // If the file cannot be read for any reason, then the archive is invalid.
-            }
-
-            // Remove archive since it is corrupt or empty.
-            if (isArchiveValid == false)
-            {
-                File.Delete(fileName);
-            }
-
-            return isArchiveValid;
-        }
-
-        /// <summary>
         /// Show right click menu options
         /// </summary>
         /// <param name="sender">The sender object.</param>
@@ -1730,7 +1723,7 @@ namespace Searcher
                     this.siteWithLatestUpdate = "SourceForge";
                     downloadUrl = "https://sourceforge.net/projects/searcher/files/latest/download";
                     downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
-                    retVal = !string.IsNullOrEmpty(downloadedFile) && this.IsDownloadedZipValid(downloadedFile);
+                    retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
 
                 if (!retVal && await this.NewReleaseExistsInGitHub())
@@ -1738,7 +1731,7 @@ namespace Searcher
                     this.siteWithLatestUpdate = "GitHub";
                     downloadUrl = await this.GetLatestReleaseDownloadPathInGitHub();
                     downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
-                    retVal = !string.IsNullOrEmpty(downloadedFile) && this.IsDownloadedZipValid(downloadedFile);
+                    retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
             }
 
