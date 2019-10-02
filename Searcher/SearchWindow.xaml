@@ -27,6 +27,9 @@
         Loaded="Window_Loaded"
         Title="Searcher" Height="400" Width="740"
         KeyDown="Window_KeyDown">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo x:Name="TaskBarItemInfoProgress" />
+    </Window.TaskbarItemInfo>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />

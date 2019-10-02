@@ -33,7 +33,6 @@ namespace Searcher
     using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -712,6 +711,8 @@ namespace Searcher
                 string searchPath = this.CmbDirectory.Text;
                 string filters = string.IsNullOrEmpty(this.CmbFilters.Text) ? "*.*" : this.CmbFilters.Text;
                 this.TxtResults.IsDocumentEnabled = true;
+                this.TaskBarItemInfoProgress.ProgressValue = 0;
+                this.TaskBarItemInfoProgress.ProgressState = TaskbarItemProgressState.Normal;
                 this.executionTime.Start();
                 this.searchTimer.Start();
 
@@ -740,6 +741,7 @@ namespace Searcher
                 {
                     this.executionTime.Stop();
                     this.searchTimer.Stop();
+                    this.TaskBarItemInfoProgress.ProgressState = TaskbarItemProgressState.None;
                     this.BtnCancel.IsEnabled = false;
                     this.BtnSearch.IsEnabled = true;
                     this.EnableSearchControls(true);
@@ -2136,6 +2138,10 @@ namespace Searcher
                             () =>
                             {
                                 List<Inline> resultsToAdd = this.SearchAndDisplayResult(fileNamePath, termsToSearch);
+                                this.Dispatcher.Invoke(() =>
+                                {
+                                    this.TaskBarItemInfoProgress.ProgressValue = this.filesSearchedCounter * 1.0 / this.filesToSearch.Count();
+                                });
 
                                 if (resultsToAdd.Count > 0)
                                 {
