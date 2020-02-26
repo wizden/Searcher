@@ -22,39 +22,46 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="SearchWindow.xaml">
     <Application.Resources>
-        <Style TargetType="Button">
-            <Setter Property="Margin" Value="3" />
-            <Setter Property="Width" Value="100" />
-        </Style>
-        <Style TargetType="CheckBox">
-            <Setter Property="Margin" Value="3" />
-        </Style>
-        <Style TargetType="ComboBox">
-            <Setter Property="Margin" Value="3" />
-            <Setter Property="Width" Value="100" />
-        </Style>
-        <Style TargetType="DatePicker">
-            <Setter Property="Margin" Value="1" />
-            <Setter Property="Width" Value="105" />
-        </Style>
-        <Style TargetType="DatePickerTextBox">
-            <Setter Property="MaxLength" Value="10" />
-        </Style>
-        <Style TargetType="GroupBox">
-            <Setter Property="Margin" Value="3" />
-        </Style>
-        <Style TargetType="ProgressBar">
-            <Setter Property="Margin" Value="3" />
-        </Style>
-        <Style TargetType="RadioButton">
-            <Setter Property="Margin" Value="3" />
-        </Style>
-        <Style TargetType="TextBlock">
-            <Setter Property="Margin" Value="1" />
-        </Style>
-        <Style TargetType="TextBox">
-            <Setter Property="Margin" Value="3" />
-        </Style>
+        <ResourceDictionary>
+            <Style TargetType="Button">
+                <Setter Property="Margin" Value="3" />
+                <Setter Property="Width" Value="100" />
+            </Style>
+            <Style TargetType="CheckBox">
+                <Setter Property="Margin" Value="3" />
+            </Style>
+            <Style TargetType="ComboBox">
+                <Setter Property="Margin" Value="3" />
+                <Setter Property="Width" Value="100" />
+            </Style>
+            <Style TargetType="DatePicker">
+                <Setter Property="Margin" Value="1" />
+                <Setter Property="Width" Value="105" />
+            </Style>
+            <Style TargetType="DatePickerTextBox">
+                <Setter Property="MaxLength" Value="10" />
+            </Style>
+            <Style TargetType="GroupBox">
+                <Setter Property="Margin" Value="3" />
+            </Style>
+            <Style TargetType="ProgressBar">
+                <Setter Property="Margin" Value="3" />
+            </Style>
+            <Style TargetType="RadioButton">
+                <Setter Property="Margin" Value="3" />
+            </Style>
+            <Style TargetType="TextBlock">
+                <Setter Property="Margin" Value="1" />
+            </Style>
+            <Style TargetType="TextBox">
+                <Setter Property="Margin" Value="3" />
+            </Style>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/StringResources.de-DE.xaml" />
+                <ResourceDictionary Source="Resources/StringResources.en-US.xaml" />
+                <ResourceDictionary Source="Resources/StringResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
     <JumpList.JumpList>
         <JumpList>

@@ -18,6 +18,15 @@ namespace Searcher
         public ResultsPopout()
         {
             this.InitializeComponent();
+            this.SetContentBasedOnLanguage();
+        }
+
+        /// <summary>
+        /// Set readable content based on selected language.
+        /// </summary>
+        private void SetContentBasedOnLanguage()
+        {
+            this.Title = Application.Current.Resources["ResultsPopout"].ToString();
         }
     }
 }

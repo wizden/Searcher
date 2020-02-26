@@ -283,16 +283,24 @@ namespace SearcherLibrary
                                             Match searchMatch = Regex.Match(matchLine, searchTerm, this.RegexOptions);         // Use this match for the result highlight, based on additional characters being selected before and after the match.
 
                                             // Only add, if it does not already exist (Not sure how the body elements manage to bring back the same content again.
-                                            if (!matchedLines.Any(ml => ml.SearchTerm == searchTerm && ml.Content == string.Format("Page {0}:\t{1}", pageNumber, matchLine)))
+                                            if (!matchedLines.Any(ml => ml.SearchTerm == searchTerm && ml.Content == string.Format("{0} {1}:\t{2}", Resources.Strings.Page, pageNumber, matchLine)))
                                             {
-                                                matchedLines.Add(new MatchedLine { Content = string.Format("Page {0}:\t{1}", pageNumber, matchLine), SearchTerm = searchTerm, FileName = fileName, LineNumber = pageNumber, StartIndex = searchMatch.Index + 7 + pageNumber.ToString().Length, Length = searchMatch.Length });
+                                                matchedLines.Add(new MatchedLine 
+                                                { 
+                                                    Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Page, pageNumber, matchLine), 
+                                                    SearchTerm = searchTerm, 
+                                                    FileName = fileName, 
+                                                    LineNumber = pageNumber, 
+                                                    StartIndex = searchMatch.Index + Resources.Strings.Page.Length + 3 + pageNumber.ToString().Length, 
+                                                    Length = searchMatch.Length 
+                                                });
                                             }
                                         }
                                     }
                                 }
                                 catch (ArgumentException aex)
                                 {
-                                    throw new ArgumentException(aex.Message + " If using Regex, try escaping using the \\ character. Regex failures - Search cancelled. Correct regular expression and retry.");
+                                    throw new ArgumentException(aex.Message + " " + Resources.Strings.RegexFailureSearchCancelled);
                                 }
                             }
                         }
@@ -322,7 +330,14 @@ namespace SearcherLibrary
                                         endIndex = (allContent.Length >= match.Index + match.Length + IndexBoundary) ? this.GetLocationOfLastWord(allContent, match.Index + match.Length + IndexBoundary) : allContent.Length;
                                         string matchLine = allContent.Substring(startIndex, endIndex - startIndex);
                                         Match searchMatch = Regex.Match(matchLine, searchTerm, this.RegexOptions);         // Use this match for the result highlight, based on additional characters being selected before and after the match.
-                                        allContentMatchedLines.Add(new MatchedLine { Content = string.Format("Page {0}:\t{1}", pageNumber, matchLine), SearchTerm = searchTerm, FileName = fileName, LineNumber = pageNumber, StartIndex = searchMatch.Index + 7 + pageNumber.ToString().Length, Length = searchMatch.Length });
+                                        allContentMatchedLines.Add(new MatchedLine 
+                                        { 
+                                            Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Page, pageNumber, matchLine), 
+                                            SearchTerm = searchTerm, 
+                                            FileName = fileName, 
+                                            LineNumber = pageNumber, 
+                                            StartIndex = searchMatch.Index + Resources.Strings.Page.Length + 3 + pageNumber.ToString().Length, 
+                                            Length = searchMatch.Length });
                                     }
 
                                     fileName = string.Empty;
@@ -330,12 +345,12 @@ namespace SearcherLibrary
                             }
                             catch (ArgumentException aex)
                             {
-                                throw new ArgumentException(aex.Message + " If using Regex, try escaping using the \\ character. Regex failures - Search cancelled. Correct regular expression and retry.");
+                                throw new ArgumentException(aex.Message + " " + Resources.Strings.RegexFailureSearchCancelled);
                             }
                         }
 
                         // Only add those lines that do not already exist in matches found. Do not like the search mechanism below, but it helps to search by excluding the "Page {0}:\t{1}" content.
-                        matchedLines.AddRange(allContentMatchedLines.Where(acm => !matchedLines.Any(ml => acm.Length == ml.Length && acm.Content.Contains(ml.Content.Substring(7 + ml.LineNumber.ToString().Length, ml.Content.Length - (7 + ml.LineNumber.ToString().Length))))));
+                        matchedLines.AddRange(allContentMatchedLines.Where(acm => !matchedLines.Any(ml => acm.Length == ml.Length && acm.Content.Contains(ml.Content.Substring(Resources.Strings.Page.Length + 3 + ml.LineNumber.ToString().Length, ml.Content.Length - (Resources.Strings.Page.Length + 3 + ml.LineNumber.ToString().Length))))));
                     }
 
                     document.Close();
@@ -351,8 +366,8 @@ namespace SearcherLibrary
                 if (ffx.Message == "File contains corrupted data.")
                 {
                     string error = fileName.Contains("~$")
-                        ? "The file is either corrupt or open in another application."
-                        : "The file is either corrupt or protected.";
+                        ? Resources.Strings.FileCorruptOrLockedByApp
+                        : Resources.Strings.FileCorruptOrProtected;
                     throw new IOException(error, ffx);
                 }
                 else
@@ -402,14 +417,22 @@ namespace SearcherLibrary
                                     endIndex = (pdfPage.Length >= match.Index + match.Length + IndexBoundary) ? match.Index + match.Length + IndexBoundary : pdfPage.Length;
                                     string matchLine = pdfPage.Substring(startIndex, endIndex - startIndex);
                                     Match searchMatch = Regex.Match(matchLine, searchTerm, this.RegexOptions);          // Use this match for the result highlight, based on additional characters being selected before and after the match.
-                                    matchedLines.Add(new MatchedLine { Content = string.Format("Page {0}:\t{1}", pageCounter.ToString(), matchLine), SearchTerm = searchTerm, FileName = fileName, LineNumber = 1, StartIndex = searchMatch.Index + 7 + pageCounter.ToString().Length, Length = searchMatch.Length });
+                                    matchedLines.Add(new MatchedLine 
+                                    { 
+                                        Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Page, pageCounter.ToString(), matchLine), 
+                                        SearchTerm = searchTerm, 
+                                        FileName = fileName, 
+                                        LineNumber = 1, 
+                                        StartIndex = searchMatch.Index + Resources.Strings.Page.Length + 3 + pageCounter.ToString().Length, 
+                                        Length = searchMatch.Length 
+                                    });
                                 }
                             }
                         }
                     }
                     catch (ArgumentException aex)
                     {
-                        throw new ArgumentException(aex.Message + " If using Regex, try escaping using the \\ character. Regex failures - Search cancelled. Correct regular expression and retry.");
+                        throw new ArgumentException(aex.Message + " " + Resources.Strings.RegexFailureSearchCancelled);
                     }
                 }
 
@@ -479,7 +502,15 @@ namespace SearcherLibrary
                                     }
 
                                     Match searchMatch = Regex.Match(matchLine, searchTerm, this.RegexOptions);          // Use this match for the result highlight, based on additional characters being selected before and after the match.
-                                    matchedLines.Add(new MatchedLine { Content = string.Format("Slide {0}:\t{1}", (slideCounter + 1).ToString(), matchLine), SearchTerm = searchTerm, FileName = fileName, LineNumber = 1, StartIndex = searchMatch.Index + 8 + (slideCounter + 1).ToString().Length, Length = searchMatch.Length });
+                                    matchedLines.Add(new MatchedLine 
+                                    { 
+                                        Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Slide, (slideCounter + 1).ToString(), matchLine), 
+                                        SearchTerm = searchTerm, 
+                                        FileName = fileName, 
+                                        LineNumber = 1, 
+                                        StartIndex = searchMatch.Index + Resources.Strings.Slide.Length + 3 + (slideCounter + 1).ToString().Length, 
+                                        Length = searchMatch.Length 
+                                    });
                                 }
                             }
                         }
@@ -496,8 +527,8 @@ namespace SearcherLibrary
                 if (ffx.Message == "File contains corrupted data.")
                 {
                     string error = fileName.Contains("~$")
-                        ? "The file is either corrupt or open in another application."
-                        : "The file is either corrupt or protected.";
+                        ? Resources.Strings.FileCorruptOrLockedByApp
+                        : Resources.Strings.FileCorruptOrProtected;
                     throw new IOException(error, ffx);
                 }
                 else
@@ -543,7 +574,7 @@ namespace SearcherLibrary
 
                         if (sheet == null)
                         {
-                            throw new ArgumentException("Sheet Not Found");
+                            throw new ArgumentException(Resources.Strings.SheetNotFound);
                         }
 
                         WorksheetPart workSheetPart = wkbkPart.GetPartById(sheet.Id) as WorksheetPart;
@@ -590,14 +621,22 @@ namespace SearcherLibrary
                             {
                                 foreach (Match match in matches)
                                 {
-                                    matchedLines.Add(new MatchedLine { Content = string.Format("{0}\\{1}\t\t{2}", ecd.SheetName, ecd.CellReference, ecd.CellContent), SearchTerm = searchTerm, FileName = fileName, LineNumber = 1, StartIndex = match.Index + (ecd.SheetName.Length + ecd.CellReference.Length + 3), Length = match.Length });
+                                    matchedLines.Add(new MatchedLine 
+                                    { 
+                                        Content = string.Format("{0}\\{1}\t\t{2}", ecd.SheetName, ecd.CellReference, ecd.CellContent), 
+                                        SearchTerm = searchTerm, 
+                                        FileName = fileName, 
+                                        LineNumber = 1, 
+                                        StartIndex = match.Index + (ecd.SheetName.Length + ecd.CellReference.Length + 3), 
+                                        Length = match.Length 
+                                    });
                                 }
                             }
                         }
                     }
                     catch (ArgumentException aex)
                     {
-                        throw new ArgumentException(aex.Message + " If using Regex, try escaping using the \\ character. Regex failures - Search cancelled. Correct regular expression and retry.");
+                        throw new ArgumentException(aex.Message + " " + Resources.Strings.RegexFailureSearchCancelled);
                     }
                 }
 
@@ -611,8 +650,8 @@ namespace SearcherLibrary
                 if (ffx.Message == "File contains corrupted data.")
                 {
                     string error = fileName.Contains("~$")
-                        ? "The file is either corrupt or open in another application."
-                        : "The file is either corrupt or protected.";
+                        ? Resources.Strings.FileCorruptOrLockedByApp
+                        : Resources.Strings.FileCorruptOrProtected;
                     throw new IOException(error, ffx);
                 }
                 else
@@ -715,7 +754,7 @@ namespace SearcherLibrary
                         }
                         catch (PathTooLongException ptlex)
                         {
-                            throw new PathTooLongException(string.Format("Error accessing entry {0} in archive {1} - {2}", reader.Entry.Key, fileName, ptlex.Message));
+                            throw new PathTooLongException(string.Format("{0} {1} {2} {3} - {4}", Resources.Strings.ErrorAccessingEntry, reader.Entry.Key, Resources.Strings.InArchive, fileName, ptlex.Message));
                         }
                     }
                 }
@@ -729,7 +768,7 @@ namespace SearcherLibrary
             {
                 if (ane.Message.Contains("String reference not set to an instance of a String."))
                 {
-                    throw new NotSupportedException(string.Format("Unable to access {0}. The file may be encrypted.", fileName));
+                    throw new NotSupportedException(string.Format("{0} {1}. {2}", Resources.Strings.ErrorAccessingFile, fileName, Resources.Strings.FileEncrypted));
                 }
                 else
                 {

@@ -29,6 +29,7 @@ namespace Searcher
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Resources;
     using System.Windows.Controls;
     using System.Windows.Documents;
     using SearcherLibrary;
