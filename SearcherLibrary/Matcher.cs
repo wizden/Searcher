@@ -27,8 +27,10 @@ namespace SearcherLibrary
 
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Resources;
     using System.Text.RegularExpressions;
     using System.Threading;
 
@@ -100,6 +102,23 @@ namespace SearcherLibrary
         /// Gets or sets the cancellation token source object to cancel file search.
         /// </summary>
         public CancellationTokenSource CancellationTokenSource { get; set; }
+
+        /// <summary>
+        /// Gets or sets the culture to determine the resource for language.
+        /// </summary>
+        public CultureInfo CultureInfo 
+        {
+            get
+            {
+                return Thread.CurrentThread.CurrentCulture;
+            }
+
+            set
+            {
+                Thread.CurrentThread.CurrentCulture = value;
+                Thread.CurrentThread.CurrentUICulture = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the search is across multiple lines using Regex.
@@ -275,7 +294,7 @@ namespace SearcherLibrary
                             //                         12345   6 7
                             matchedLines.Add(new MatchedLine
                             {
-                                Content = string.Format("Line {0}:\t{1}", lineToDisplayStart, match.Value),
+                                Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineToDisplayStart, match.Value),
                                 SearchTerm = termToSearch,
                                 LineNumber = lineToDisplayStart,
                                 StartIndex = lineToDisplayStart.ToString().Length + 7,
@@ -288,7 +307,7 @@ namespace SearcherLibrary
 
                             matchedLines.Add(new MatchedLine
                             {
-                                Content = string.Format("Line {0}:\t{1}", lineNumberStart.ToString(), match.Value),
+                                Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineNumberStart.ToString(), match.Value),
                                 SearchTerm = termToSearch,
                                 LineNumber = lineNumberStart + 1,
                                 StartIndex = 7 + lineNumberStart.ToString().Length,
@@ -340,7 +359,7 @@ namespace SearcherLibrary
             Match tempMatchObj;
             string searchLine = string.Empty;
             string tempSearchLine = string.Empty;
-            
+
             foreach (string line in contents)
             {
                 lineCounter++;
@@ -374,7 +393,7 @@ namespace SearcherLibrary
                                     //                         12345   6 7
                                     matchedLines.Add(new MatchedLine
                                     {
-                                        Content = string.Format("Line {0}:\t{1}", lineCounter, tempSearchLine),
+                                        Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineCounter, tempSearchLine),
                                         SearchTerm = searchTerm,
                                         LineNumber = lineCounter,
                                         StartIndex = tempMatchObj.Index + 7 + lineCounter.ToString().Length,
@@ -385,7 +404,7 @@ namespace SearcherLibrary
                                 {
                                     matchedLines.Add(new MatchedLine
                                     {
-                                        Content = string.Format("Line {0}:\t{1}", lineCounter, searchLine),
+                                        Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineCounter, searchLine),
                                         SearchTerm = searchTerm,
                                         LineNumber = lineCounter,
                                         StartIndex = match.Index + 7 + lineCounter.ToString().Length,
@@ -398,7 +417,7 @@ namespace SearcherLibrary
                     catch (ArgumentException aex)
                     {
                         this.CancellationTokenSource.Cancel();
-                        throw new ArgumentException(aex.Message + @"Regex failures - Search cancelled. Correct regular expression and retry. If using Regex, try escaping using the '\' character");
+                        throw new ArgumentException(aex.Message + Resources.Strings.RegexFailureSearchCancelled);
                     }
                 }
             }

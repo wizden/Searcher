@@ -38,7 +38,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Text="Exclusion type" />
+            <TextBlock Name="TblkExclusionType" Text="Exclusion type" />
             <RadioButton Name="RbtnTemporary" Grid.Column="1" Content="Temporary" GroupName="GrpPermTemp" IsChecked="True" />
             <RadioButton Name="RbtnPermanent"  Grid.Column="3" Content="Permanent" GroupName="GrpPermTemp" />
         </Grid>

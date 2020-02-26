@@ -167,19 +167,21 @@ namespace Searcher
         /// </summary>
         private void InitialiseControls()
         {
+            SetContentBasedOnLanguage();
+
             this.TblkVersionNumber.Text = Common.VersionNumber;
             string yearInfo = DateTime.Today.Year > 2018
                 ? "2018 - " + DateTime.Today.Year
                 : "2018";
 
-            string copyRightText = string.Format("Copyright (C) {0}  {1}{2}", yearInfo, "Dennis Joseph", Environment.NewLine);
-            string warrantyText = "This program comes with ABSOLUTELY NO WARRANTY." + Environment.NewLine;
+            string copyRightText = string.Format("{0} {1}  {2}{3}", Application.Current.Resources["Copyright"].ToString(), yearInfo, "Dennis Joseph", Environment.NewLine);
+            string warrantyText = Application.Current.Resources["WarrantyText"].ToString() + Environment.NewLine;
 
             Run copyRightAndWarranty = new Run(string.Join(Environment.NewLine, new string[] { copyRightText, warrantyText }));
-            Run run2 = new Run("This is free software, and you are welcome to redistribute it under certain conditions. See the ");
-            Run run4 = new Run("for details");
+            Run run2 = new Run(Application.Current.Resources["DistributeSoftware"].ToString() + " ");
+            Run run4 = new Run(" " + Application.Current.Resources["ForDetails"].ToString());
 
-            Hyperlink hyperlink = new Hyperlink(new Run("GNU licence link "))
+            Hyperlink hyperlink = new Hyperlink(new Run(Application.Current.Resources["GNULicenceLink"].ToString()))
             {
                 NavigateUri = new Uri("https://www.gnu.org/licenses/gpl-3.0.en.html")
             };
@@ -199,6 +201,16 @@ namespace Searcher
         private void SetupAppWithoutPreferences()
         {
             this.ChkUpdatesCheck.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Set readable content based on selected language.
+        /// </summary>
+        private void SetContentBasedOnLanguage()
+        {
+            this.Title = Application.Current.Resources["AboutSearcher"].ToString();
+            this.ChkUpdatesCheck.Content = Application.Current.Resources["MonthlyUpdateCheck"].ToString();
+            this.BtnUpdateSearcher.Content = Application.Current.Resources["Update"].ToString();
         }
 
         #endregion Private Methods        

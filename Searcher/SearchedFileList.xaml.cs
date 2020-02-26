@@ -48,6 +48,7 @@ namespace Searcher
         {
             this.InitializeComponent();
             this.FilesToInclude = new List<string>();
+            this.SetContentBasedOnLanguage();
         }
 
         /// <summary>
@@ -217,7 +218,7 @@ namespace Searcher
             List<string> itemsToInclude = listbox.SelectedItems.Cast<string>().ToList();
             this.FilesToInclude.AddRange(itemsToInclude.Where(i => (File.Exists(i) || Directory.Exists(i)) && !this.FilesToInclude.Any(fi => fi == i)));
 
-            itemsToInclude.ForEach(item => 
+            itemsToInclude.ForEach(item =>
             {
                 listbox.Items.Remove(item);
             });
@@ -234,6 +235,17 @@ namespace Searcher
             {
                 this.Close();
             }
+        }
+
+        /// <summary>
+        /// Set readable content based on selected language.
+        /// </summary>
+        private void SetContentBasedOnLanguage()
+        {
+            this.Title = Application.Current.Resources["SearchedFileList"].ToString();
+            this.BtnCopyList.Content = Application.Current.Resources["Directory"].ToString();
+            this.TblkAlwaysExcluded.Text = Application.Current.Resources["TemporarilyExcluded"].ToString();
+            this.TblkTemporarilyExcluded.Text = Application.Current.Resources["AlwaysExcluded"].ToString();
         }
 
         #endregion Private Methods

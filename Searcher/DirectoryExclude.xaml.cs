@@ -31,6 +31,7 @@ namespace Searcher
         public DirectoryExclude()
         {
             this.InitializeComponent();
+            this.SetContentBasedOnLanguage();
         }
         
         /// <summary>
@@ -146,6 +147,18 @@ namespace Searcher
             }
 
             return retVal;
+        }
+
+        /// <summary>
+        /// Set readable content based on selected language.
+        /// </summary>
+        private void SetContentBasedOnLanguage()
+        {
+            this.Title = Application.Current.Resources["SelectDirToExclude"].ToString();
+            this.RbtnTemporary.Content = Application.Current.Resources["Temporary"].ToString();
+            this.RbtnPermanent.Content = Application.Current.Resources["Permanent"].ToString();
+            this.TblkExclusionType.Text = Application.Current.Resources["ExclusionType"].ToString();
+            this.BtnCancel.Content = Application.Current.Resources["Cancel"].ToString();
         }
 
         /// <summary>
