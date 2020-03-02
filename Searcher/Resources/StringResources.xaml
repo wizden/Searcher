@@ -32,7 +32,7 @@
 
     <system:String x:Key="CreatePreferencesFileQuestion">No search preferences found. Do you want to save your search preferences?</system:String>
 
-    <system:String x:Key="Directory">Directory</system:String>
+    <system:String x:Key="Directory">_Directory</system:String>
 
     <system:String x:Key="DirectoryPathNotFound">Unable to access directory path(s) or path(s) cannot be found</system:String>
 
@@ -60,7 +60,9 @@
 
     <system:String x:Key="FilesFound">Files found</system:String>
 
-    <system:String x:Key="Filters">Filters</system:String>
+    <system:String x:Key="Filters">Fi_lters</system:String>
+
+    <system:String x:Key="FindKeywords">_Find keywords</system:String>
 
     <system:String x:Key="ForDetails">for details</system:String>
 
@@ -72,13 +74,13 @@
 
     <system:String x:Key="GNULicenceLink">GNU licence link</system:String>
 
-    <system:String x:Key="HighlightResults">Highlight results</system:String>
+    <system:String x:Key="HighlightResults">_Highlight results</system:String>
 
     <system:String x:Key="In">in</system:String>
 
     <system:String x:Key="Language">Language</system:String>
 
-    <system:String x:Key="MatchCase">Match case</system:String>
+    <system:String x:Key="MatchCase">Match _case</system:String>
 
     <system:String x:Key="Matches">Match(es)</system:String>
 
@@ -88,9 +90,9 @@
 
     <system:String x:Key="MonthlyUpdateCheck">Check for updates (monthly)</system:String>
 
-    <system:String x:Key="Multiline">Multiline?</system:String>
+    <system:String x:Key="Multiline">_Multiline?</system:String>
 
-    <system:String x:Key="Normal">Normal</system:String>
+    <system:String x:Key="Normal">_Normal</system:String>
 
     <system:String x:Key="NoSearchPreferences">No search preferences</system:String>
 
@@ -110,7 +112,7 @@
 
     <system:String x:Key="ProcessingFiles">Processed Files</system:String>
 
-    <system:String x:Key="Regex">Regex</system:String>
+    <system:String x:Key="Regex">_Regex</system:String>
 
     <system:String x:Key="Results">Results</system:String>
 
@@ -130,8 +132,6 @@
 
     <system:String x:Key="SearchMode">Search Mode</system:String>
 
-    <system:String x:Key="SearchTerm">Search Term</system:String>
-
     <system:String x:Key="SelectDate">Select a date</system:String>
 
     <system:String x:Key="SelectDirToExclude">Select directory to exclude</system:String>
@@ -146,7 +146,7 @@
 
     <system:String x:Key="StartDateLessThanEndDateError">Start date cannot be later than end date.</system:String>
 
-    <system:String x:Key="Subfolders">Subfolders</system:String>
+    <system:String x:Key="Subfolders">_Subfolders</system:String>
 
     <system:String x:Key="TemporarilyExcluded">Temporarily Excluded</system:String>
 
@@ -186,5 +186,5 @@
 
     <system:String x:Key="WarrantyText">This program comes with ABSOLUTELY NO WARRANTY.</system:String>
 
-    <system:String x:Key="WholeWord">Whole Word</system:String>
+    <system:String x:Key="WholeWord">Whole _word</system:String>
 </ResourceDictionary>
