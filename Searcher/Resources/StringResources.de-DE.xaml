@@ -59,8 +59,10 @@
 
     <system:String x:Key="FilesFound">Dateien gefunden</system:String>
 
-    <system:String x:Key="Filters">Filter</system:String>
+    <system:String x:Key="Filters">Fi_lter</system:String>
 
+    <system:String x:Key="FindKeywords">Suchbegri_ff</system:String>
+    
     <system:String x:Key="ForDetails">für Details</system:String>
 
     <system:String x:Key="Found">Gefunden</system:String>
@@ -71,7 +73,7 @@
 
     <system:String x:Key="GNULicenceLink">GNU-Lizenzlink</system:String>
 
-    <system:String x:Key="HighlightResults">Ergebnisse hervorheben</system:String>
+    <system:String x:Key="HighlightResults">Ergebnisse _hervorheben</system:String>
 
     <system:String x:Key="In">in</system:String>
 
@@ -87,9 +89,9 @@
 
     <system:String x:Key="MonthlyUpdateCheck">Nach Updates suchen (monatlich)</system:String>
 
-    <system:String x:Key="Multiline">Mehrzeilig?</system:String>
+    <system:String x:Key="Multiline">_Mehrzeilig?</system:String>
 
-    <system:String x:Key="Normal">Normal</system:String>
+    <system:String x:Key="Normal">_Normal</system:String>
 
     <system:String x:Key="NoSearchPreferences">Keine Sucheinstellungen</system:String>
 
@@ -109,7 +111,7 @@
 
     <system:String x:Key="ProcessingFiles">Durchsuchte Datei(en)</system:String>
 
-    <system:String x:Key="Regex">Regulärer Ausdruck</system:String>
+    <system:String x:Key="Regex">_Regulärer Ausdruck</system:String>
 
     <system:String x:Key="Results">Ergebnisse</system:String>
 
@@ -128,8 +130,6 @@
     <system:String x:Key="Searching">Suchen</system:String>
 
     <system:String x:Key="SearchMode">Suchmodus</system:String>
-
-    <system:String x:Key="SearchTerm">Suchbegriff</system:String>
 
     <system:String x:Key="SelectDate">Datum auswählen</system:String>
 
@@ -185,5 +185,5 @@
 
     <system:String x:Key="WarrantyText">Keine Gewähr auf dieses Programm, - keine Garantie.</system:String>
 
-    <system:String x:Key="WholeWord">Ganzes Wort</system:String>
+    <system:String x:Key="WholeWord">Ganzes _Wort</system:String>
 </ResourceDictionary>

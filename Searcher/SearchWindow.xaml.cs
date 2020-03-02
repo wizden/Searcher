@@ -32,9 +32,7 @@ namespace Searcher
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Net;
     using System.Net.Http;
-    using System.Resources;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -42,7 +40,6 @@ namespace Searcher
     using System.Windows.Controls;
     using System.Windows.Documents;
     using System.Windows.Input;
-    using System.Windows.Markup;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
     using System.Windows.Navigation;
@@ -193,11 +190,6 @@ namespace Searcher
         private string culture = "en-US";
 
         /// <summary>
-        /// Private store for the default file name when downloading the latest release.
-        /// </summary>
-        private string latestReleaseDefaultFileName = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher_new.zip");
-
-        /// <summary>
         /// Boolean indicating whether the search is case sensitive.
         /// </summary>
         private bool matchCase = false;
@@ -316,11 +308,6 @@ namespace Searcher
         /// Boolean indicating whether the search should show the execution time.
         /// </summary>
         private bool showExecutionTime = false;
-
-        /// <summary>
-        /// Private store for the site that contains the latest update.
-        /// </summary>
-        private string siteWithLatestUpdate = string.Empty;
 
         /// <summary>
         /// Private store for the window height.
@@ -1061,64 +1048,24 @@ namespace Searcher
         /// <summary>
         /// Determine whether updates can be checked for.
         /// </summary>
-        private void DownloadUpdates()
+        private async void DownloadUpdates()
         {
+            // This method is async void because if the search for update fails, we do not worry further as it does not impact the application usage.
             if (this.preferenceFile != null && this.preferenceFile.Descendants("CheckForUpdates").FirstOrDefault().Value.ToUpper() == true.ToString().ToUpper())
             {
-                DateTime lastUpdateCheckDate;
+                UpdateApp updateApp = new UpdateApp(this.preferenceFile);
 
-                if (this.preferenceFile.Descendants("LastUpdateCheckDate") != null && this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault() != null
-                    && DateTime.TryParse(this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value, out lastUpdateCheckDate))
+                if (updateApp.UpdatedAppExistsLocally())
                 {
-                    // Delete any previous version.
-                    System.IO.File.Delete(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher.exe.old"));
-
-                    if (Common.ApplicationUpdateExists)
+                    this.Dispatcher.Invoke(() =>
                     {
-                        this.Dispatcher.Invoke(() =>
-                        {
-                            this.Title = string.Format("{0} ({1})", this.Title, Application.Current.Resources["ClickAboutForUpdates"].ToString());
-                        });
-                    }
-
-                    // Check for updates monthly. Why bother the user more frequently. Can look to make this configurable in the future.
-                    if (lastUpdateCheckDate.AddMonths(1) < DateTime.Today)
-                    {
-                        string nextCheckDate = DateTime.Today.ToShortDateString();
-
-                        Task.Run(async () =>
-                        {
-                            if (await this.NewReleaseExistsAsync())
-                            {
-                                if (System.IO.File.Exists(this.latestReleaseDefaultFileName))
-                                {
-                                    string newProgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg");
-
-                                    try
-                                    {
-                                        System.IO.Compression.ZipFile.ExtractToDirectory(this.latestReleaseDefaultFileName, newProgPath);
-                                        nextCheckDate = DateTime.Today.ToShortDateString();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        if (ex is IOException || ex is InvalidDataException)
-                                        {
-                                            // Nothing to handle. Failed to extract, so either file is invalid (re-download) or the extract was reattempted (remove zip file). In either case, remove downloaded zip file.
-                                        }
-                                        else
-                                        {
-                                            throw;
-                                        }
-                                    }
-
-                                    System.IO.File.Delete(this.latestReleaseDefaultFileName);
-                                }
-                            }
-
-                            // Save the current date as when the last check for updates was performed. Next check must be after 1 month atleast.
-                            this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value = nextCheckDate;
-                        });
-                    }
+                        this.Title = string.Format("{0} ({1})", this.Title, Application.Current.Resources["ClickAboutForUpdates"].ToString());
+                    });
+                }
+                else
+                {
+                    string nextUpdateCheckDate = await updateApp.CheckAndDownloadUpdatedVersionAsync();
+                    this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value = nextUpdateCheckDate;
                 }
             }
         }
@@ -1249,50 +1196,6 @@ namespace Searcher
         {
             string fullFilePath = Common.GetLinkUriDetails(sender);
             this.AddToSearchFileExclusionList(fullFilePath);
-        }
-
-        /// <summary>
-        /// Get the name of the updated application download file.
-        /// </summary>
-        /// <param name="downloadUrl">The url path for the latest executable.</param>
-        /// <returns>The name of the updated application download file.</returns>
-        private async Task<string> GetDownloadedUpdateFilenameAsync(string downloadUrl)
-        {
-            string retVal = string.Empty;
-
-            retVal = await Task.Run<string>(() =>
-            {
-                string newFileName = string.Empty;
-
-                if (!string.IsNullOrEmpty(this.siteWithLatestUpdate))
-                {
-                    if (!string.IsNullOrEmpty(downloadUrl))
-                    {
-                        try
-                        {
-                            if (File.Exists(this.latestReleaseDefaultFileName))
-                            {
-                                File.Delete(this.latestReleaseDefaultFileName);
-                            }
-
-                            using (WebClient client = new WebClient())
-                            {
-                                client.DownloadFile(new Uri(downloadUrl), this.latestReleaseDefaultFileName);
-                                newFileName = this.latestReleaseDefaultFileName;
-                            }
-                        }
-                        catch
-                        {
-                            // If the exception occurs after newFileName is set, set newFileName to empty string.
-                            newFileName = string.Empty;
-                        }
-                    }
-                }
-
-                return newFileName;
-            });
-
-            return retVal;
         }
 
         /// <summary>
@@ -1711,129 +1614,6 @@ namespace Searcher
         }
 
         /// <summary>
-        /// Determine if a new application version exists.
-        /// </summary>
-        /// <returns>Boolean indicating whether a new application version exists.</returns>
-        private async Task<bool> NewReleaseExistsAsync()
-        {
-            bool retVal = false;
-
-            if (System.IO.Directory.Exists(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg")))
-            {
-                retVal = true;
-            }
-            else
-            {
-                string downloadedFile = string.Empty;
-                string downloadUrl = string.Empty;
-
-                if (await this.NewReleaseExistsInSourceForge())
-                {
-                    this.siteWithLatestUpdate = "SourceForge";
-                    downloadUrl = "https://sourceforge.net/projects/searcher/files/latest/download";
-                    downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
-                    retVal = !string.IsNullOrEmpty(downloadedFile);
-                }
-
-                if (!retVal && await this.NewReleaseExistsInGitHub())
-                {
-                    this.siteWithLatestUpdate = "GitHub";
-                    downloadUrl = await this.GetLatestReleaseDownloadPathInGitHub();
-                    downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
-                    retVal = !string.IsNullOrEmpty(downloadedFile);
-                }
-            }
-
-            return retVal;
-        }
-
-        /// <summary>
-        /// Check if a new version exists on GitHub.
-        /// </summary>
-        /// <returns>Boolean indicating whether a new version exists.</returns>
-        private async Task<bool> NewReleaseExistsInGitHub()
-        {
-            bool retVal = false;
-
-            retVal = await Task.Run<bool>(async () =>
-            {
-                bool newReleaseExists = false;
-                string latestReleaseDownloadUrl = string.Empty;
-
-                try
-                {
-                    latestReleaseDownloadUrl = await this.GetLatestReleaseDownloadPathInGitHub();
-                }
-                catch
-                {
-                    // Cannot do much. Failed to access/retrieve data from the website.
-                }
-
-                if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
-                {
-                    string searchValue = "/Searcher_v";
-                    string strSiteVersion = latestReleaseDownloadUrl.Substring(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length).Replace(".zip", string.Empty);
-                    Version appVersion = new Version(Common.VersionNumber);
-                    Version siteVersion;
-
-                    if (Version.TryParse(strSiteVersion, out siteVersion))
-                    {
-                        newReleaseExists = siteVersion > appVersion;
-                    }
-                }
-
-                return newReleaseExists;
-            });
-
-            return retVal;
-        }
-
-        /// <summary>
-        /// Check if a new version exists on SourceForge.
-        /// </summary>
-        /// <returns>Boolean indicating whether a new version exists.</returns>
-        private async Task<bool> NewReleaseExistsInSourceForge()
-        {
-            bool retVal = await Task.Run<bool>(async () =>
-            {
-                bool newReleaseExists = false;
-                string path = @"https://sourceforge.net/projects/searcher/best_release.json";
-                using (HttpClient client = new HttpClient())
-                {
-                    client.Timeout = new TimeSpan(0, 0, 0, 30);
-                    string latestReleaseDownloadUrl = string.Empty;
-
-                    try
-                    {
-                        latestReleaseDownloadUrl = await client.GetStringAsync(new Uri(path));
-                    }
-                    catch
-                    {
-                        // Cannot do much. Failed to access/retrieve data from the website.
-                    }
-
-                    if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
-                    {
-                        Newtonsoft.Json.Linq.JObject jsonSiteVersion = Newtonsoft.Json.Linq.JObject.Parse(latestReleaseDownloadUrl);
-                        string fileName = jsonSiteVersion["release"]["filename"].ToString();
-                        string strSiteVersion = fileName.Replace("/Searcher_v", string.Empty).Replace(".zip", string.Empty);
-                        Version appVersion = new Version(Common.VersionNumber);
-                        Version siteVersion;
-
-                        if (Version.TryParse(strSiteVersion, out siteVersion))
-                        {
-                            newReleaseExists = siteVersion > appVersion;
-                        }
-                    }
-
-                    return newReleaseExists;
-                }
-            });
-
-            return retVal;
-        }
-
-        /// <summary>
         /// Context menu to open windows explorer to the selected file.
         /// </summary>
         /// <param name="sender">The sender object</param>
@@ -2248,15 +2028,8 @@ namespace Searcher
         /// </summary>
         private void SetContentBasedOnLanguage()
         {
-
-            // TODO: Cannot set multiple times
-            ////FrameworkElement.LanguageProperty.OverrideMetadata(
-            ////  typeof(FrameworkElement),
-            ////  new FrameworkPropertyMetadata(
-            ////      XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
-
             this.LblDirectory.Content = Application.Current.Resources["Directory"].ToString();
-            this.LblFindWhat.Content = Application.Current.Resources["SearchTerm"].ToString();
+            this.LblFindWhat.Content = Application.Current.Resources["FindKeywords"].ToString();
             this.LblFilters.Content = Application.Current.Resources["Filters"].ToString();
             this.ExpndrOptions.Header = Application.Current.Resources["Options"].ToString();
             this.GrpMatchOptions.Header = Application.Current.Resources["MatchOptions"].ToString();
@@ -2416,7 +2189,6 @@ namespace Searcher
         /// <summary>
         /// Set language based on culture.
         /// </summary>
-        /// <param name="culture">The culture to base the form display content on.</param>
         private void SetLanguage()
         {
             this.SetResourceDictionary();

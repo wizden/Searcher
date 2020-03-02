@@ -167,7 +167,7 @@ namespace Searcher
         /// </summary>
         private void InitialiseControls()
         {
-            SetContentBasedOnLanguage();
+            this.SetContentBasedOnLanguage();
 
             this.TblkVersionNumber.Text = Common.VersionNumber;
             string yearInfo = DateTime.Today.Year > 2018
