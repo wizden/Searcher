@@ -28,10 +28,11 @@ namespace SearcherLibrary
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.IO.Compression;
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Text;
     using System.Text.RegularExpressions;
-    using System.Threading;
     using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Presentation;
@@ -55,14 +56,14 @@ namespace SearcherLibrary
         private const string AppName7Zip = "7-zip";
 
         /// <summary>
-        /// Private variable to hold the name of the temporary extraction directory.
-        /// </summary>
-        private const string TempExtractDirectoryName = "→_extract_←";
-
-        /// <summary>
         /// The number of characters to display before and after the matched content index.
         /// </summary>
         private const int IndexBoundary = 50;
+
+        /// <summary>
+        /// The maximum length of a content to check. If longer than this, split the search output result to minimise the length of results content displayed.
+        /// </summary>
+        private const int MaxContentLengthCheck = 200;
 
         /// <summary>
         /// The maximum date value in excel (see https://support.office.com/en-us/article/move-data-from-excel-to-access-90c35a40-bcc3-46d9-aa7f-4106f78850b4).
@@ -75,9 +76,14 @@ namespace SearcherLibrary
         private const double MinExcelDate = -657434;
 
         /// <summary>
-        /// The maximum length of a content to check. If longer than this, split the search output result to minimise the length of results content displayed.
+        /// Private variable to hold the name of the temporary extraction directory.
         /// </summary>
-        private const int MaxContentLengthCheck = 200;
+        private const string TempExtractDirectoryName = "→_extract_←";
+
+        /// <summary>
+        /// List of characters not allowed for the file system.
+        /// </summary>
+        private static List<char> disallowedCharactersByOperatingSystem;
 
         /// <summary>
         /// Private variable to hold the install location of the 7-zip executable.
@@ -105,6 +111,32 @@ namespace SearcherLibrary
 
         #endregion Public Properties
 
+        #region Private Properties
+
+        /// <summary>
+        /// Gets the list of characters not allowed by the operating system.
+        /// </summary>
+        private static List<char> DisallowedCharactersByOperatingSystem
+        {
+            get
+            {
+                if (disallowedCharactersByOperatingSystem == null)
+                {
+                    disallowedCharactersByOperatingSystem = new List<char>();
+
+                    if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        // Based on: https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file. Excluding "\" and "/" as these get used for IEntry paths.
+                        disallowedCharactersByOperatingSystem.AddRange(new char[] { '<', '>', ':', '|', '?', '*' });
+                    }
+                }
+
+                return disallowedCharactersByOperatingSystem;
+            }
+        }
+
+        #endregion Private Properties
+
         #region Public Methods
 
         /// <summary>
@@ -131,6 +163,7 @@ namespace SearcherLibrary
             {
                 case ".7Z":
                 case ".GZ":
+                case ".JAR":
                 case ".RAR":
                 case ".TAR":
                 case ".ZIP":
@@ -158,6 +191,40 @@ namespace SearcherLibrary
         #endregion Public Methods
 
         #region Private Methods
+
+        /// <summary>
+        /// Decompress a GZIP file stream.
+        /// </summary>
+        /// <param name="fileName">The GZIP file name.</param>
+        /// <param name="searchTerms">The terms to search for.</param>
+        /// <returns>List of matched lines for GZIP file contents.</returns>
+        private List<MatchedLine> DecompressGZipStream(string fileName, IEnumerable<string> searchTerms)
+        {
+            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            string newFileName = string.Empty;
+
+            FileInfo fileToDecompress = new FileInfo(fileName);
+            using (FileStream originalFileStream = fileToDecompress.OpenRead())
+            {
+                string currentFileName = fileToDecompress.FullName;
+                newFileName = currentFileName.Remove(currentFileName.Length - fileToDecompress.Extension.Length);
+
+                using (FileStream decompressedFileStream = File.Create(newFileName))
+                {
+                    using (GZipStream decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress))
+                    {
+                        decompressionStream.CopyTo(decompressedFileStream);
+                    }
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(newFileName))
+            {
+                matchedLines.AddRange(this.localMatcherObj.GetMatch(newFileName, searchTerms));
+            }
+
+            return matchedLines;
+        }
 
         /// <summary>
         /// Get the position of the first word.
@@ -201,6 +268,74 @@ namespace SearcherLibrary
             }
 
             return retVal;
+        }
+
+        /// <summary>
+        /// Search for matches in zipped archive files.
+        /// </summary>
+        /// <param name="fileName">The name of the file.</param>
+        /// <param name="searchTerms">The terms to search.</param>
+        /// <param name="tempDirPath">The temporary extract directory.</param>
+        /// <param name="archive">The archive to be searched.</param>
+        /// <returns>The matched lines containing the search terms.</returns>
+        private List<MatchedLine> GetMatchedLinesInZipArchive(string fileName, IEnumerable<string> searchTerms, string tempDirPath, SharpCompress.Archives.IArchive archive)
+        {
+            List<MatchedLine> matchedLines = new List<MatchedLine>();
+
+            try
+            {
+                IReader reader = archive.ExtractAllEntries();
+                while (reader.MoveToNextEntry())
+                {
+                    if (!reader.Entry.IsDirectory)
+                    {
+                        // Ignore symbolic links as these are captured by the original target.
+                        if (string.IsNullOrWhiteSpace(reader.Entry.LinkTarget) && !reader.Entry.Key.Any(c => DisallowedCharactersByOperatingSystem.Any(dc => dc == c)))
+                        {
+                            try
+                            {
+                                reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
+                                matchedLines.AddRange(this.localMatcherObj.GetMatch(fullFilePath, searchTerms));
+
+                                if (matchedLines != null && matchedLines.Count > 0)
+                                {
+                                    // Want the exact path of the file - without the .extract part.
+                                    string dirNameToDisplay = fullFilePath.Replace(TempExtractDirectoryName, string.Empty);
+                                    matchedLines.Where(ml => string.IsNullOrEmpty(ml.FileName) || ml.FileName.Contains(TempExtractDirectoryName)).ToList()
+                                        .ForEach(ml => ml.FileName = dirNameToDisplay);
+                                }
+                            }
+                            catch (PathTooLongException ptlex)
+                            {
+                                throw new PathTooLongException(string.Format("{0} {1} {2} {3} - {4}", Resources.Strings.ErrorAccessingEntry, reader.Entry.Key, Resources.Strings.InArchive, fileName, ptlex.Message));
+                            }
+                        }
+                    }
+                }
+
+                if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    matchedLines.Clear();
+                }
+            }
+            catch (ArgumentNullException ane)
+            {
+                if (ane.Message.Contains("Value cannot be null") && fileName.EndsWith(".gz", StringComparison.OrdinalIgnoreCase))
+                {
+                    matchedLines = this.DecompressGZipStream(fileName, searchTerms);
+                }
+                else if (ane.Message.Contains("String reference not set to an instance of a String."))
+                {
+                    throw new NotSupportedException(string.Format("{0} {1}. {2}", Resources.Strings.ErrorAccessingFile, fileName, Resources.Strings.FileEncrypted));
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return matchedLines;
         }
 
         /// <summary>
@@ -337,7 +472,8 @@ namespace SearcherLibrary
                                             FileName = fileName, 
                                             LineNumber = pageNumber, 
                                             StartIndex = searchMatch.Index + Resources.Strings.Page.Length + 3 + pageNumber.ToString().Length, 
-                                            Length = searchMatch.Length });
+                                            Length = searchMatch.Length 
+                                        });
                                     }
 
                                     fileName = string.Empty;
@@ -717,70 +853,6 @@ namespace SearcherLibrary
                 // Clean up to delete the temporarily created directory.
                 Directory.Delete(tempDirPath, true);
             }
-        }
-
-        /// <summary>
-        /// Search for matches in zipped archive files.
-        /// </summary>
-        /// <param name="fileName">The name of the file.</param>
-        /// <param name="searchTerms">The terms to search.</param>
-        /// <param name="tempDirPath">The temporary extract directory.</param>
-        /// <param name="archive">The archive to be searched.</param>
-        /// <returns>The matched lines containing the search terms.</returns>
-        private List<MatchedLine> GetMatchedLinesInZipArchive(string fileName, IEnumerable<string> searchTerms, string tempDirPath, SharpCompress.Archives.IArchive archive)
-        {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
-
-            try
-            {
-                IReader reader = archive.ExtractAllEntries();
-                while (reader.MoveToNextEntry())
-                {
-                    if (!reader.Entry.IsDirectory)
-                    {
-                        try
-                        {
-                            reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                            string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key);
-                            matchedLines.AddRange(this.localMatcherObj.GetMatch(fullFilePath, searchTerms));
-
-                            if (matchedLines != null && matchedLines.Count > 0)
-                            {
-                                // Want the exact path of the file - without the .extract part.
-                                string dirNameToDisplay = fullFilePath.Replace(TempExtractDirectoryName, string.Empty);
-                                matchedLines.Where(ml => string.IsNullOrEmpty(ml.FileName) || ml.FileName.Contains(TempExtractDirectoryName)).ToList()
-                                    .ForEach(ml => ml.FileName = dirNameToDisplay);
-                            }
-                        }
-                        catch (PathTooLongException ptlex)
-                        {
-                            throw new PathTooLongException(string.Format("{0} {1} {2} {3} - {4}", Resources.Strings.ErrorAccessingEntry, reader.Entry.Key, Resources.Strings.InArchive, fileName, ptlex.Message));
-                        }
-                    }
-                }
-
-                if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
-                {
-                    matchedLines.Clear();
-                }
-            }
-            catch (ArgumentNullException ane)
-            {
-                if (ane.Message.Contains("String reference not set to an instance of a String."))
-                {
-                    throw new NotSupportedException(string.Format("{0} {1}. {2}", Resources.Strings.ErrorAccessingFile, fileName, Resources.Strings.FileEncrypted));
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return matchedLines;
         }
 
         /// <summary>

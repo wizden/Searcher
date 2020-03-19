@@ -22,7 +22,7 @@ namespace SearcherLibrary.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Strings {
+    internal class Strings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace SearcherLibrary.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SearcherLibrary.Resources.Strings", typeof(Strings).Assembly);
@@ -51,7 +51,7 @@ namespace SearcherLibrary.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Error accessing entry.
         /// </summary>
-        public static string ErrorAccessingEntry {
+        internal static string ErrorAccessingEntry {
             get {
                 return ResourceManager.GetString("ErrorAccessingEntry", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Error accessing file.
         /// </summary>
-        public static string ErrorAccessingFile {
+        internal static string ErrorAccessingFile {
             get {
                 return ResourceManager.GetString("ErrorAccessingFile", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The file is either corrupt or open in another application..
         /// </summary>
-        public static string FileCorruptOrLockedByApp {
+        internal static string FileCorruptOrLockedByApp {
             get {
                 return ResourceManager.GetString("FileCorruptOrLockedByApp", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The file is either corrupt or protected..
         /// </summary>
-        public static string FileCorruptOrProtected {
+        internal static string FileCorruptOrProtected {
             get {
                 return ResourceManager.GetString("FileCorruptOrProtected", resourceCulture);
             }
@@ -99,16 +99,25 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The file may be encrypted..
         /// </summary>
-        public static string FileEncrypted {
+        internal static string FileEncrypted {
             get {
                 return ResourceManager.GetString("FileEncrypted", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Symbolic link file cannot be extracted..
+        /// </summary>
+        internal static string FileIsSymbolicLink {
+            get {
+                return ResourceManager.GetString("FileIsSymbolicLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to in archive.
         /// </summary>
-        public static string InArchive {
+        internal static string InArchive {
             get {
                 return ResourceManager.GetString("InArchive", resourceCulture);
             }
@@ -117,7 +126,7 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Line.
         /// </summary>
-        public static string Line {
+        internal static string Line {
             get {
                 return ResourceManager.GetString("Line", resourceCulture);
             }
@@ -126,7 +135,7 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Page.
         /// </summary>
-        public static string Page {
+        internal static string Page {
             get {
                 return ResourceManager.GetString("Page", resourceCulture);
             }
@@ -135,7 +144,7 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Regex failures - Search cancelled. Correct regular expression and retry. If using Regex, try escaping using the &quot;\&quot; character..
         /// </summary>
-        public static string RegexFailureSearchCancelled {
+        internal static string RegexFailureSearchCancelled {
             get {
                 return ResourceManager.GetString("RegexFailureSearchCancelled", resourceCulture);
             }
@@ -144,7 +153,7 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Sheet Not Found.
         /// </summary>
-        public static string SheetNotFound {
+        internal static string SheetNotFound {
             get {
                 return ResourceManager.GetString("SheetNotFound", resourceCulture);
             }
@@ -153,7 +162,7 @@ namespace SearcherLibrary.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Slide.
         /// </summary>
-        public static string Slide {
+        internal static string Slide {
             get {
                 return ResourceManager.GetString("Slide", resourceCulture);
             }
