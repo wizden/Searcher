@@ -25,6 +25,7 @@ namespace Searcher
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using SearcherLibrary;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -32,7 +33,6 @@ namespace Searcher
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Net.Http;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -45,7 +45,6 @@ namespace Searcher
     using System.Windows.Navigation;
     using System.Windows.Shell;
     using System.Xml.Linq;
-    using SearcherLibrary;
 
     /// <summary>
     /// Interaction logic for MainWindow.

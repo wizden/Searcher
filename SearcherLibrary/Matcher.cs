@@ -30,7 +30,6 @@ namespace SearcherLibrary
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Resources;
     using System.Text.RegularExpressions;
     using System.Threading;
 
@@ -158,13 +157,13 @@ namespace SearcherLibrary
 
             try
             {
-                if (!this.IsNonAsciiSearch(fileName))
+                if (this.IsNonAsciiSearch(fileName))
                 {
-                    matchedLines = this.GetMatch(File.ReadAllLines(fileName), searchTerms);
+                    matchedLines = this.FileSearchInNonASCII(fileName, searchTerms); 
                 }
                 else
                 {
-                    matchedLines = this.FileSearchInNonASCII(fileName, searchTerms);
+                    matchedLines = this.GetMatch(File.ReadAllLines(fileName), searchTerms);
                 }
             }
             catch (Exception ex)

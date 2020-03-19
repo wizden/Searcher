@@ -132,6 +132,9 @@
   <data name="FileEncrypted" xml:space="preserve">
     <value>Die Datei ist möglicherweise verschlüsselt.</value>
   </data>
+  <data name="FileIsSymbolicLink" xml:space="preserve">
+    <value>Symbolische Link Datei kann nicht extrahiert werden.</value>
+  </data>
   <data name="InArchive" xml:space="preserve">
     <value>im Archiv</value>
   </data>
