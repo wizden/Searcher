@@ -1,0 +1,189 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <system:String x:Key="About">जानकारी</system:String>
+
+    <system:String x:Key="AboutSearcher">सर्चर के बारे में</system:String>
+
+    <system:String x:Key="Administrator">प्रशासक</system:String>
+
+    <system:String x:Key="All">सब</system:String>
+
+    <system:String x:Key="AlwaysExcluded">हमेशा बाहर</system:String>
+
+    <system:String x:Key="Any">कोई भी</system:String>
+
+    <system:String x:Key="ArchiveFileExclusionNotAllowed">फ़ाइल को बाहर करने में असमर्थ। संग्रहीत या ज़िपित फ़ाइलों को बाहर नहीं किया जा सकता है। भविष्य के संस्करण में संभाला जायेगा।</system:String>
+
+    <system:String x:Key="Cancel">रद्द</system:String>
+
+    <system:String x:Key="ClickAboutForUpdates">अपडेट के लिए 'जानकारी' पर क्लिक करें</system:String>
+
+    <system:String x:Key="CopyAll">सभी को कॉपी करें</system:String>
+
+    <system:String x:Key="CopyFileName">फ़ाइल का नाम कॉपी करें</system:String>
+
+    <system:String x:Key="CopyFileNameNoExtension">फ़ाइल का नाम कॉपी करें (बिना एक्सटेंशन के)</system:String>
+
+    <system:String x:Key="CopyFullPath">पूरा पथ कॉपी करें</system:String>
+
+    <system:String x:Key="Copyright">कॉपीराइट ©</system:String>
+
+    <system:String x:Key="CreatePreferencesFileQuestion">कोई खोज सेटिंग नहीं मिली। क्या आप अपनी खोज सेटिंग बनाना चाहते हैं?</system:String>
+
+    <system:String x:Key="Directory">फ़ोल्डर</system:String>
+
+    <system:String x:Key="DirectoryPathNotFound">फ़ोल्डर पथ (राशियों) या पथ तक पहुंचने में असमर्थ</system:String>
+
+    <system:String x:Key="DistributeSoftware">यह मुफ्त सॉफ्टवेयर है, और कुछ शर्तों के तहत इसे फिर से वितरित करने के लिए आपका स्वागत है। कृपया देखें</system:String>
+
+    <system:String x:Key="Editor">संपादक सॉफ्टवेयर</system:String>
+
+    <system:String x:Key="EndDate">अंतिम दिनांक</system:String>
+
+    <system:String x:Key="ErrorOccurred">कुछ गड़बड़ हो गया</system:String>
+
+    <system:String x:Key="ExcludeArchiveAsFile">हटाया नहीं जा सकता। यदि यह एक संग्रह है, तो कृपया इसे फ़ाइल के रूप में बाहर रखें।</system:String>
+
+    <system:String x:Key="ExcludeDirectory">फ़ोल्डर को खोज से बाहर रखें</system:String>
+
+    <system:String x:Key="ExcludeFileAlways">हमेशा फ़ाइल को खोज से बाहर रखें</system:String>
+
+    <system:String x:Key="ExcludeFileTemporarily">फ़ाइल को अभी के लिए खोज से बाहर निकालें</system:String>
+
+    <system:String x:Key="ExclusionType">बहिष्करण प्रकार</system:String>
+
+    <system:String x:Key="ExecutableFiles">निष्पादन योग्य फ़ाइलें</system:String>
+
+    <system:String x:Key="Files">फ़ाइलें</system:String>
+
+    <system:String x:Key="FilesFound">फाइलें मिली</system:String>
+
+    <system:String x:Key="Filters">फिल्टर</system:String>
+
+    <system:String x:Key="FindKeywords">कीवर्ड खोजें</system:String>
+
+    <system:String x:Key="ForDetails">जानकारी के लिए</system:String>
+
+    <system:String x:Key="Found">मिली</system:String>
+
+    <system:String x:Key="GetFilesToSearch">खोज करने के लिए फ़ाइलें प्राप्त हो रही है</system:String>
+
+    <system:String x:Key="GettingFilesToSearch">खोज करने के लिए फ़ाइलें प्राप्त हो रही है</system:String>
+
+    <system:String x:Key="GNULicenceLink">GNU लाइसेंस लिंक</system:String>
+
+    <system:String x:Key="HighlightResults">परिणाम हाइलाइट करें</system:String>
+
+    <system:String x:Key="In">में</system:String>
+
+    <system:String x:Key="Language">भाषा</system:String>
+
+    <system:String x:Key="MatchCase">अक्षर संवेदनशील</system:String>
+
+    <system:String x:Key="Matches">परिणाम</system:String>
+
+    <system:String x:Key="MatchOptions">परिणाम विकल्प</system:String>
+
+    <system:String x:Key="Misc">विविध</system:String>
+
+    <system:String x:Key="MonthlyUpdateCheck">अपडेट की लिए जाँच (मासिक)</system:String>
+
+    <system:String x:Key="Multiline">बहु लाइन</system:String>
+
+    <system:String x:Key="Normal">साधारण</system:String>
+
+    <system:String x:Key="NoSearchPreferences">खोज सेटिंग नहीं मिली</system:String>
+
+    <system:String x:Key="Of">की</system:String>
+
+    <system:String x:Key="OpenDirectoryInExplorer">एक्सप्लोरर में फ़ोल्डर युक्त खोलें</system:String>
+
+    <system:String x:Key="OpenPreferencesFile">सेटिंग फ़ाइल खोलें</system:String>
+
+    <system:String x:Key="Options">विकल्प</system:String>
+
+    <system:String x:Key="Permanent">स्थायी</system:String>
+
+    <system:String x:Key="PopOutResults">परिणाम देखें</system:String>
+
+    <system:String x:Key="PreferencesFileLoadFailure">सेटिंग फ़ाइल खोलने में असमर्थ</system:String>
+
+    <system:String x:Key="ProcessingFiles">संसाधित फ़ाइलें</system:String>
+
+    <system:String x:Key="Regex">रेजेक्स</system:String>
+
+    <system:String x:Key="Results">परिणाम</system:String>
+
+    <system:String x:Key="ResultsPopout">परिणाम</system:String>
+
+    <system:String x:Key="SaveResultsToFile">सभी परिणाम फ़ाइल में सहेजें</system:String>
+
+    <system:String x:Key="Search">खोजें</system:String>
+
+    <system:String x:Key="SearchCancelled">खोज रद्द</system:String>
+
+    <system:String x:Key="SearchComplete">खोज खत्म</system:String>
+
+    <system:String x:Key="SearchedFileList">खोजे गए फ़ाइल सूची</system:String>
+
+    <system:String x:Key="Searching">खोज जारी है</system:String>
+
+    <system:String x:Key="SearchMode">खोज मोड</system:String>
+
+    <system:String x:Key="SelectDate">तिथि चुनें</system:String>
+
+    <system:String x:Key="SelectDirToExclude">इस फ़ोल्डर को न खोजें</system:String>
+
+    <system:String x:Key="SelectEditor">संपादक सॉफ्टवेयर चुने</system:String>
+
+    <system:String x:Key="SeparateUsingCharacter">अतिरिक्त प्रविष्टियों को अलग करने के लिए चरित्र</system:String>
+
+    <system:String x:Key="SpecifySearchDirectory">खोज करने के लिए फ़ोल्डर और शब्द का दे।</system:String>
+
+    <system:String x:Key="StartDate">प्रारंभ दिनांक</system:String>
+
+    <system:String x:Key="StartDateLessThanEndDateError">प्रारंभ तिथि अंतिम तिथि के बाद नहीं हो सकती।</system:String>
+
+    <system:String x:Key="Subfolders">उप फ़ोल्डर</system:String>
+
+    <system:String x:Key="TemporarilyExcluded">अस्थायी रूप से बहिष्कृत</system:String>
+
+    <system:String x:Key="Temporary">अस्थायी</system:String>
+
+    <system:String x:Key="TimeToSearch">फाइलों को पाने और खोजने का समय</system:String>
+
+    <system:String x:Key="TooltipChangeLanguage">भाषा बदलें</system:String>
+
+    <system:String x:Key="TooltipEditorForFile">फाइलें खोलने के लिए संपादक सॉफ्टवेयर</system:String>
+
+    <system:String x:Key="TooltipFileCreateEndDate">फ़ाइल निर्माण (अंतिम तिथि)</system:String>
+
+    <system:String x:Key="TooltipFileCreateStartDate">फ़ाइल निर्माण (आरंभ तिथि)</system:String>
+
+    <system:String x:Key="TooltipHighlightMatches">परिणामी मैचों में पृष्ठभूमि को हाइलाइट करें।</system:String>
+
+    <system:String x:Key="TooltipMatchCase">केस संवेदनशील मैच</system:String>
+
+    <system:String x:Key="TooltipMatchWholeWord">पूरा शब्द मिलाएँ</system:String>
+
+    <system:String x:Key="TooltipNormalSearch">डिफ़ॉल्ट खोज मोड</system:String>
+
+    <system:String x:Key="TooltipOpenSearchedFileList">खोज की गई फ़ाइल सूची खोलें</system:String>
+
+    <system:String x:Key="TooltipSearchRegex">रेजेक्स का उपयोग करके खोजें</system:String>
+
+    <system:String x:Key="TooltipSearchRegexMultiLine">रेजेक्स से कई लाइनों पर खोज करें</system:String>
+
+    <system:String x:Key="TooltipSearchSubfolders">उप फ़ोल्डर के भीतर खोजें।</system:String>
+
+    <system:String x:Key="UnknownAssemblyName">अज्ञात असेंबली का नाम</system:String>
+
+    <system:String x:Key="Update">अपडेट</system:String>
+
+    <system:String x:Key="UseConfigDelimiterCharacter">यदि कॉन्फ़िगरेशन के माध्यम से विशिष्ट वर्णमाला का उपयोग किया है, तो कृपया खोज करते समय इसका उपयोग करें।</system:String>
+
+    <system:String x:Key="WarrantyText">यह सॉफ्टवेयर बिना किसी वारंटी के आता है</system:String>
+
+    <system:String x:Key="WholeWord">पूरा शब्द</system:String>
+</ResourceDictionary>
