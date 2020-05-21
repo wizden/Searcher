@@ -243,7 +243,7 @@ namespace Searcher
         private void SetContentBasedOnLanguage()
         {
             this.Title = Application.Current.Resources["SearchedFileList"].ToString();
-            this.BtnCopyList.Content = Application.Current.Resources["Directory"].ToString();
+            this.BtnCopyList.Content = Application.Current.Resources["CopyAll"].ToString();
             this.TblkAlwaysExcluded.Text = Application.Current.Resources["TemporarilyExcluded"].ToString();
             this.TblkTemporarilyExcluded.Text = Application.Current.Resources["AlwaysExcluded"].ToString();
         }

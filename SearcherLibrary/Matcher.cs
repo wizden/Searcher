@@ -168,7 +168,7 @@ namespace SearcherLibrary
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format("Error accessing file {0}. {1}", fileName, ex.Message));
+                throw new Exception(string.Format("{0} {1}. {2}", Resources.Strings.ErrorAccessingFile, fileName, ex.Message));
             }
 
             return matchedLines;
