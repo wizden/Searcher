@@ -141,17 +141,17 @@
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="0" Grid.Column="2" Name="StkFileCreationStartDate" Orientation="Horizontal">
-                                    <TextBlock Name="TblkStartDate" Text="Start Date" Margin="1, 5" Width="55" />
+                                    <TextBlock Name="TblkStartDate" Text="Start Date" Margin="1, 5" Width="70" />
                                     <DatePicker Name="DtpStartDate" SelectedDateChanged="DtpStartDate_SelectedDateChanged" Height="24" PreviewKeyUp="DtpStartDate_PreviewKeyUp" Width="120" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="1" Grid.Column="2" Name="StkFileCreationEndDate" Orientation="Horizontal">
-                                    <TextBlock Name="TblkEndDate" Text="End Date" Margin="1, 5" Width="55" />
+                                    <TextBlock Name="TblkEndDate" Text="End Date" Margin="1, 5" Width="70" />
                                     <DatePicker Name="DtpEndDate" SelectedDateChanged="DtpEndDate_SelectedDateChanged" Height="24" PreviewKeyUp="DtpEndDate_PreviewKeyUp" Width="120" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="2" Grid.Column="2" Name="StkChangeLanguage" Orientation="Horizontal">
-                                    <TextBlock x:Name="TblkLanguage" Text="Language" Margin="1, 5" Width="55" />
+                                    <TextBlock x:Name="TblkLanguage" Text="Language" Margin="1, 5" Width="70" />
                                     <ComboBox Name="CmbLanguage" SelectionChanged="CmbLanguage_SelectionChanged" Width="90">
                                         <ComboBoxItem Tag="en-US">
                                             <Grid>
@@ -171,6 +171,16 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Name="TblkDeutsch" Text="Deutsch"></TextBlock>
                                                 <Image Grid.Column="1" Name="ImgDeutsch" Source="Images/de-DE.png" Width="30" Height="20" />
+                                            </Grid>
+                                        </ComboBoxItem>
+                                        <ComboBoxItem Tag="hi-IN">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="70" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Name="TblkHindi" Text="हिन्दी"></TextBlock>
+                                                <Image Grid.Column="1" Name="ImgIndia" Source="Images/hi-IN.png" Width="30" Height="20" />
                                             </Grid>
                                         </ComboBoxItem>
                                     </ComboBox>
