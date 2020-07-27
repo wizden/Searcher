@@ -39,6 +39,20 @@ namespace Searcher
     /// </summary>
     public partial class SearchedFileList : Window
     {
+        #region Private Fields
+
+        /// <summary>
+        /// Private filed to retain window height between instances.
+        /// </summary>
+        private static double windowHeight;
+
+        /// <summary>
+        /// Private filed to retain window width between instances.
+        /// </summary>
+        private static double windowWidth;
+
+        #endregion Private Fields
+
         #region Public Constructors
 
         /// <summary>
@@ -49,6 +63,12 @@ namespace Searcher
             this.InitializeComponent();
             this.FilesToInclude = new List<string>();
             this.SetContentBasedOnLanguage();
+
+            if (windowWidth > 0 && windowHeight > 0)
+            {
+                this.Height = windowHeight;
+                this.Width = windowWidth;
+            }
         }
 
         /// <summary>
@@ -71,17 +91,22 @@ namespace Searcher
         /// Initialises a new instance of the <see cref="SearchedFileList"/> class.
         /// </summary>
         /// <param name="fileNamePaths">The list of file name paths.</param>
-        /// <param name="excludedFileNames">The list of file names excluded from search.</param>
-        public SearchedFileList(IEnumerable<string> fileNamePaths, IEnumerable<string> excludedFileNames)
+        /// <param name="excludedContent">The list of file names excluded from search.</param>
+        public SearchedFileList(IEnumerable<string> fileNamePaths, IEnumerable<string> excludedContent)
             : this(fileNamePaths)
         {
-            if (excludedFileNames.Count() > 0)
+            if (excludedContent.Count() > 0)
             {
-                this.GrdFilesExcluded.Visibility = System.Windows.Visibility.Visible;
-                excludedFileNames.OrderBy(f => f).ToList().ForEach(f =>
+                this.ExpandTemporarilyExcluded.IsExpanded = true;
+
+                excludedContent.OrderBy(f => f).ToList().ForEach(f =>
                 {
-                    this.LstFilesExcluded.Items.Add(f);
+                    this.LstTemporarilyExcluded.Items.Add(f);
                 });
+            }
+            else
+            {
+                this.ExpandTemporarilyExcluded.IsExpanded = false;
             }
         }
 
@@ -89,19 +114,23 @@ namespace Searcher
         /// Initialises a new instance of the <see cref="SearchedFileList"/> class.
         /// </summary>
         /// <param name="fileNamePaths">The list of file name paths.</param>
-        /// <param name="excludedFileNames">The list of file names excluded from search.</param>
-        /// <param name="alwaysExcludedFileNames">The list of file names excluded from search via configuration.</param>
-        public SearchedFileList(IEnumerable<string> fileNamePaths, IEnumerable<string> excludedFileNames, IEnumerable<string> alwaysExcludedFileNames)
-            : this(fileNamePaths, excludedFileNames)
+        /// <param name="temporarilyExcludedContent">The list of file names excluded from search.</param>
+        /// <param name="alwaysExcludedContent">The list of file names excluded from search via configuration.</param>
+        public SearchedFileList(IEnumerable<string> fileNamePaths, IEnumerable<string> temporarilyExcludedContent, IEnumerable<string> alwaysExcludedContent)
+            : this(fileNamePaths, temporarilyExcludedContent)
         {
-            if (alwaysExcludedFileNames.Count() > 0)
+            if (alwaysExcludedContent.Count() > 0)
             {
-                this.GrdFilesExcludedAlways.Visibility = System.Windows.Visibility.Visible;
+                this.ExpandAlwaysExcluded.IsExpanded = true;
 
-                alwaysExcludedFileNames.OrderBy(f => f).ToList().ForEach(f =>
+                alwaysExcludedContent.OrderBy(f => f).ToList().ForEach(f =>
                 {
-                    this.LstFilesAlwaysExcluded.Items.Add(f);
+                    this.LstAlwaysExcluded.Items.Add(f);
                 });
+            }
+            else
+            {
+                this.ExpandAlwaysExcluded.IsExpanded = false;
             }
         }
 
@@ -244,10 +273,21 @@ namespace Searcher
         {
             this.Title = Application.Current.Resources["SearchedFileList"].ToString();
             this.BtnCopyList.Content = Application.Current.Resources["CopyAll"].ToString();
-            this.TblkAlwaysExcluded.Text = Application.Current.Resources["TemporarilyExcluded"].ToString();
-            this.TblkTemporarilyExcluded.Text = Application.Current.Resources["AlwaysExcluded"].ToString();
+            this.ExpandAlwaysExcluded.Header = Application.Current.Resources["AlwaysExcluded"].ToString();
+            this.ExpandTemporarilyExcluded.Header = Application.Current.Resources["TemporarilyExcluded"].ToString();
         }
 
-        #endregion Private Methods
+        /// <summary>
+        /// Remember window dimensions for reopening next time.
+        /// </summary>
+        /// <param name="sender">The parameter is not used.</param>
+        /// <param name="e">The parameter is not used.</param>
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            windowWidth = this.Width;
+            windowHeight = this.Height;
+        }
+
+        #endregion Private Methods  
     }
 }

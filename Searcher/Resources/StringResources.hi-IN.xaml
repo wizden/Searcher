@@ -9,7 +9,7 @@
 
     <system:String x:Key="All">सब</system:String>
 
-    <system:String x:Key="AlwaysExcluded">हमेशा बाहर</system:String>
+    <system:String x:Key="AlwaysExcluded">हमेशा बहिष्कृत</system:String>
 
     <system:String x:Key="Any">कोई भी</system:String>
 
@@ -147,7 +147,7 @@
 
     <system:String x:Key="Subfolders">उप फ़ोल्डर</system:String>
 
-    <system:String x:Key="TemporarilyExcluded">अस्थायी रूप से बहिष्कृत</system:String>
+    <system:String x:Key="TemporarilyExcluded">अभी के लिए बहिष्कृत</system:String>
 
     <system:String x:Key="Temporary">अस्थायी</system:String>
 
