@@ -42,6 +42,11 @@ namespace SearcherLibrary
         SEVENZIP,
 
         /// <summary>
+        /// Files with .DOCM extension.
+        /// </summary>
+        DOCM,
+
+        /// <summary>
         /// Files with .DOCX extension.
         /// </summary>
         DOCX,
@@ -67,6 +72,11 @@ namespace SearcherLibrary
         RAR,
 
         /// <summary>
+        /// Files with .PPTM extension.
+        /// </summary>
+        PPTM,
+
+        /// <summary>
         /// Files with .PPTX extension.
         /// </summary>
         PPTX,
@@ -75,6 +85,11 @@ namespace SearcherLibrary
         /// Files with .TAR extension.
         /// </summary>
         TAR,
+
+        /// <summary>
+        /// Files with .XLSM extension.
+        /// </summary>
+        XLSM,
 
         /// <summary>
         /// Files with .XLSX extension.

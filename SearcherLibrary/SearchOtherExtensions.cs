@@ -170,14 +170,17 @@ namespace SearcherLibrary
                     matchedLines = this.GetMatchesInZip(fileName, searchTerms);
                     break;
                 case ".DOCX":
+                case ".DOCM":
                     matchedLines = this.GetMatchesInDocx(fileName, searchTerms);
                     break;
                 case ".PDF":
                     matchedLines = this.GetMatchesInPdf(fileName, searchTerms);
                     break;
+                case ".PPTM":
                 case ".PPTX":
                     matchedLines = this.GetMatchesInPptx(fileName, searchTerms);
                     break;
+                case ".XLSM":
                 case ".XLSX":
                     matchedLines = this.GetMatchesInXlsx(fileName, searchTerms);
                     break;
@@ -689,7 +692,7 @@ namespace SearcherLibrary
 
             try
             {
-                using (DocumentFormat.OpenXml.Packaging.SpreadsheetDocument document = DocumentFormat.OpenXml.Packaging.SpreadsheetDocument.Open(fileName, false))
+                using (SpreadsheetDocument document = SpreadsheetDocument.Open(fileName, false))
                 {
                     WorkbookPart wkbkPart = document.WorkbookPart;
                     List<Sheet> sheets = wkbkPart.Workbook.Descendants<Sheet>().ToList();
@@ -842,16 +845,12 @@ namespace SearcherLibrary
                     archive.Dispose();
                 }
 
+                this.RemoveTempDirectory(tempDirPath);
                 return matchedLines;
             }
             catch (Exception)
             {
                 throw;
-            }
-            finally
-            {
-                // Clean up to delete the temporarily created directory.
-                Directory.Delete(tempDirPath, true);
             }
         }
 
@@ -993,6 +992,33 @@ namespace SearcherLibrary
             }
 
             return retVal;
+        }
+
+        /// <summary>
+        /// Remove the temporarily created directory.
+        /// </summary>
+        /// <param name="tempDirPath">The temporarily created directory containing archive contents.</param>
+        private void RemoveTempDirectory(string tempDirPath)
+        {
+            IOException fileAccessException;
+            int counter = 0;    // If unable to delete after 10 attempts, get out instead of staying stuck.
+
+            do
+            {
+                fileAccessException = null;
+
+                try
+                {
+                    // Clean up to delete the temporarily created directory. If files are still in use, an exception will be thrown.
+                    Directory.Delete(tempDirPath, true);
+                }
+                catch (IOException ioe)
+                {
+                    fileAccessException = ioe;
+                    System.Threading.Thread.Sleep(counter);     // Sleep for tiny increments of time, while waiting for file to be released (max 45 milliseconds).
+                    counter++;
+                }
+            } while (fileAccessException != null && fileAccessException.Message.ToUpper().Contains("The process cannot access the file".ToUpper()) && counter < 10);
         }
 
         /// <summary>
