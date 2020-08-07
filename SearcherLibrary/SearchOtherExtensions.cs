@@ -163,7 +163,6 @@ namespace SearcherLibrary
             {
                 case ".7Z":
                 case ".GZ":
-                case ".JAR":
                 case ".RAR":
                 case ".TAR":
                 case ".ZIP":
