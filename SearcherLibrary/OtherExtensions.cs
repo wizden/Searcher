@@ -57,11 +57,6 @@ namespace SearcherLibrary
         GZ,
 
         /// <summary>
-        /// Files with .JAR extension.
-        /// </summary>
-        JAR,
-
-        /// <summary>
         /// Files with .PDF extension.
         /// </summary>
         PDF,

@@ -1587,7 +1587,14 @@ namespace Searcher
         {
             try
             {
-                Process.Start(this.editorNamePath, "\"" + e.Uri.LocalPath + "\"");
+                if (Enum.GetNames(typeof(OtherExtensions)).Any(oe => Path.GetExtension(e.Uri.LocalPath).ToUpper().Contains(oe.ToUpper())))
+                {
+                    Process.Start(e.Uri.LocalPath);
+                }
+                else
+                {
+                    Process.Start(this.editorNamePath, "\"" + e.Uri.LocalPath + "\"");
+                }
             }
             catch (Exception)
             {
