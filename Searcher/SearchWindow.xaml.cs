@@ -1063,8 +1063,8 @@ namespace Searcher
                 }
                 else
                 {
-                    string nextUpdateCheckDate = await updateApp.CheckAndDownloadUpdatedVersionAsync();
-                    this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value = nextUpdateCheckDate;
+                    string lastUpdateCheckDate = await updateApp.CheckAndDownloadUpdatedVersionAsync();
+                    this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value = lastUpdateCheckDate;
                 }
             }
         }

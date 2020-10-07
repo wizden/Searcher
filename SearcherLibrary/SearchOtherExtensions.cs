@@ -696,20 +696,16 @@ namespace SearcherLibrary
                     WorkbookPart wkbkPart = document.WorkbookPart;
                     List<Sheet> sheets = wkbkPart.Workbook.Descendants<Sheet>().ToList();
                     string cellValue = string.Empty;
-                    List<OpenXmlElement> sharedStringTable = wkbkPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault().SharedStringTable.ToList();        // Get it in memory for performance.
+                    List<OpenXmlElement> sharedStringTable = wkbkPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault()?.SharedStringTable?.ToList();        // Get it in memory for performance.
                     CellFormats cellFormats = wkbkPart.WorkbookStylesPart.Stylesheet.CellFormats;
                     List<DocumentFormat.OpenXml.Spreadsheet.NumberingFormat> numberingFormats = wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats != null
                         ? wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats.Elements<DocumentFormat.OpenXml.Spreadsheet.NumberingFormat>().ToList()
                         : null;
                     string cellFormatCodeUpper = string.Empty;
+                    int counter = 0;
 
                     foreach (Sheet sheet in sheets)
                     {
-                        if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
                         if (sheet == null)
                         {
                             throw new ArgumentException(Resources.Strings.SheetNotFound);
@@ -721,6 +717,8 @@ namespace SearcherLibrary
                         {
                             foreach (Cell cell in ((WorksheetPart)wkbkPart.GetPartById(sheet.Id)).Worksheet.Descendants<Cell>())
                             {
+                                counter++;
+
                                 if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
                                 {
                                     break;
@@ -731,6 +729,12 @@ namespace SearcherLibrary
                                     cellValue = this.GetSpreadsheetCellValue(cell, sharedStringTable, cellFormats, numberingFormats);
                                     excelCellDetails.Add(new SpreadsheetCellDetail { CellContent = cellValue, CellReference = cell.CellReference.Value, SheetName = sheet.Name.Value });
                                 }
+
+                                if (counter % 10000 == 0)
+                                {
+                                    counter = 0;
+                                    System.Threading.Thread.Sleep(100);     // Large dataset. Give the UI 100 milliseconds to refresh itself.
+                                }
                             }
                         }
                     }
@@ -740,11 +744,6 @@ namespace SearcherLibrary
 
                 foreach (string searchTerm in searchTerms)
                 {
-                    if (this.localMatcherObj.CancellationTokenSource.Token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
                     try
                     {
                         foreach (SpreadsheetCellDetail ecd in excelCellDetails)

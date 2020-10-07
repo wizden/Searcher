@@ -41,6 +41,11 @@ namespace Searcher
         #region Private Fields
 
         /// <summary>
+        /// </summary>
+        /// The date when an attempt was made to check for updates.
+        private DateTime lastUpdateCheckDate = DateTime.MinValue;
+
+        /// <summary>
         /// Private store for the default file name when downloading the latest release.
         /// </summary>
         private string latestReleaseDefaultFileName = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher_new.zip");
@@ -66,6 +71,11 @@ namespace Searcher
         public UpdateApp(XDocument preferenceFile)
         {
             this.preferenceFile = preferenceFile;
+
+            if (this.preferenceFile.Descendants("LastUpdateCheckDate") != null && this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault() != null)
+            {
+                DateTime.TryParse(this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value, out this.lastUpdateCheckDate);
+            }
         }
 
         #endregion Public Constructors
@@ -117,6 +127,13 @@ namespace Searcher
                     System.IO.File.Delete(this.latestReleaseDefaultFileName);
                 }
             }
+            else
+            {
+                if (this.lastUpdateCheckDate.AddMonths(1) > DateTime.Today)
+                {
+                    nextCheckDate = this.lastUpdateCheckDate.ToString("yyyy-MM-dd");
+                }
+            }
 
             return nextCheckDate;
         }
@@ -134,16 +151,10 @@ namespace Searcher
             bool retVal = false;
             if (this.preferenceFile.Descendants("CheckForUpdates").FirstOrDefault().Value.ToUpper() == true.ToString().ToUpper())
             {
-                DateTime lastUpdateCheckDate;
-
-                if (this.preferenceFile.Descendants("LastUpdateCheckDate") != null && this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault() != null
-                    && DateTime.TryParse(this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value, out lastUpdateCheckDate))
+                // Check for updates monthly. Why bother the user more frequently. Can look to make this configurable in the future.
+                if (this.lastUpdateCheckDate.AddMonths(1) < DateTime.Today)
                 {
-                    // Check for updates monthly. Why bother the user more frequently. Can look to make this configurable in the future.
-                    if (lastUpdateCheckDate.AddMonths(1) < DateTime.Today)
-                    {
-                        retVal = await this.NewReleaseFoundOnlineAsync();
-                    }
+                    retVal = await this.NewReleaseFoundOnlineAsync();
                 }
             }
 
