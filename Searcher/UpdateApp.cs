@@ -41,8 +41,8 @@ namespace Searcher
         #region Private Fields
 
         /// <summary>
-        /// </summary>
         /// The date when an attempt was made to check for updates.
+        /// </summary>
         private DateTime lastUpdateCheckDate = DateTime.MinValue;
 
         /// <summary>

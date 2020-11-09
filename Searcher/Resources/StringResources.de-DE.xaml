@@ -67,8 +67,6 @@
 
     <system:String x:Key="Found">Gefunden</system:String>
 
-    <system:String x:Key="GetFilesToSearch">Holen Sie sich Dateien zu Suchen</system:String>
-
     <system:String x:Key="GettingFilesToSearch">Holen Sie sich Dateien zum Suchen</system:String>
 
     <system:String x:Key="GNULicenceLink">GNU-Lizenzlink</system:String>

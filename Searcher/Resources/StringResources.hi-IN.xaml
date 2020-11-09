@@ -67,8 +67,6 @@
 
     <system:String x:Key="Found">मिली</system:String>
 
-    <system:String x:Key="GetFilesToSearch">खोज करने के लिए फ़ाइलें प्राप्त हो रही है</system:String>
-
     <system:String x:Key="GettingFilesToSearch">खोज करने के लिए फ़ाइलें प्राप्त हो रही है</system:String>
 
     <system:String x:Key="GNULicenceLink">GNU लाइसेंस लिंक</system:String>
