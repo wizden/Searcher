@@ -25,7 +25,6 @@ namespace Searcher
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
-    using SearcherLibrary;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -45,6 +44,7 @@ namespace Searcher
     using System.Windows.Navigation;
     using System.Windows.Shell;
     using System.Xml.Linq;
+    using SearcherLibrary;
 
     /// <summary>
     /// Interaction logic for MainWindow.
@@ -119,6 +119,11 @@ namespace Searcher
         private ContentPopup contentPopup;
 
         /// <summary>
+        /// Language used on the form.
+        /// </summary>
+        private string culture = "en-US";
+
+        /// <summary>
         /// Private store for the list of directories that will not be searched (temporarily or always).
         /// </summary>
         private List<string> directoriesToExclude = new List<string>();
@@ -159,6 +164,11 @@ namespace Searcher
         private int filesSearchedCounter = 0;
 
         /// <summary>
+        /// Private store for the determining the progress of the files currently being searched.
+        /// </summary>
+        private List<FileSearchResult> filesSearchProgress = new List<FileSearchResult>();
+
+        /// <summary>
         /// Private store for the list of files that will not be searched (temporarily or always).
         /// </summary>
         private List<string> filesToExclude = new List<string>();
@@ -182,11 +192,6 @@ namespace Searcher
         /// Boolean indicating whether results are to be highlighted.
         /// </summary>
         private bool highlightResults = false;
-
-        /// <summary>
-        /// Language used on the form.
-        /// </summary>
-        private string culture = "en-US";
 
         /// <summary>
         /// Boolean indicating whether the search is case sensitive.
@@ -420,7 +425,7 @@ namespace Searcher
         /// </summary>
         /// <param name="matchedLines">The list of match objects to display matches</param>
         /// <returns>List of Inline to be added to the results.</returns>
-        private List<Inline> AddResult(List<MatchedLine> matchedLines)
+        private async Task<List<Inline>> AddResult(List<MatchedLine> matchedLines)
         {
             List<Inline> retVal = new List<Inline>();
             string currentFileName = string.Empty;
@@ -428,6 +433,8 @@ namespace Searcher
 
             foreach (MatchedLine ml in matchedLines)
             {
+                matchCounter++;
+
                 if (!ml.DisplayProcessed && !this.cancellationTokenSource.Token.IsCancellationRequested)
                 {
                     if (!string.IsNullOrEmpty(ml.FileName) && !this.filesSearched.Contains(ml.FileName))
@@ -436,7 +443,7 @@ namespace Searcher
                         this.filesSearched.Add(ml.FileName);
                         currentFileName = ml.FileName;
 
-                        Dispatcher.Invoke(() =>
+                        this.Dispatcher.Invoke(() =>
                         {
                             Hyperlink link = new Hyperlink(new Run(Environment.NewLine + ml.FileName + Environment.NewLine));
                             link.NavigateUri = new Uri(ml.FileName);
@@ -457,7 +464,7 @@ namespace Searcher
 
                     for (int counter = 0; counter < contentArray.Count; counter++)
                     {
-                        Dispatcher.Invoke(() =>
+                        this.Dispatcher.Invoke(() =>
                         {
                             if (counter % 2 == 1)
                             {
@@ -472,30 +479,18 @@ namespace Searcher
                             }
                         });
                     }
-
-                    ml.DisplayProcessed = true;
-                    Dispatcher.Invoke(() =>
+                    
+                    this.Dispatcher.Invoke(() =>
                     {
                         retVal.Add(new Run(Environment.NewLine));
-                        matchCounter++;
-
-                        if (matchCounter % 100 == 0 && matchedLines.Count() > 1000)         // If more than a 1000 matches exist, update the UI every 100 matches to keep it responsive.
-                        {
-                            if (string.IsNullOrEmpty(this.fileBeingDisplayed))              // If multiple files exist with excessive matches, lock the first file to display it's results.
-                            {
-                                lock (syncRoot)
-                                {
-                                    this.fileBeingDisplayed = currentFileName;
-                                }
-                            }
-
-                            if (this.fileBeingDisplayed == currentFileName)
-                            {
-                                this.AddResultsToTextbox(retVal);                           // Display the contents of only the first file with excessive matches. The others are added to the list of objects to be displayed later.
-                                retVal.Clear();
-                            }
-                        }
                     });
+
+                    ml.DisplayProcessed = true;
+                }
+
+                if (matchCounter++ % 100 == 0)
+                {
+                    await Task.Delay(5);
                 }
             }
 
@@ -506,12 +501,28 @@ namespace Searcher
         /// Adds the result matches to the textbox.
         /// </summary>
         /// <param name="resultsToAdd">The list of Inline to display.</param>
-        private void AddResultsToTextbox(List<Inline> resultsToAdd)
+        /// <returns>Task to add contents to textbox.</returns>
+        private async Task AddResultsToTextbox(List<Inline> resultsToAdd)
         {
-            Dispatcher.Invoke(() =>
+            if (!this.cancellationTokenSource.IsCancellationRequested)
             {
-                this.richTextboxParagraph.Inlines.AddRange(resultsToAdd);
-            });
+                int rowsToTake = 100;
+
+                if (resultsToAdd.Count < rowsToTake)
+                {
+                    this.richTextboxParagraph.Inlines.AddRange(resultsToAdd);
+                }
+                else
+                {
+                    int completed = 0;
+                    while (completed < resultsToAdd.Count)
+                    {
+                        this.richTextboxParagraph.Inlines.AddRange(resultsToAdd.Skip(completed).Take(rowsToTake));
+                        completed += rowsToTake;
+                        await Task.Delay(5);       // If there are lots of rows, give the UI time to refresh itself.
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -1290,24 +1301,6 @@ namespace Searcher
         }
 
         /// <summary>
-        /// Gets the download path of the latest release in GitHub.
-        /// </summary>
-        /// <returns>The download path of the latest release in GitHub.</returns>
-        private async Task<string> GetLatestReleaseDownloadPathInGitHub()
-        {
-            string downloadUrl = string.Empty;
-            Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("searcher"));
-            Octokit.Release latestRelease = await client.Repository.Release.GetLatest("wizden", "searcher");
-
-            if (latestRelease != null && latestRelease.Assets != null && latestRelease.Assets.Count > 0)
-            {
-                downloadUrl = latestRelease.Assets[0].BrowserDownloadUrl;
-            }
-
-            return downloadUrl;
-        }
-
-        /// <summary>
         /// Get the line number for which the mouse is double clicked.
         /// </summary>
         /// <returns>The line number for which the mouse is double clicked.</returns>
@@ -1355,6 +1348,23 @@ namespace Searcher
                         }
                     }
                 }
+            }
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// Get the file that is taking the longest time to run.
+        /// </summary>
+        /// <param name="fileName">The default file name to be displayed.</param>
+        /// <returns>String containing file that is taking the longest time to run.</returns>
+        private string GetLongestRunningFile(string fileName)
+        {
+            string retVal = fileName;
+
+            lock (this.filesSearchProgress)
+            {
+                retVal = this.filesSearchProgress?.Where(fsr => fsr.SearchStartDateTimeTicks > 0).OrderBy(fsr => fsr?.SearchStartDateTimeTicks).FirstOrDefault()?.FileNamePath ?? fileName;
             }
 
             return retVal;
@@ -1675,7 +1685,7 @@ namespace Searcher
                     this.filesToSearch.AddRange(await pathTask);
                 }
 
-                this.RemoveExclusionPaths();
+                await this.RemoveExclusionPaths();
                 this.SetFileCounterProgressInformation(0, string.Format("{0}: {1}", Application.Current.Resources["FilesFound"].ToString(), this.filesToSearch.Count));
                 this.filesToSearch = this.filesToSearch.Distinct().OrderBy(f => f).ToList();      // Remove duplicates that could be added via path filters that cover the same item mulitple times.
                 this.distinctFilesFound = true;
@@ -1761,25 +1771,29 @@ namespace Searcher
         /// <summary>
         /// Remove files that will not be part of the current search.
         /// </summary>
-        private void RemoveExclusionPaths()
+        /// <returns>Task indicating the status of the operation.</returns>
+        private async Task RemoveExclusionPaths()
         {
             this.filesToSearch.RemoveAll(f => this.filesToExclude.Any(excludeFile => excludeFile.ToUpper() == f.ToUpper()));
 
-            foreach (string dirToExclude in this.directoriesToExclude)
+            await Task.Run(() => 
             {
-                string exclDir = dirToExclude.ToUpper();
-                this.filesToSearch.RemoveAll(f =>
+                foreach (string dirToExclude in this.directoriesToExclude)
                 {
-                    try
+                    string exclDir = dirToExclude.ToUpper();
+                    this.filesToSearch.RemoveAll(f =>
                     {
-                        return Path.GetDirectoryName(f).ToUpper().StartsWith(exclDir);
-                    }
-                    catch (PathTooLongException)
-                    {
-                        return false;
-                    }
-                });
-            }
+                        try
+                        {
+                            return Path.GetDirectoryName(f).ToUpper().StartsWith(exclDir);
+                        }
+                        catch (PathTooLongException)
+                        {
+                            return false;
+                        }
+                    });
+                }
+            });
         }
 
         /// <summary>
@@ -1794,8 +1808,9 @@ namespace Searcher
             this.searchStartTime = DateTime.Now;
             this.TblkProgressTime.Text = string.Format("{0:hh\\:mm\\:ss}", DateTime.Now.Subtract(this.searchStartTime));
             this.SetProgressInformation(string.Empty);
-            this.SetFileCounterProgressInformation(0, Application.Current.Resources["GetFilesToSearch"].ToString());
+            this.SetFileCounterProgressInformation(0, Application.Current.Resources["GettingFilesToSearch"].ToString());
             this.TxtResults.Document = new FlowDocument(this.richTextboxParagraph);
+            this.filesSearchProgress.Clear();
             this.BtnSearch.IsEnabled = false;
             this.BtnCancel.IsEnabled = true;
         }
@@ -1853,23 +1868,29 @@ namespace Searcher
         /// <param name="fileName">The file name to search.</param>
         /// <param name="termsToSearch">The terms to search.</param>
         /// <returns>Task object that searches and displays the result.</returns>
-        private List<Inline> SearchAndDisplayResult(string fileName, IEnumerable<string> termsToSearch)
+        private async Task<List<Inline>> SearchAndDisplayResult(string fileName, IEnumerable<string> termsToSearch)
         {
             List<Inline> retVal = new List<Inline>();
-            this.SetProgressInformation(string.Format("{0}: {1}", Application.Current.Resources["Searching"].ToString(), fileName));
-            
             List<MatchedLine> matchedLines = new List<MatchedLine>();
 
             try
             {
-                matchedLines = this.matcherObj.GetMatch(fileName, termsToSearch);
+                matchedLines = await Task.Run<List<MatchedLine>>(
+                    () =>
+                {
+                    string longestRunningFile = this.GetLongestRunningFile(fileName);
+                    this.SetProgressInformation(string.Format("{0}: {1}", Application.Current.Resources["Searching"].ToString(), longestRunningFile));
+                    return this.matcherObj.GetMatch(fileName, termsToSearch);
+                }, 
+                this.cancellationTokenSource.Token);
             }
             catch (Exception ex)
             {
-                this.SetSearchError(ex.Message);
+                if (ex.Message != "A task was canceled.")
+                {
+                    this.SetSearchError(ex.Message);
+                }
             }
-
-            this.SetFileCounterProgressInformation(this.filesSearchedCounter, string.Format("{0} {1} {2} {3} ({4} %)", Application.Current.Resources["ProcessingFiles"].ToString(), this.filesSearchedCounter, Application.Current.Resources["Of"].ToString(), this.filesToSearch.Count(), (int)(this.filesSearchedCounter * 100) / this.filesToSearch.Count()));
 
             if (matchedLines != null && matchedLines.Count > 0)
             {
@@ -1886,7 +1907,7 @@ namespace Searcher
                         }
 
                         groupedMatch.MatchLine[0].FileName = groupedMatch.FileName;
-                        retVal.AddRange(this.AddResult(groupedMatch.MatchLine));
+                        retVal.AddRange(await this.AddResult(groupedMatch.MatchLine));
                     }
                 }
                 else
@@ -1895,7 +1916,7 @@ namespace Searcher
                     string resultFileName = matchedLines.Select(ml => ml.FileName).FirstOrDefault();
                     matchedLines.ForEach(ml => ml.FileName = string.Empty);
                     matchedLines[0].FileName = (resultFileName != null && resultFileName.Length > fileName.Length) ? resultFileName : fileName;
-                    retVal = this.AddResult(matchedLines);
+                    retVal = await this.AddResult(matchedLines);
                 }
             }
 
@@ -1918,9 +1939,7 @@ namespace Searcher
             this.matcherObj.AllMatchesInFile = this.searchTypeAll;
             this.matcherObj.RegexOptions = this.regexOptions;
             this.matcherObj.CancellationTokenSource = this.cancellationTokenSource;
-
             List<Task> searchTasks = new List<Task>();
-            List<Inline> pendingResultsToAdd = new List<Inline>();
 
             try
             {
@@ -1928,45 +1947,41 @@ namespace Searcher
                 {
                     if (!this.cancellationTokenSource.Token.IsCancellationRequested)
                     {
-                        searchTasks.Add(Task.Run(
-                            () =>
-                            {
-                                List<Inline> resultsToAdd = this.SearchAndDisplayResult(fileNamePath, termsToSearch);
-                                this.Dispatcher.Invoke(() =>
-                                {
-                                    this.TaskBarItemInfoProgress.ProgressValue = this.filesSearchedCounter * 1.0 / this.filesToSearch.Count();
-                                });
+                        FileSearchResult fileSearchResult = new FileSearchResult { FileNamePath = fileNamePath, SearchStartDateTimeTicks = DateTime.UtcNow.Ticks };
 
-                                if (resultsToAdd.Count > 0)
+                        // Lock list prior to adding new file and determine the longest processing file.
+                        lock (this.filesSearchProgress)
+                        {
+                            this.filesSearchProgress.Add(fileSearchResult);
+                        }
+
+                        Task searchTask = Task.Run(
+                            async () =>
+                        {
+                            fileSearchResult.SearchMatches = await this.SearchAndDisplayResult(fileNamePath, termsToSearch);
+                            await this.Dispatcher.Invoke(async () =>
+                            {
+                                if (fileSearchResult.SearchMatches.Count > 0)
                                 {
-                                    if (string.IsNullOrEmpty(this.fileBeingDisplayed))
-                                    {
-                                        this.AddResultsToTextbox(resultsToAdd);
-                                    }
-                                    else
-                                    {
-                                        if (this.fileBeingDisplayed == fileNamePath)
-                                        {
-                                            this.AddResultsToTextbox(resultsToAdd);
-                                            this.fileBeingDisplayed = string.Empty;         // Clear the filename with excessive matches after all results have been displayed. If other similar files exist, one of them will acquire this via lock.
+                                    await this.UpdateResults(fileSearchResult);
                                 }
-                                        else
-                                        {
-                                            pendingResultsToAdd.AddRange(resultsToAdd);
-                                        }
-                                    }
-                                }
-                            },
-                        this.cancellationTokenSource.Token));
+
+                                this.TaskBarItemInfoProgress.ProgressValue = this.filesSearchedCounter * 1.0 / this.filesToSearch.Count();
+                                this.SetFileCounterProgressInformation(this.filesSearchedCounter, string.Format("{0} {1} {2} {3} ({4} %)", Application.Current.Resources["ProcessingFiles"].ToString(), this.filesSearchedCounter, Application.Current.Resources["Of"].ToString(), this.filesToSearch.Count(), (int)(this.filesSearchedCounter * 100) / this.filesToSearch.Count()));
+                            });
+
+                            lock (this.filesSearchProgress)
+                            {
+                                this.filesSearchProgress.Remove(fileSearchResult);
+                            }
+                        }, 
+                        this.cancellationTokenSource.Token);
+
+                        searchTasks.Add(searchTask);
                     }
                 }
 
                 await Task.WhenAll(searchTasks);
-
-                if (pendingResultsToAdd.Count > 0)
-                {
-                    this.AddResultsToTextbox(pendingResultsToAdd);
-                }
             }
             finally
             {
@@ -1988,12 +2003,22 @@ namespace Searcher
                     this.Dispatcher.Invoke(() =>
                     {
                         this.TblkProgressTime.Text = string.Format("{0:hh\\:mm\\:ss}", DateTime.Now.Subtract(this.searchStartTime));
+
+                        lock (this.filesSearchProgress)
+                        {
+                            if (this.filesSearchProgress?.Count > 0)
+                            {
+                                string longestRunningFile = filesSearchProgress.OrderBy(fsr => fsr.SearchStartDateTimeTicks).FirstOrDefault().FileNamePath;
+                                this.SetProgressInformation(string.Format("{0}: {1}", Application.Current.Resources["Searching"].ToString(), this.GetLongestRunningFile(longestRunningFile)));
+                            }
+                        }
                     });
                 }
             }
             catch (TaskCanceledException)
             {
                 this.searchTimer.Stop();
+
                 if (!this.cancellationTokenSource.IsCancellationRequested)
                 {
                     this.cancellationTokenSource.Cancel();
@@ -2118,15 +2143,12 @@ namespace Searcher
         {
             try
             {
-                this.Dispatcher.Invoke(() =>
+                if (value >= 0)
                 {
-                    if (value >= 0)
-                    {
-                        this.PgBarSearch.Value = value;
-                    }
+                    this.PgBarSearch.Value = value;
+                }
 
-                    this.TblkProgress.Text = text;
-                });
+                this.TblkProgress.Text = text;
             }
             catch (TaskCanceledException)
             {
@@ -2608,6 +2630,17 @@ namespace Searcher
                 directories.ForEach(s => comboBox.Items.Add(s));
                 comboBox.SelectedIndex = 0;
             }
+        }
+
+        /// <summary>
+        /// Update the UI with results from search.
+        /// </summary>
+        /// <param name="fileSearchResult">The FileSearchResult object that contains one or more matches.</param>
+        /// <returns>Task to update the results.</returns>
+        private async Task UpdateResults(FileSearchResult fileSearchResult)
+        {
+            await this.AddResultsToTextbox(fileSearchResult.SearchMatches);
+            
         }
 
         /// <summary>
