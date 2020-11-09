@@ -62,12 +62,10 @@
     <system:String x:Key="Filters">Fi_lter</system:String>
 
     <system:String x:Key="FindKeywords">Suchbegri_ff</system:String>
-    
+
     <system:String x:Key="ForDetails">für Details</system:String>
 
     <system:String x:Key="Found">Gefunden</system:String>
-
-    <system:String x:Key="GetFilesToSearch">Holen Sie sich Dateien zu Suchen</system:String>
 
     <system:String x:Key="GettingFilesToSearch">Holen Sie sich Dateien zum Suchen</system:String>
 

@@ -41,8 +41,8 @@ namespace Searcher
         #region Private Fields
 
         /// <summary>
-        /// </summary>
         /// The date when an attempt was made to check for updates.
+        /// </summary>
         private DateTime lastUpdateCheckDate = DateTime.MinValue;
 
         /// <summary>
@@ -79,14 +79,14 @@ namespace Searcher
         }
 
         #endregion Public Constructors
-        
+
         #region Public Methods
 
         /// <summary>
         /// Check if a newer version has already been downloaded.
         /// </summary>
         /// <returns>A newer version exists locally.</returns>
-        public bool UpdatedAppExistsLocally() 
+        public bool UpdatedAppExistsLocally()
         {
             // Delete any previous version.
             System.IO.File.Delete(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher.exe.old"));
@@ -345,7 +345,7 @@ namespace Searcher
 
             return retVal;
         }
-        
+
         #endregion Private Methods
     }
 }
