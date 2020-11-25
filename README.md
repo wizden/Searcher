@@ -1,5 +1,5 @@
 ## Description
-This utility is intended to help in search/grep for multiple content in multiple locations for multiple file types. It mainly supports the ASCII and UNICODE file formats.
+This utility is intended to help in search/grep for multiple content in multiple locations for multiple file types.
 
 ## Main features
 * Search multiple directories for multiple content based on multiple file extensions.
