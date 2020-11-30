@@ -59,6 +59,8 @@
 
     <system:String x:Key="FilesFound">Files found</system:String>
 
+    <system:String x:Key="FileMatchCount">Match count</system:String>
+
     <system:String x:Key="Filters">Fi_lters</system:String>
 
     <system:String x:Key="FindKeywords">_Find keywords</system:String>

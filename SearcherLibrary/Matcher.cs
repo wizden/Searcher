@@ -359,6 +359,11 @@ namespace SearcherLibrary
             string searchLine = string.Empty;
             string tempSearchLine = string.Empty;
 
+            // Get length of line keyword based on length in language.
+            // 7 - Based on length of "Line {0}:\t{1}".
+            //                         12345   6 7
+            int lengthOfLineKeywordPlus3 = Resources.Strings.Line.Length + 3;
+
             foreach (string line in contents)
             {
                 lineCounter++;
@@ -388,14 +393,12 @@ namespace SearcherLibrary
                                     tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
                                     tempMatchObj = Regex.Match(tempSearchLine, searchTerm, this.RegexOptions);
 
-                                    // 7 - Based on length of "Line {0}:\t{1}".
-                                    //                         12345   6 7
                                     matchedLines.Add(new MatchedLine
                                     {
                                         Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineCounter, tempSearchLine),
                                         SearchTerm = searchTerm,
                                         LineNumber = lineCounter,
-                                        StartIndex = tempMatchObj.Index + 7 + lineCounter.ToString().Length,
+                                        StartIndex = tempMatchObj.Index + lengthOfLineKeywordPlus3 + lineCounter.ToString().Length,
                                         Length = tempMatchObj.Length
                                     });
                                 }
@@ -406,7 +409,7 @@ namespace SearcherLibrary
                                         Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineCounter, searchLine),
                                         SearchTerm = searchTerm,
                                         LineNumber = lineCounter,
-                                        StartIndex = match.Index + 7 + lineCounter.ToString().Length,
+                                        StartIndex = match.Index + lengthOfLineKeywordPlus3 + lineCounter.ToString().Length,
                                         Length = match.Length
                                     });
                                 }

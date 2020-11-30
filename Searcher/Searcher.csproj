@@ -122,6 +122,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="FileSearchResult.cs" />
+    <Compile Include="PreferencesHandler.cs" />
     <Compile Include="UpdateApp.cs" />
     <Page Include="ContentPopup.xaml">
       <SubType>Designer</SubType>
