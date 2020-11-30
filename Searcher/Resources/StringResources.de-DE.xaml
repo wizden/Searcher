@@ -59,6 +59,8 @@
 
     <system:String x:Key="FilesFound">Dateien gefunden</system:String>
 
+    <system:String x:Key="FileMatchCount">Übereinstimmung(en) nummer</system:String>
+
     <system:String x:Key="Filters">Fi_lter</system:String>
 
     <system:String x:Key="FindKeywords">Suchbegri_ff</system:String>

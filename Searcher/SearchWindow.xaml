@@ -117,77 +117,83 @@
                         </GroupBox>
 
                         <GroupBox Grid.Column="2" Header="Misc" Name="GrpMisc">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                </Grid.RowDefinitions>
-                                
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto" />
-                                    <ColumnDefinition Width="20" />
-                                    <ColumnDefinition Width="auto" />
-                                </Grid.ColumnDefinitions>
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
 
-                                <CheckBox Grid.Row="0" Grid.Column="0" Content="_Subfolders" Name="ChkSearchSubfolders" IsChecked="True" />
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
 
-                                <CheckBox Grid.Row="1" Grid.Column="0" Content="_Highlight results" Name="ChkHighlightResults" IsChecked="True" />
-                                
-                                <StackPanel Grid.Row="2" Grid.Column="0" Name="StkPnlEditor" KeyboardNavigation.IsTabStop="False" Orientation="Horizontal">
-                                    <TextBlock Name="TblkEditor" Text="Editor"  />
-                                    <TextBox Name="TxtEditor" Text="notepad" KeyboardNavigation.IsTabStop="False" Width="70" IsReadOnly="True" Background="#FFE6E6E6" />
-                                    <Button Name="BtnChangeEditor" Content=". . ." Width="25" KeyboardNavigation.IsTabStop="False" Click="BtnChangeEditor_Click" />
-                                </StackPanel>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition Width="20" />
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition Width="20" />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Row="0" Grid.Column="2" Name="StkFileCreationStartDate" Orientation="Horizontal">
-                                    <TextBlock Name="TblkStartDate" Text="Start Date" Margin="1, 5" Width="70" />
-                                    <DatePicker Name="DtpStartDate" SelectedDateChanged="DtpStartDate_SelectedDateChanged" Height="24" PreviewKeyUp="DtpStartDate_PreviewKeyUp" Width="120" />
-                                </StackPanel>
+                                    <CheckBox Grid.Row="0" Grid.Column="0" Content="_Subfolders" Name="ChkSearchSubfolders" IsChecked="True" />
 
-                                <StackPanel Grid.Row="1" Grid.Column="2" Name="StkFileCreationEndDate" Orientation="Horizontal">
-                                    <TextBlock Name="TblkEndDate" Text="End Date" Margin="1, 5" Width="70" />
-                                    <DatePicker Name="DtpEndDate" SelectedDateChanged="DtpEndDate_SelectedDateChanged" Height="24" PreviewKeyUp="DtpEndDate_PreviewKeyUp" Width="120" />
-                                </StackPanel>
+                                    <CheckBox Grid.Row="1" Grid.Column="0" Content="_Highlight results" Name="ChkHighlightResults" IsChecked="True" />
 
-                                <StackPanel Grid.Row="2" Grid.Column="2" Name="StkChangeLanguage" Orientation="Horizontal">
-                                    <TextBlock x:Name="TblkLanguage" Text="Language" Margin="1, 5" Width="70" />
-                                    <ComboBox Name="CmbLanguage" SelectionChanged="CmbLanguage_SelectionChanged" Width="90">
-                                        <ComboBoxItem Tag="en-US">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="70" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Name="TblkEnglish" Text="English"></TextBlock>
-                                                <Image Grid.Column="1" Name="ImgEnglish" Source="Images/en-US.png" Width="30" Height="20" />
-                                            </Grid>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem Tag="de-DE">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="70" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Name="TblkDeutsch" Text="Deutsch"></TextBlock>
-                                                <Image Grid.Column="1" Name="ImgDeutsch" Source="Images/de-DE.png" Width="30" Height="20" />
-                                            </Grid>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem Tag="hi-IN">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="70" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Name="TblkHindi" Text="हिन्दी"></TextBlock>
-                                                <Image Grid.Column="1" Name="ImgIndia" Source="Images/hi-IN.png" Width="30" Height="20" />
-                                            </Grid>
-                                        </ComboBoxItem>
-                                    </ComboBox>
-                                    <Image Name="ImgFlag" Width="30" />
-                                </StackPanel>
-                            </Grid>
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Name="StkPnlEditor" KeyboardNavigation.IsTabStop="False" Orientation="Horizontal">
+                                        <TextBlock Name="TblkEditor" Text="Editor" VerticalAlignment="Center" />
+                                        <TextBox Name="TxtEditor" Text="notepad" KeyboardNavigation.IsTabStop="False" Width="70" IsReadOnly="True" Background="#FFE6E6E6" Height="20" />
+                                        <Button Name="BtnChangeEditor" Content=". . ." Width="25" KeyboardNavigation.IsTabStop="False" Click="BtnChangeEditor_Click" Height="20" />
+                                    </StackPanel>
 
+                                    <StackPanel Grid.Row="0" Grid.Column="2" Name="StkFileCreationStartDate" Orientation="Horizontal">
+                                        <TextBlock Name="TblkStartDate" Text="Start Date" Margin="1, 5" Width="70" />
+                                        <DatePicker Name="DtpStartDate" SelectedDateChanged="DtpStartDate_SelectedDateChanged" Height="24" PreviewKeyUp="DtpStartDate_PreviewKeyUp" Width="120" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="2" Name="StkFileCreationEndDate" Orientation="Horizontal">
+                                        <TextBlock Name="TblkEndDate" Text="End Date" Margin="1, 5" Width="70" />
+                                        <DatePicker Name="DtpEndDate" SelectedDateChanged="DtpEndDate_SelectedDateChanged" Height="24" PreviewKeyUp="DtpEndDate_PreviewKeyUp" Width="120" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="2" Name="StkChangeLanguage" Orientation="Horizontal">
+                                        <TextBlock x:Name="TblkLanguage" Text="Language" Margin="1, 5" Width="70" />
+                                        <ComboBox Name="CmbLanguage" SelectionChanged="CmbLanguage_SelectionChanged" Width="90">
+                                            <ComboBoxItem Tag="en-US">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="70" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Name="TblkEnglish" Text="English"></TextBlock>
+                                                    <Image Grid.Column="1" Name="ImgEnglish" Source="Images/en-US.png" Width="30" Height="20" />
+                                                </Grid>
+                                            </ComboBoxItem>
+                                            <ComboBoxItem Tag="de-DE">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="70" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Name="TblkDeutsch" Text="Deutsch"></TextBlock>
+                                                    <Image Grid.Column="1" Name="ImgDeutsch" Source="Images/de-DE.png" Width="30" Height="20" />
+                                                </Grid>
+                                            </ComboBoxItem>
+                                            <ComboBoxItem Tag="hi-IN">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="70" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Name="TblkHindi" Text="हिन्दी"></TextBlock>
+                                                    <Image Grid.Column="1" Name="ImgIndia" Source="Images/hi-IN.png" Width="30" Height="20" />
+                                                </Grid>
+                                            </ComboBoxItem>
+                                        </ComboBox>
+                                        <Image Name="ImgFlag" Width="30" />
+                                    </StackPanel>
+
+                                    <CheckBox Grid.Row="0" Grid.Column="4" Content="Match Count" Name="ChkShowMatchCount" IsChecked="False" />
+                                </Grid>
+                            </ScrollViewer>
                         </GroupBox>
                     </Grid>
                 </Grid>

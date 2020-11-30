@@ -59,6 +59,8 @@
 
     <system:String x:Key="FilesFound">फाइलें मिली</system:String>
 
+    <system:String x:Key="FileMatchCount">मैच की गिनती</system:String>
+
     <system:String x:Key="Filters">फिल्टर</system:String>
 
     <system:String x:Key="FindKeywords">कीवर्ड खोजें</system:String>
