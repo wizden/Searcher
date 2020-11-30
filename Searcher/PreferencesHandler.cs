@@ -34,8 +34,13 @@ namespace Searcher
     using System.Windows;
     using System.Xml.Linq;
 
+    /// <summary>
+    /// Class to handle preferences for the executable.
+    /// </summary>
     public static class PreferencesHandler
     {
+        #region Fields
+
         /// <summary>
         /// Private store for the main search window.
         /// </summary>
@@ -47,9 +52,18 @@ namespace Searcher
         private static XDocument preferencesFile;
 
         /// <summary>
-        /// Private store for the location of the preference file.
+        /// Gets the location of the preference file.
         /// </summary>
-        public static string PreferenceFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SearcherPreferences.xml");
+        public static string PreferenceFilePath
+        {
+            get
+            {
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SearcherPreferences.xml");
+            }
+        }
+        #endregion Fields
+
+        #region Properties
 
         /// <summary>
         /// Gets the preferences file.
@@ -74,6 +88,10 @@ namespace Searcher
             }
         }
 
+        #endregion Properties
+
+        #region Methods
+
         /// <summary>
         /// Saves current search preferences for future use.
         /// </summary>
@@ -92,6 +110,7 @@ namespace Searcher
         /// <summary>
         /// Check if any missing xml elements are there from the default settings. If yes, create the missing elements. Generally done for upgrade. Not ideal, but avoids XSD.
         /// </summary>
+        /// <param name="fileName">The preferences file name.</param>
         public static void CheckPreferencesFile(string fileName)
         {
             XDocument prefFile = null;
@@ -181,11 +200,11 @@ namespace Searcher
                         }
                         else if (node == "WindowHeight")
                         {
-                            prefFile.Root.Add(new XElement("WindowHeight", (mainSearchWindow?.MinHeight ?? 200)));
+                            prefFile.Root.Add(new XElement("WindowHeight", mainSearchWindow?.MinHeight ?? 200));
                         }
                         else if (node == "WindowWidth")
                         {
-                            prefFile.Root.Add(new XElement("WindowWidth", (mainSearchWindow?.MinWidth ?? 200)));
+                            prefFile.Root.Add(new XElement("WindowWidth", mainSearchWindow?.MinWidth ?? 200));
                         }
                         else if (node == "PopupWindowHeight")
                         {
@@ -283,6 +302,15 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Sets the main search window object for setting window specific preferences.
+        /// </summary>
+        /// <param name="searchWindow">The main search window object.</param>
+        public static void SetMainSearchWindow(SearchWindow searchWindow)
+        {
+            mainSearchWindow = searchWindow;
+        }
+
+        /// <summary>
         /// Set the value for the preference element.
         /// </summary>
         /// <param name="preference">Name of the preference element.</param>
@@ -297,15 +325,6 @@ namespace Searcher
             {
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Sets the main search window object for setting window specific preferences.
-        /// </summary>
-        /// <param name="searchWindow">The main search window object.</param>
-        public static void SetMainSearchWindow(SearchWindow searchWindow)
-        {
-            mainSearchWindow = searchWindow;
         }
 
         /// <summary>
@@ -332,8 +351,8 @@ namespace Searcher
                 new XElement("CustomEditor", string.Empty),
                 new XElement("CheckForUpdates", true),
                 new XElement("LastUpdateCheckDate", DateTime.Today.AddMonths(-1).ToShortDateString()),
-                new XElement("WindowHeight", (mainSearchWindow?.MinHeight ?? 200)),
-                new XElement("WindowWidth", (mainSearchWindow?.MinWidth ?? 200)),
+                new XElement("WindowHeight", mainSearchWindow?.MinHeight ?? 200),
+                new XElement("WindowWidth", mainSearchWindow?.MinWidth ?? 200),
                 new XElement("PopupWindowHeight", 300),
                 new XElement("PopupWindowWidth", 500),
                 new XElement("PopupWindowTimeoutSeconds", 4),
@@ -349,5 +368,7 @@ namespace Searcher
             XDocument retVal = XDocument.Parse(new XElement("SearcherPreferences", initialPreferences).ToString(), LoadOptions.None);
             return retVal;
         }
+
+        #endregion Methods
     }
 }
