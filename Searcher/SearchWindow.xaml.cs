@@ -1052,6 +1052,13 @@ namespace Searcher
                     retVal = new TextRange(fileNameInline.ContentStart.GetLineStartPosition(1), fileNameInline.ContentStart.GetLineStartPosition(2)).Text;
                     retVal = retVal.Replace(Environment.NewLine, string.Empty);
                 }
+
+                int indexOfMatchCount = retVal.IndexOf($" ({Application.Current.Resources["Matches"]}: ");
+
+                if (indexOfMatchCount > 0)
+                {
+                    retVal = retVal.Substring(0, indexOfMatchCount);
+                }
             }
 
             return retVal;
