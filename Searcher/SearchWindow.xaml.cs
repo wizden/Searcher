@@ -180,6 +180,11 @@ namespace Searcher
         private int filesWithMatch = 0;
 
         /// <summary>
+        /// Private store to determine whether the filters are to be excluded.
+        /// </summary>
+        private bool filterExclusionSet = false;
+
+        /// <summary>
         /// The back colour value for matching result values.
         /// </summary>
         private SolidColorBrush highlightResultBackColour = Brushes.PeachPuff;
@@ -1053,7 +1058,7 @@ namespace Searcher
                     retVal = retVal.Replace(Environment.NewLine, string.Empty);
                 }
 
-                int indexOfMatchCount = retVal.IndexOf($" ({Application.Current.Resources["Matches"]}: ");
+                int indexOfMatchCount = retVal.LastIndexOf($" ({Application.Current.Resources["Matches"]}: ");
 
                 if (indexOfMatchCount > 0)
                 {
@@ -1074,6 +1079,11 @@ namespace Searcher
         {
             List<string> filesToSearch = new List<string>();
             List<string> pathErrors = new List<string>();
+
+            if (this.filterExclusionSet)
+            {
+                filter = "*.*";
+            }
 
             if (!this.cancellationTokenSource.Token.IsCancellationRequested)
             {
@@ -1473,8 +1483,8 @@ namespace Searcher
         /// <returns>Task object that performs the search.</returns>
         private async Task PerformSearchAsync(string searchText, string searchPath, string filters)
         {
-            List<string> filtersToUse = filters.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList();
-            List<string> searchPaths = searchPath.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList();
+            List<string> filtersToUse = filters.Trim().Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList();
+            List<string> searchPaths = searchPath.Trim().Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList();
             this.filesToSearch = new List<string>();
             this.filesSearched = new List<string>();
             this.distinctFilesFound = false;
@@ -1508,6 +1518,11 @@ namespace Searcher
                 foreach (Task<List<string>> pathTask in pathsListTask)
                 {
                     this.filesToSearch.AddRange(await pathTask);
+                }
+
+                if (this.filterExclusionSet)
+                {
+                    await RemoveFilesForFilterExclusion(filtersToUse);
                 }
 
                 await this.RemoveExclusionPaths();
@@ -1563,6 +1578,23 @@ namespace Searcher
             }
 
             newWnd.Show();
+        }
+
+        /// <summary>
+        /// If filters exclusion is set, remove the files that are to be exlcuded from search.
+        /// </summary>
+        /// <param name="filtersToUse">The list of filters to exclude.</param>
+        private async Task RemoveFilesForFilterExclusion(List<string> filtersToUse)
+        {
+            await Task.Run(() =>
+            {
+                filesToSearch = filesToSearch.Distinct().ToList();
+
+                foreach (string filter in filtersToUse)
+                {
+                    filesToSearch.RemoveAll(f => Regex.Matches(f, filter.Replace("*", ".*"), RegexOptions.IgnoreCase).Count > 0);
+                }
+            });
         }
 
         /// <summary>
@@ -2249,6 +2281,7 @@ namespace Searcher
             this.minSearchDate = this.DtpStartDate.SelectedDate.HasValue ? this.DtpStartDate.SelectedDate.Value : DateTime.MinValue;
             this.maxSearchDate = this.DtpEndDate.SelectedDate.HasValue ? this.DtpEndDate.SelectedDate.Value.Add(new TimeSpan(23, 59, 59)) : DateTime.MaxValue;   // Add time else uses 00:00:00
             this.showMatchCount = this.ChkShowMatchCount.IsChecked.Value == true;
+            this.filterExclusionSet = this.ChkExcludeFilters.IsChecked.Value == true;
             this.SetSearchError(string.Empty);
             this.matchesFound = 0;
             this.filesWithMatch = 0;
