@@ -305,6 +305,11 @@ namespace Searcher
         private string separatorCharacter = ";";
 
         /// <summary>
+        /// Gets or sets a value indicating whether preferences should be saved.
+        /// </summary>
+        private bool shouldSavePreferences = true;
+
+        /// <summary>
         /// Boolean indicating whether the search should show the execution time.
         /// </summary>
         private bool showExecutionTime = false;
@@ -1318,6 +1323,7 @@ namespace Searcher
                     }
                     else
                     {
+                        shouldSavePreferences = false;
                         this.SetupAppWithoutPreferences();
                     }
                 }
@@ -2495,7 +2501,7 @@ namespace Searcher
         /// <param name="e">The CancelEventArgs object.</param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (PreferencesHandler.PreferencesFile != null)
+            if (shouldSavePreferences && PreferencesHandler.PreferencesFile != null)
             {
                 PreferencesHandler.SetPreferenceValue("MatchWholeWord",  this.ChkMatchWholeWord.IsChecked.Value.ToString());
                 PreferencesHandler.SetPreferenceValue("MatchCase", this.ChkMatchCase.IsChecked.Value.ToString());
