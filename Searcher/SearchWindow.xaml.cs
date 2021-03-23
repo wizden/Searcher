@@ -604,7 +604,7 @@ namespace Searcher
             if (PreferencesHandler.PreferencesFile != null)
             {
                 saw.AppHasPreferencesFile = PreferencesHandler.PreferencesFile != null;
-                PreferencesHandler.SetPreferenceValue("CheckForUpdates", true.ToString().ToUpper());
+                saw.CanCheckForUpdates = PreferencesHandler.GetPreferenceValue("CheckForUpdates") == true.ToString();
             }
 
             saw.Owner = this;
