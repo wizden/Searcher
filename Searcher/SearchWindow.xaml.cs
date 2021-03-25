@@ -1775,7 +1775,7 @@ namespace Searcher
                 }
                 else
                 {
-                    matchedLines = matchedLines.OrderBy(ml => ml.LineNumber).ThenBy(ml => ml.StartIndex).ToList();
+                    matchedLines = matchedLines.OrderBy(ml => ml.MatchId).ToList();
                     string resultFileName = matchedLines.Select(ml => ml.FileName).FirstOrDefault();
                     matchedLines.ForEach(ml => ml.FileName = string.Empty);
                     matchedLines[0].FileName = (resultFileName != null && resultFileName.Length > fileName.Length) ? resultFileName : fileName;

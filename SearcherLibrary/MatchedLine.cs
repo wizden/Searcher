@@ -44,6 +44,11 @@ namespace SearcherLibrary
         public string Content { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the file has been processed for display.
+        /// </summary>
+        public bool DisplayProcessed { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the file.
         /// </summary>
         public string FileName { get; set; }
@@ -59,6 +64,11 @@ namespace SearcherLibrary
         public int LineNumber { get; set; }
 
         /// <summary>
+        /// Gets or sets the id of the match for ordering results.
+        /// </summary>
+        public int MatchId { get; set; }
+
+        /// <summary>
         /// Gets or sets the search term for which the match exists.
         /// </summary>
         public string SearchTerm { get; set; }
@@ -67,11 +77,6 @@ namespace SearcherLibrary
         /// Gets or sets the start index at which a match exists.
         /// </summary>
         public int StartIndex { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the file has been processed for display.
-        /// </summary>
-        public bool DisplayProcessed { get; set; }
 
         #endregion Public Properties
     }

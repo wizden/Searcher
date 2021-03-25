@@ -352,6 +352,7 @@ namespace SearcherLibrary
         private List<MatchedLine> SearchASCIIContent(IEnumerable<string> contents, IEnumerable<string> searchTerms)
         {
             List<MatchedLine> matchedLines = new List<MatchedLine>();
+            int matchCounter = 0;
             int lineCounter = 0;
             int lineToDisplayStart = 0;
             int lineToDisplayEnd = 0;
@@ -395,6 +396,7 @@ namespace SearcherLibrary
 
                                     matchedLines.Add(new MatchedLine
                                     {
+                                        MatchId = matchCounter++,
                                         Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineCounter, tempSearchLine),
                                         SearchTerm = searchTerm,
                                         LineNumber = lineCounter,
@@ -406,6 +408,7 @@ namespace SearcherLibrary
                                 {
                                     matchedLines.Add(new MatchedLine
                                     {
+                                        MatchId = matchCounter++,
                                         Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineCounter, searchLine),
                                         SearchTerm = searchTerm,
                                         LineNumber = lineCounter,
