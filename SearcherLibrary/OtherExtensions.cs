@@ -57,6 +57,21 @@ namespace SearcherLibrary
         GZ,
 
         /// <summary>
+        /// Files with .ODP extension for Open Document Presentation.
+        /// </summary>
+        ODP,
+
+        /// <summary>
+        /// Files with .ODS extension for Open Document Spreadsheet.
+        /// </summary>
+        ODS,
+
+        /// <summary>
+        /// Files with .ODT extension for Open Document Text.
+        /// </summary>
+        ODT,
+
+        /// <summary>
         /// Files with .PDF extension.
         /// </summary>
         PDF,
