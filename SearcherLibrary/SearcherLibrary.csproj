@@ -73,6 +73,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileExtensions\SearchArchive.cs" />
+    <Compile Include="FileExtensions\SearchExcel.cs" />
+    <Compile Include="FileExtensions\SearchOdp.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="FileExtensions\SearchOds.cs" />
+    <Compile Include="FileExtensions\SearchOdt.cs" />
+    <Compile Include="FileExtensions\SearchPdf.cs" />
+    <Compile Include="FileExtensions\SearchPowerpoint.cs" />
+    <Compile Include="FileExtensions\SearchWinword.cs" />
     <Compile Include="MatchedLine.cs" />
     <Compile Include="Matcher.cs" />
     <Compile Include="OtherExtensions.cs" />
