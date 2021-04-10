@@ -135,6 +135,9 @@
   <data name="FileIsSymbolicLink" xml:space="preserve">
     <value>प्रतीकात्मक लिंक फ़ाइल नहीं निकाली जा सकती।</value>
   </data>
+  <data name="Header" xml:space="preserve">
+    <value>शीर्ष लेख</value>
+  </data>
   <data name="InArchive" xml:space="preserve">
     <value>संग्रह में</value>
   </data>

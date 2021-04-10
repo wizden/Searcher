@@ -48,6 +48,18 @@
     <Reference Include="itextsharp">
       <HintPath>..\packages\iTextSharp.5.5.13\lib\itextsharp.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.4.0\lib\net46\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
+    <Reference Include="MsgReader, Version=3.12.4.0, Culture=neutral, PublicKeyToken=3ba01cf3434959fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\MsgReader.3.12.4\lib\net45\MsgReader.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenMcdf, Version=2.2.1.9, Culture=neutral, PublicKeyToken=fdbb1629d7c00800, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenMcdf.2.2.1.9\lib\net40\OpenMcdf.dll</HintPath>
+    </Reference>
+    <Reference Include="RtfPipe, Version=2.0.7677.4303, Culture=neutral, PublicKeyToken=5f6ab4ce530296d2, processorArchitecture=MSIL">
+      <HintPath>..\packages\RtfPipe.2.0.7677.4303\lib\net45\RtfPipe.dll</HintPath>
+    </Reference>
     <Reference Include="SharpCompress, Version=0.28.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpCompress.0.28.1\lib\netstandard2.0\SharpCompress.dll</HintPath>
     </Reference>
@@ -56,6 +68,7 @@
       <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
     </Reference>
@@ -76,9 +89,11 @@
       <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Text.Encoding.CodePages, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Text.Encoding.CodePages.5.0.0\lib\net461\System.Text.Encoding.CodePages.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp">
@@ -96,6 +111,9 @@
     </Compile>
     <Compile Include="FileExtensions\SearchOds.cs" />
     <Compile Include="FileExtensions\SearchOdt.cs" />
+    <Compile Include="FileExtensions\SearchOutlook.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="FileExtensions\SearchPdf.cs" />
     <Compile Include="FileExtensions\SearchPowerpoint.cs" />
     <Compile Include="FileExtensions\SearchWinword.cs" />

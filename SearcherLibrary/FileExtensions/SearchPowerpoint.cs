@@ -60,8 +60,8 @@ namespace SearcherLibrary.FileExtensions
                             {
                                 foreach (Match match in matches)
                                 {
-                                    startIndex = match.Index >= SearchOtherExtensions.IndexBoundary ? match.Index - SearchOtherExtensions.IndexBoundary : 0;
-                                    endIndex = (slideAllText[slideCounter].Length >= match.Index + match.Length + SearchOtherExtensions.IndexBoundary) ? match.Index + match.Length + SearchOtherExtensions.IndexBoundary : slideAllText[slideCounter].Length;
+                                    startIndex = match.Index >= IndexBoundary ? match.Index - IndexBoundary : 0;
+                                    endIndex = (slideAllText[slideCounter].Length >= match.Index + match.Length + IndexBoundary) ? match.Index + match.Length + IndexBoundary : slideAllText[slideCounter].Length;
                                     string matchLine = slideAllText[slideCounter].Substring(startIndex, endIndex - startIndex);
 
                                     while (matchLine.StartsWith("\r") || matchLine.StartsWith("\n"))

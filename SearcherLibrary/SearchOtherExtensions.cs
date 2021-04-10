@@ -150,6 +150,10 @@ namespace SearcherLibrary
                 case ".ODT":
                     matchedLines = new SearchOdt().GetMatchesInOdt(fileName, searchTerms, matcher);
                     break;
+                case ".MSG":
+                case ".OFT":
+                    matchedLines = new SearchOutlook().GetMatchesInOutlook(fileName, searchTerms, matcher);
+                    break;
                 case ".PDF":
                     matchedLines = new SearchPdf().GetMatchesInPdf(fileName, searchTerms, matcher);
                     break;

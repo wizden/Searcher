@@ -57,6 +57,11 @@ namespace SearcherLibrary
         GZ,
 
         /// <summary>
+        /// Files with .MSG extension for outlook mail files.
+        /// </summary>
+        MSG,
+
+        /// <summary>
         /// Files with .ODP extension for Open Document Presentation.
         /// </summary>
         ODP,
@@ -71,6 +76,11 @@ namespace SearcherLibrary
         /// </summary>
         ODT,
 
+        /// <summary>
+        /// Files with .OFT extension for outlook template files.
+        /// </summary>
+        OFT,
+        
         /// <summary>
         /// Files with .PDF extension.
         /// </summary>

@@ -25,9 +25,6 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         internal List<MatchedLine> GetMatchesInPdf(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            string pdfPage = string.Empty;
-            int startIndex = 0;
-            int endIndex = 0;
             int matchCounter = 0;
             List<MatchedLine> matchedLines = new List<MatchedLine>();
 
@@ -43,7 +40,7 @@ namespace SearcherLibrary.FileExtensions
                     try
                     {
                         ////pdfPage = PdfTextExtractor.GetTextFromPage(reader, pageCounter);                                            // Shows the result with line breaks.
-                        pdfPage = Regex.Replace(PdfTextExtractor.GetTextFromPage(reader, pageCounter), @"\r\n?|\n", " ").Trim();        // Shows the result in a single line, since line breaks are removed.
+                        string pdfPage = Regex.Replace(PdfTextExtractor.GetTextFromPage(reader, pageCounter), @"\r\n?|\n", " ").Trim();
 
                         foreach (string searchTerm in searchTerms)
                         {
@@ -52,8 +49,8 @@ namespace SearcherLibrary.FileExtensions
                             {
                                 foreach (Match match in matches)
                                 {
-                                    startIndex = match.Index >= SearchOtherExtensions.IndexBoundary ? match.Index - SearchOtherExtensions.IndexBoundary : 0;
-                                    endIndex = (pdfPage.Length >= match.Index + match.Length + SearchOtherExtensions.IndexBoundary) ? match.Index + match.Length + SearchOtherExtensions.IndexBoundary : pdfPage.Length;
+                                    int startIndex = match.Index >= IndexBoundary ? match.Index - IndexBoundary : 0;
+                                    int endIndex = (pdfPage.Length >= match.Index + match.Length + IndexBoundary) ? match.Index + match.Length + IndexBoundary : pdfPage.Length;
                                     string matchLine = pdfPage.Substring(startIndex, endIndex - startIndex);
                                     Match searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions);          // Use this match for the result highlight, based on additional characters being selected before and after the match.
                                     matchedLines.Add(new MatchedLine
@@ -74,14 +71,14 @@ namespace SearcherLibrary.FileExtensions
                     {
                         throw new ArgumentException(aex.Message + " " + Resources.Strings.RegexFailureSearchCancelled);
                     }
+
+                    if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
+                    {
+                        matchedLines.Clear();
+                    }
                 }
 
                 reader.Close();
-            }
-
-            if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
-            {
-                matchedLines.Clear();
             }
 
             return matchedLines;

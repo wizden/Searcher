@@ -135,6 +135,9 @@
   <data name="FileIsSymbolicLink" xml:space="preserve">
     <value>Symbolische Link Datei kann nicht extrahiert werden.</value>
   </data>
+  <data name="Header" xml:space="preserve">
+    <value>Kopfzeile</value>
+  </data>
   <data name="InArchive" xml:space="preserve">
     <value>im Archiv</value>
   </data>

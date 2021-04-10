@@ -135,6 +135,9 @@
   <data name="FileIsSymbolicLink" xml:space="preserve">
     <value>Symbolic link file cannot be extracted.</value>
   </data>
+  <data name="Header" xml:space="preserve">
+    <value>Header</value>
+  </data>
   <data name="InArchive" xml:space="preserve">
     <value>in archive</value>
   </data>
