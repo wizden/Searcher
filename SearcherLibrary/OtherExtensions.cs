@@ -52,6 +52,11 @@ namespace SearcherLibrary
         DOCX,
 
         /// <summary>
+        /// Files with .EML extension.
+        /// </summary>
+        EML,
+
+        /// <summary>
         /// Files with .GZ (GZIP) extension.
         /// </summary>
         GZ,

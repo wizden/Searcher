@@ -118,7 +118,7 @@ namespace SearcherLibrary
         /// <returns>The matched lines containing the search terms.</returns>
         public List<MatchedLine> SearchFileForMatch(string fileName, IEnumerable<string> searchTerms, Matcher matcher = null)
         {
-            string fileExtension = System.IO.Path.GetExtension(fileName).ToUpper();
+            string fileExtension = Path.GetExtension(fileName).ToUpper();
 
             if (matcher != null)
             {
@@ -150,6 +150,7 @@ namespace SearcherLibrary
                 case ".ODT":
                     matchedLines = new SearchOdt().GetMatchesInOdt(fileName, searchTerms, matcher);
                     break;
+                case ".EML":
                 case ".MSG":
                 case ".OFT":
                     matchedLines = new SearchOutlook().GetMatchesInOutlook(fileName, searchTerms, matcher);
