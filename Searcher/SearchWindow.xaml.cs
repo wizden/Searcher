@@ -2399,6 +2399,7 @@ namespace Searcher
         /// <param name="e">The parameter is not used.</param>
         private void TxtResults_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            this.SetSearchError(string.Empty);
             int lineNo = this.GetLineNumberForPopup();
 
             if (lineNo > 0)
@@ -2412,14 +2413,21 @@ namespace Searcher
 
                 if (!string.IsNullOrWhiteSpace(file) && Common.IsAsciiSearch(file))
                 {
-                    this.contentPopup = new ContentPopup(file, lineNo);
-                    this.contentPopup.Width = this.popupWindowWidth;
-                    this.contentPopup.Height = this.popupWindowHeight;
-                    this.contentPopup.WindowCloseTimeoutSeconds = (this.popupWindowTimeoutSeconds < 2 || this.popupWindowTimeoutSeconds > 20)
-                        ? 4
-                        : this.popupWindowTimeoutSeconds;
-                    this.contentPopup.Show();
-                    this.contentPopup.Closed += this.ContentPopup_Closed;
+                    try
+                    {
+                        this.contentPopup = new ContentPopup(file, lineNo);
+                        this.contentPopup.Width = this.popupWindowWidth;
+                        this.contentPopup.Height = this.popupWindowHeight;
+                        this.contentPopup.WindowCloseTimeoutSeconds = (this.popupWindowTimeoutSeconds < 2 || this.popupWindowTimeoutSeconds > 20)
+                            ? 4
+                            : this.popupWindowTimeoutSeconds;
+                        this.contentPopup.Show();
+                        this.contentPopup.Closed += this.ContentPopup_Closed;
+                    }
+                    catch (FileNotFoundException fnfe)
+                    {
+                        this.SetSearchError(fnfe.Message);
+                    }
                 }
             }
         }
