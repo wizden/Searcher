@@ -151,8 +151,8 @@ namespace SearcherLibrary.FileExtensions
                                 {
                                     foreach (Match match in matches)
                                     {
-                                        startIndex = match.Index >= IndexBoundary ? this.GetLocationOfFirstWord(allContent, match.Index - IndexBoundary) : 0;
-                                        endIndex = (allContent.Length >= match.Index + match.Length + IndexBoundary) ? this.GetLocationOfLastWord(allContent, match.Index + match.Length + IndexBoundary) : allContent.Length;
+                                        startIndex = match.Index >= SearchOtherExtensions.IndexBoundary ? this.GetLocationOfFirstWord(allContent, match.Index - SearchOtherExtensions.IndexBoundary) : 0;
+                                        endIndex = (allContent.Length >= match.Index + match.Length + SearchOtherExtensions.IndexBoundary) ? this.GetLocationOfLastWord(allContent, match.Index + match.Length + SearchOtherExtensions.IndexBoundary) : allContent.Length;
                                         string matchLine = allContent.Substring(startIndex, endIndex - startIndex);
                                         Match searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions);         // Use this match for the result highlight, based on additional characters being selected before and after the match.
                                         allContentMatchedLines.Add(new MatchedLine

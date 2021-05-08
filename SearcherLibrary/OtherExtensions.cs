@@ -25,12 +25,6 @@ namespace SearcherLibrary
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// List of extensions that can be searched.
     /// </summary>

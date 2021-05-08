@@ -25,23 +25,11 @@ namespace SearcherLibrary
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
-    using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.IO.Compression;
-    using System.Linq;
     using System.Runtime.InteropServices;
-    using System.Text;
     using System.Text.RegularExpressions;
-    using System.Xml.Linq;
-    using DocumentFormat.OpenXml;
-    using DocumentFormat.OpenXml.Packaging;
-    using DocumentFormat.OpenXml.Presentation;
-    using DocumentFormat.OpenXml.Spreadsheet;
-    using DocumentFormat.OpenXml.Wordprocessing;
     using FileExtensions;
-    using SharpCompress.Common;
-    using SharpCompress.Readers;
 
     /// <summary>
     /// Class to search files with NON-ASCII extensions.
@@ -66,20 +54,6 @@ namespace SearcherLibrary
         private static List<char> disallowedCharactersByOperatingSystem;
 
         #endregion Private Fields
-
-        #region Public Properties
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the search mode uses regex.
-        /// </summary>
-        public bool IsRegexSearch { get; set; }
-
-        /// <summary>
-        /// Gets or sets the regex options to use when searching.
-        /// </summary>
-        public RegexOptions RegexOptions { get; set; }
-
-        #endregion Public Properties
 
         #region Private Properties
 
@@ -107,7 +81,21 @@ namespace SearcherLibrary
 
         #endregion Private Properties
 
-        #region Public Methods
+        #region Internal Properties
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the search mode uses regex.
+        /// </summary>
+        internal bool IsRegexSearch { get; set; }
+
+        /// <summary>
+        /// Gets or sets the regex options to use when searching.
+        /// </summary>
+        internal RegexOptions RegexOptions { get; set; }
+
+        #endregion Internal Properties
+
+        #region Internal Methods
 
         /// <summary>
         /// Search for matches in NON-ASCII files.
@@ -116,7 +104,7 @@ namespace SearcherLibrary
         /// <param name="searchTerms">The terms to search.</param>
         /// <param name="matcher">Optional matcher object to search for zipped files that may contain ASCII files.</param>
         /// <returns>The matched lines containing the search terms.</returns>
-        public List<MatchedLine> SearchFileForMatch(string fileName, IEnumerable<string> searchTerms, Matcher matcher = null)
+        internal List<MatchedLine> SearchFileForMatch(string fileName, IEnumerable<string> searchTerms, Matcher matcher = null)
         {
             string fileExtension = Path.GetExtension(fileName).ToUpper();
 
@@ -173,7 +161,7 @@ namespace SearcherLibrary
             return matchedLines;
         }
 
-        #endregion Public Methods
+        #endregion Internal Methods
 
         #region Private Methods
 
