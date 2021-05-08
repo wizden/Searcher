@@ -25,12 +25,6 @@ namespace SearcherLibrary
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// Class to capture a matched line.
     /// </summary>

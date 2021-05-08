@@ -25,12 +25,6 @@ namespace SearcherLibrary
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// List of extensions that can be searched.
     /// </summary>
@@ -52,9 +46,19 @@ namespace SearcherLibrary
         DOCX,
 
         /// <summary>
+        /// Files with .EML extension.
+        /// </summary>
+        EML,
+
+        /// <summary>
         /// Files with .GZ (GZIP) extension.
         /// </summary>
         GZ,
+
+        /// <summary>
+        /// Files with .MSG extension for outlook mail files.
+        /// </summary>
+        MSG,
 
         /// <summary>
         /// Files with .ODP extension for Open Document Presentation.
@@ -71,6 +75,11 @@ namespace SearcherLibrary
         /// </summary>
         ODT,
 
+        /// <summary>
+        /// Files with .OFT extension for outlook template files.
+        /// </summary>
+        OFT,
+        
         /// <summary>
         /// Files with .PDF extension.
         /// </summary>

@@ -235,11 +235,6 @@ namespace Searcher
         private bool multilineRegex = false;
 
         /// <summary>
-        /// Private field to store class that allows searching NON-ASCII files.
-        /// </summary>
-        private SearchOtherExtensions otherExtensions = new SearchOtherExtensions();
-
-        /// <summary>
         /// Private store for the default height of the content popup window.
         /// </summary>
         private int popupWindowHeight = 300;
@@ -466,32 +461,16 @@ namespace Searcher
                         });
                     }
 
-                    List<string> contentArray = new List<string>();
-                    contentArray.Add(ml.Content.Substring(0, ml.StartIndex));
-                    contentArray.Add(ml.Content.Substring(ml.StartIndex, ml.Length));
-                    contentArray.Add(ml.Content.Substring(ml.StartIndex + ml.Length, ml.Content.Length - (ml.StartIndex + ml.Length)));
                     this.matchesFound++;
-
-                    for (int counter = 0; counter < contentArray.Count; counter++)
-                    {
-                        this.Dispatcher.Invoke(() =>
-                        {
-                            if (counter % 2 == 1)
-                            {
-                                retVal.Add(new Run(Regex.Unescape(Regex.Escape(contentArray[counter])))
-                                {
-                                    Background = this.highlightResults ? this.highlightResultBackColour : this.applicationBackColour
-                                });
-                            }
-                            else
-                            {
-                                retVal.Add(new Run(contentArray[counter]));
-                            }
-                        });
-                    }
-
                     this.Dispatcher.Invoke(() =>
                     {
+                        retVal.Add(new Run(ml.Content.Substring(0, ml.StartIndex)));
+                        retVal.Add(new Run(Regex.Unescape(Regex.Escape(ml.Content.Substring(ml.StartIndex, ml.Length))))
+                        {
+                            Background = this.highlightResults ? this.highlightResultBackColour : this.applicationBackColour
+                        });
+                        retVal.Add(new Run(ml.Content.Substring(ml.StartIndex + ml.Length, ml.Content.Length - (ml.StartIndex + ml.Length))));
+
                         retVal.Add(new Run(Environment.NewLine));
                     });
 
@@ -1503,7 +1482,6 @@ namespace Searcher
             }
 
             List<string> termsToSearch = this.SetTermsToSearchText(searchText);
-            this.otherExtensions = new SearchOtherExtensions { RegexOptions = this.regexOptions, IsRegexSearch = this.searchModeRegex };
             List<Task<List<string>>> pathsListTask = new List<Task<List<string>>>(searchPaths.Count());
 
             try
@@ -2399,6 +2377,7 @@ namespace Searcher
         /// <param name="e">The parameter is not used.</param>
         private void TxtResults_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            this.SetSearchError(string.Empty);
             int lineNo = this.GetLineNumberForPopup();
 
             if (lineNo > 0)
@@ -2412,14 +2391,21 @@ namespace Searcher
 
                 if (!string.IsNullOrWhiteSpace(file) && Common.IsAsciiSearch(file))
                 {
-                    this.contentPopup = new ContentPopup(file, lineNo);
-                    this.contentPopup.Width = this.popupWindowWidth;
-                    this.contentPopup.Height = this.popupWindowHeight;
-                    this.contentPopup.WindowCloseTimeoutSeconds = (this.popupWindowTimeoutSeconds < 2 || this.popupWindowTimeoutSeconds > 20)
-                        ? 4
-                        : this.popupWindowTimeoutSeconds;
-                    this.contentPopup.Show();
-                    this.contentPopup.Closed += this.ContentPopup_Closed;
+                    try
+                    {
+                        this.contentPopup = new ContentPopup(file, lineNo);
+                        this.contentPopup.Width = this.popupWindowWidth;
+                        this.contentPopup.Height = this.popupWindowHeight;
+                        this.contentPopup.WindowCloseTimeoutSeconds = (this.popupWindowTimeoutSeconds < 2 || this.popupWindowTimeoutSeconds > 20)
+                            ? 4
+                            : this.popupWindowTimeoutSeconds;
+                        this.contentPopup.Show();
+                        this.contentPopup.Closed += this.ContentPopup_Closed;
+                    }
+                    catch (FileNotFoundException fnfe)
+                    {
+                        this.SetSearchError(fnfe.Message);
+                    }
                 }
             }
         }

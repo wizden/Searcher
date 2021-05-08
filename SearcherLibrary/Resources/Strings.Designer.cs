@@ -115,6 +115,15 @@ namespace SearcherLibrary.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Header.
+        /// </summary>
+        internal static string Header {
+            get {
+                return ResourceManager.GetString("Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to in archive.
         /// </summary>
         internal static string InArchive {
