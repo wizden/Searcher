@@ -43,6 +43,8 @@
 
     <system:String x:Key="ErrorOccurred">Error occurred</system:String>
 
+    <system:String x:Key="Exclude">Exclude</system:String>
+
     <system:String x:Key="ExcludeArchiveAsFile">Cannot exclude. If this is an archive, please exclude it as a file.</system:String>
 
     <system:String x:Key="ExcludeDirectory">Exclude directory from search</system:String>

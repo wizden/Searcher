@@ -1909,6 +1909,7 @@ namespace Searcher
             this.BtnCancel.Content = Application.Current.Resources["Cancel"].ToString();
             this.CmbItemAny.Content = Application.Current.Resources["Any"].ToString();
             this.CmbItemAll.Content = Application.Current.Resources["All"].ToString();
+            this.ChkExcludeFilters.Content = Application.Current.Resources["Exclude"].ToString();
             this.BtnAbout.Content = Application.Current.Resources["About"].ToString();
 
             string separatorTooltipMessage = string.Format("{0} '{1}'.", Application.Current.Resources["SeparateUsingCharacter"].ToString(), this.separatorCharacter);

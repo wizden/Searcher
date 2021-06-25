@@ -43,6 +43,8 @@
 
     <system:String x:Key="ErrorOccurred">Ein Fehler ist aufgetreten</system:String>
 
+    <system:String x:Key="Exclude">Ausschileßen</system:String>
+
     <system:String x:Key="ExcludeArchiveAsFile">Kann nicht ausschließen. Wenn dies ein Archiv ist, schließen Sie es bitte als Datei aus.</system:String>
 
     <system:String x:Key="ExcludeDirectory">Verzeichnis von der Suche ausschließen</system:String>

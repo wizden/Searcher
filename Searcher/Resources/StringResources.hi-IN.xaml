@@ -43,6 +43,8 @@
 
     <system:String x:Key="ErrorOccurred">कुछ गड़बड़ हो गया</system:String>
 
+    <system:String x:Key="Exclude">अपवर्जित</system:String>
+
     <system:String x:Key="ExcludeArchiveAsFile">हटाया नहीं जा सकता। यदि यह एक संग्रह है, तो कृपया इसे फ़ाइल के रूप में बाहर रखें।</system:String>
 
     <system:String x:Key="ExcludeDirectory">फ़ोल्डर को खोज से बाहर रखें</system:String>
