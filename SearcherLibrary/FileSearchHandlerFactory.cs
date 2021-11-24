@@ -23,24 +23,24 @@ namespace SearcherLibrary
         ///     Private store for the list of available search handlers.
         /// </summary>
         private static readonly Lazy<Dictionary<String, IFileSearchHandler>> _lazySearchHandlers = new Lazy<Dictionary<String, IFileSearchHandler>>(() =>
-        {
-            Console.WriteLine("Thread id: " + Thread.CurrentThread.ManagedThreadId);
-            var retVal = new Dictionary<String, IFileSearchHandler>();
+         {
+             var retVal = new Dictionary<String, IFileSearchHandler>();
 
-            foreach (var fshType in Assembly.GetAssembly(typeof(FileSearchHandler)).GetTypes().Where(t => t.IsSubclassOf(typeof(FileSearchHandler))))
-            {
-                foreach (var fileType in fshType.GetProperties().
-                                                 Where(p => p.Name == "Extensions" && p.PropertyType == typeof(List<String>)).
-                                                 Select(p => p.GetValue(null, null)).
-                                                 Cast<List<String>>().
-                                                 FirstOrDefault())
-                {
-                    retVal.Add(fileType.ToUpper(), (IFileSearchHandler) Activator.CreateInstance(fshType));
-                }
-            }
+             foreach (var fshType in Assembly.GetAssembly(typeof(FileSearchHandler)).GetTypes().Where(t => t.IsSubclassOf(typeof(FileSearchHandler))))
+             {
+                 foreach (var fileType in fshType?.GetProperties().
+                                                   Where(p => p.Name == "Extensions" && p.PropertyType == typeof(List<String>)).
+                                                   Select(p => p.GetValue(null, null)).
+                                                   Cast<List<String>>().
+                                                   FirstOrDefault())
+                 {
+                     retVal.Add(fileType.ToUpper(), (IFileSearchHandler) Activator.CreateInstance(fshType));
+                 }
+             }
 
-            return retVal;
-        });
+             return retVal;
+         },
+         LazyThreadSafetyMode.ExecutionAndPublication);
 
         private FileSearchHandlerFactory() { }
 
