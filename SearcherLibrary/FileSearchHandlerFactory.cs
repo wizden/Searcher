@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using SearcherLibrary.FileExtensions;
 
 namespace SearcherLibrary
@@ -21,7 +22,27 @@ namespace SearcherLibrary
         /// <summary>
         ///     Private store for the list of available search handlers.
         /// </summary>
-        private static Dictionary<String, IFileSearchHandler> _searchHandlers;
+        private static readonly Lazy<Dictionary<String, IFileSearchHandler>> _lazySearchHandlers = new Lazy<Dictionary<String, IFileSearchHandler>>(() =>
+        {
+            Console.WriteLine("Thread id: " + Thread.CurrentThread.ManagedThreadId);
+            var retVal = new Dictionary<String, IFileSearchHandler>();
+
+            foreach (var fshType in Assembly.GetAssembly(typeof(FileSearchHandler)).GetTypes().Where(t => t.IsSubclassOf(typeof(FileSearchHandler))))
+            {
+                foreach (var fileType in fshType.GetProperties().
+                                                 Where(p => p.Name == "Extensions" && p.PropertyType == typeof(List<String>)).
+                                                 Select(p => p.GetValue(null, null)).
+                                                 Cast<List<String>>().
+                                                 FirstOrDefault())
+                {
+                    retVal.Add(fileType.ToUpper(), (IFileSearchHandler) Activator.CreateInstance(fshType));
+                }
+            }
+
+            return retVal;
+        });
+
+        private FileSearchHandlerFactory() { }
 
         public static List<MatchedLine> Search(String fileName, IEnumerable<String> searchTerms, Matcher matcher)
         {
@@ -36,24 +57,7 @@ namespace SearcherLibrary
         /// <returns>The <see cref="IFileSearchHandler" /> search handler to search file content.</returns>
         private static IFileSearchHandler GetSearchHandler(String fileName)
         {
-            if (_searchHandlers == null)
-            {
-                _searchHandlers = new Dictionary<String, IFileSearchHandler>();
-
-                foreach (var fshType in Assembly.GetAssembly(typeof(FileSearchHandler)).GetTypes().Where(t => t.IsSubclassOf(typeof(FileSearchHandler))))
-                {
-                    foreach (var fileType in fshType.GetProperties().
-                                                     Where(p => p.Name == "Extensions" && p.PropertyType == typeof(List<String>)).
-                                                     Select(p => p.GetValue(null, null)).
-                                                     Cast<List<String>>().
-                                                     FirstOrDefault())
-                    {
-                        _searchHandlers.Add(fileType.ToUpper(), (IFileSearchHandler) Activator.CreateInstance(fshType));
-                    }
-                }
-            }
-
-            var searchHandler = _searchHandlers.FirstOrDefault(sh => sh.Key == Path.GetExtension(fileName).ToUpper()).Value;
+            var searchHandler = _lazySearchHandlers.Value.FirstOrDefault(sh => sh.Key == Path.GetExtension(fileName).ToUpper()).Value;
 
             if (searchHandler != null)
             {

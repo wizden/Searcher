@@ -1198,7 +1198,9 @@ namespace Searcher
         private string GetLongestRunningFile(string fileName)
         {
             string retVal = fileName;
-            retVal = this.filesSearchProgress.Where(fsr => fsr.Value.SearchStartDateTimeTicks > 0).OrderBy(fsr => fsr.Value.SearchStartDateTimeTicks).FirstOrDefault().Value.FileNamePath ?? fileName;
+            retVal =
+                filesSearchProgress.Where(fsr => fsr.Value.SearchStartDateTimeTicks > 0).OrderBy(fsr => fsr.Value.SearchStartDateTimeTicks).FirstOrDefault().Value?.FileNamePath ??
+                fileName;
             return retVal;
         }
 
