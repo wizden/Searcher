@@ -135,19 +135,6 @@
     <Compile Include="FileExtensions\OutlookSearchHandler.cs" />
     <Compile Include="FileExtensions\PdfSearchHandler.cs" />
     <Compile Include="FileExtensions\PresentationSearchHandler.cs" />
-    <Compile Include="FileExtensions\SearchArchive.cs" />
-    <Compile Include="FileExtensions\SearchExcel.cs" />
-    <Compile Include="FileExtensions\SearchOdp.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FileExtensions\SearchOds.cs" />
-    <Compile Include="FileExtensions\SearchOdt.cs" />
-    <Compile Include="FileExtensions\SearchOutlook.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FileExtensions\SearchPdf.cs" />
-    <Compile Include="FileExtensions\SearchPowerpoint.cs" />
-    <Compile Include="FileExtensions\SearchWinword.cs" />
     <Compile Include="FileSearchHandlerFactory.cs" />
     <Compile Include="IFileSearchHandler.cs" />
     <Compile Include="MatchedLine.cs" />
@@ -169,7 +156,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.en-US.resx</DependentUpon>
     </Compile>
-    <Compile Include="SearchOtherExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="FodyWeavers.xml">

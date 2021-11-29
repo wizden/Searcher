@@ -3,43 +3,6 @@
 // </copyright>
 // <author>Dennis Joseph</author>
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Security.Principal;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shell;
-using System.Windows.Threading;
-using System.Xml.Linq;
-using SearcherLibrary;
-using Application = System.Windows.Application;
-using Clipboard = System.Windows.Clipboard;
-using ComboBox = System.Windows.Controls.ComboBox;
-using ContextMenu = System.Windows.Controls.ContextMenu;
-using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using MenuItem = System.Windows.Controls.MenuItem;
-using MessageBox = System.Windows.MessageBox;
-using MessageBoxOptions = System.Windows.MessageBoxOptions;
-using TextBox = System.Windows.Controls.TextBox;
-using Timer = System.Timers.Timer;
-
 namespace Searcher
 {
     /*
@@ -61,6 +24,44 @@ namespace Searcher
      * You should have received a copy of the GNU General Public License
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
+
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Security.Principal;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Timers;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Documents;
+    using System.Windows.Forms;
+    using System.Windows.Input;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using System.Windows.Navigation;
+    using System.Windows.Shell;
+    using System.Windows.Threading;
+    using System.Xml.Linq;
+    using SearcherLibrary;
+    using Application = System.Windows.Application;
+    using Clipboard = System.Windows.Clipboard;
+    using ComboBox = System.Windows.Controls.ComboBox;
+    using ContextMenu = System.Windows.Controls.ContextMenu;
+    using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+    using MenuItem = System.Windows.Controls.MenuItem;
+    using MessageBox = System.Windows.MessageBox;
+    using MessageBoxOptions = System.Windows.MessageBoxOptions;
+    using TextBox = System.Windows.Controls.TextBox;
+    using Timer = System.Timers.Timer;
+
     /// <summary>
     /// Interaction logic for MainWindow.
     /// </summary>

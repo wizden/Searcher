@@ -28,20 +28,17 @@ namespace SearcherLibrary
         {
             var retVal = new Dictionary<string, IFileSearchHandler>();
 
-             foreach (var fshType in Assembly.GetAssembly(typeof(FileSearchHandler)).GetTypes().Where(t => t.IsSubclassOf(typeof(FileSearchHandler))))
-             {
-                 foreach (var fileType in fshType?.GetProperties().
-                                                   Where(p => p.Name == "Extensions" && p.PropertyType == typeof(List<String>)).
-                                                   Select(p => p.GetValue(null, null)).
-                                                   Cast<List<String>>().
-                                                   FirstOrDefault())
-                 {
-                     retVal.Add(fileType.ToUpper(), (IFileSearchHandler) Activator.CreateInstance(fshType));
-                 }
-             }
+            foreach (var fshType in Assembly.GetAssembly(typeof(FileSearchHandler)).GetTypes().Where(t => t.IsSubclassOf(typeof(FileSearchHandler))))
+            {
+                foreach (var fileType in fshType?.GetProperties().Where(p => p.Name == "Extensions" && p.PropertyType == typeof(List<string>))
+                   .Select(p => p.GetValue(null, null)).Cast<List<string>>().FirstOrDefault())
+                {
+                    retVal.Add(fileType.ToUpper(), (IFileSearchHandler)Activator.CreateInstance(fshType));
+                }
+            }
 
-             return retVal;
-         },
+            return retVal;
+        },
          LazyThreadSafetyMode.ExecutionAndPublication);
 
         #endregion Private Fields
@@ -51,7 +48,7 @@ namespace SearcherLibrary
         /// <summary>
         /// Prevents a default instance of the <see cref="FileSearchHandlerFactory" /> class from being created.
         /// </summary>
-        private FileSearchHandlerFactory() 
+        private FileSearchHandlerFactory()
         {
         }
 
