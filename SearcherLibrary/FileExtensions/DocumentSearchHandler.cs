@@ -190,11 +190,11 @@ namespace SearcherLibrary.FileExtensions
                                 {
                                     foreach (Match match in matches)
                                     {
-                                        startIndex = match.Index >= IndexBoundary
-                                                         ? this.GetLocationOfFirstWord(allContent, match.Index - IndexBoundary)
+                                        startIndex = match.Index >= FileSearchHandler.IndexBoundary
+                                                         ? this.GetLocationOfFirstWord(allContent, match.Index - FileSearchHandler.IndexBoundary)
                                                          : 0;
-                                        endIndex = allContent.Length >= match.Index + match.Length + IndexBoundary
-                                                       ? this.GetLocationOfLastWord(allContent, match.Index + match.Length + IndexBoundary)
+                                        endIndex = allContent.Length >= match.Index + match.Length + FileSearchHandler.IndexBoundary
+                                                       ? this.GetLocationOfLastWord(allContent, match.Index + match.Length + FileSearchHandler.IndexBoundary)
                                                        : allContent.Length;
                                         var matchLine = allContent.Substring(startIndex, endIndex - startIndex);
                                         var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.

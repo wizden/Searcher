@@ -92,9 +92,9 @@ namespace SearcherLibrary.FileExtensions
                             {
                                 foreach (Match match in matches)
                                 {
-                                    startIndex = match.Index >= IndexBoundary ? match.Index - IndexBoundary : 0;
-                                    endIndex = slideAllText[slideCounter].Length >= match.Index + match.Length + IndexBoundary
-                                                   ? match.Index + match.Length + IndexBoundary
+                                    startIndex = match.Index >= FileSearchHandler.IndexBoundary ? match.Index - FileSearchHandler.IndexBoundary : 0;
+                                    endIndex = slideAllText[slideCounter].Length >= match.Index + match.Length + FileSearchHandler.IndexBoundary
+                                                   ? match.Index + match.Length + FileSearchHandler.IndexBoundary
                                                    : slideAllText[slideCounter].Length;
                                     var matchLine = slideAllText[slideCounter].Substring(startIndex, endIndex - startIndex);
 
