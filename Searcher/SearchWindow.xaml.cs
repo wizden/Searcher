@@ -33,19 +33,34 @@ namespace Searcher
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
+    using System.Security.Principal;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Timers;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
+    using System.Windows.Forms;
     using System.Windows.Input;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
     using System.Windows.Navigation;
     using System.Windows.Shell;
+    using System.Windows.Threading;
     using System.Xml.Linq;
     using SearcherLibrary;
+    using Application = System.Windows.Application;
+    using Clipboard = System.Windows.Clipboard;
+    using ComboBox = System.Windows.Controls.ComboBox;
+    using ContextMenu = System.Windows.Controls.ContextMenu;
+    using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+    using MenuItem = System.Windows.Controls.MenuItem;
+    using MessageBox = System.Windows.MessageBox;
+    using MessageBoxOptions = System.Windows.MessageBoxOptions;
+    using TextBox = System.Windows.Controls.TextBox;
+    using Timer = System.Timers.Timer;
 
     /// <summary>
     /// Interaction logic for MainWindow.
@@ -72,7 +87,7 @@ namespace Searcher
         /// <summary>
         /// Private store for the maximum length in the search text.
         /// </summary>
-        private const int MaxSearchTextLength = 100;
+        private const int MaxSearchTextLength = 200;
 
         /// <summary>
         /// Private store for limiting display of long strings.
@@ -287,7 +302,7 @@ namespace Searcher
         /// <summary>
         /// Private store for timer to determine time taken to run search.
         /// </summary>
-        private System.Timers.Timer searchTimer = new System.Timers.Timer(1000);
+        private Timer searchTimer = new Timer(1000);
 
         /// <summary>
         /// Boolean indicating whether the search must contain all of the search terms.
@@ -327,7 +342,7 @@ namespace Searcher
         /// <summary>
         /// Private store to hide the zoom level text block.
         /// </summary>
-        private System.Windows.Threading.DispatcherTimer zoomLabelTimer = new System.Windows.Threading.DispatcherTimer();
+        private DispatcherTimer zoomLabelTimer = new DispatcherTimer();
 
         #endregion Private Fields
 
@@ -561,7 +576,7 @@ namespace Searcher
             }
             else
             {
-                if (!this.filesToExclude.Any(f => f.ToUpper() == fullFileName.ToUpper()) && System.IO.File.Exists(fullFileName))
+                if (!this.filesToExclude.Any(f => f.ToUpper() == fullFileName.ToUpper()) && File.Exists(fullFileName))
                 {
                     this.filesToExclude.Add(fullFileName);
                     retVal = true;
@@ -626,7 +641,7 @@ namespace Searcher
         /// <param name="e">The RoutedEventArgs object.</param>
         private void BtnChangeEditor_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
+            OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = Application.Current.Resources["ExecutableFiles"].ToString() + " (*.exe)|*.exe";
             ofd.Multiselect = false;
             ofd.InitialDirectory = @"C:\Windows\System32";
@@ -665,7 +680,7 @@ namespace Searcher
         /// <param name="e">The RoutedEventArgs object.</param>
         private void BtnDirectory_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
             if (!string.IsNullOrEmpty(this.CmbDirectory.Text))
             {
                 fbd.SelectedPath = this.CmbDirectory.Text.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Last().Trim();
@@ -896,9 +911,9 @@ namespace Searcher
         /// </summary>
         /// <param name="sender">The sender object.</param>
         /// <param name="e">The KeyEventArgs object.</param>
-        private void DtpEndDate_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        private void DtpEndDate_PreviewKeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Return)
+            if (e.Key == Key.Return)
             {
                 this.BtnSearch_Click(sender, e);
             }
@@ -922,9 +937,9 @@ namespace Searcher
         /// </summary>
         /// <param name="sender">The sender object.</param>
         /// <param name="e">The KeyEventArgs object.</param>
-        private void DtpStartDate_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        private void DtpStartDate_PreviewKeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Return)
+            if (e.Key == Key.Return)
             {
                 this.BtnSearch_Click(sender, e);
             }
@@ -1184,7 +1199,7 @@ namespace Searcher
         private string GetLongestRunningFile(string fileName)
         {
             string retVal = fileName;
-            retVal = this.filesSearchProgress.Where(fsr => fsr.Value.SearchStartDateTimeTicks > 0).OrderBy(fsr => fsr.Value.SearchStartDateTimeTicks).FirstOrDefault().Value.FileNamePath ?? fileName;
+            retVal = this.filesSearchProgress.Where(fsr => fsr.Value.SearchStartDateTimeTicks > 0).OrderBy(fsr => fsr.Value.SearchStartDateTimeTicks).FirstOrDefault().Value?.FileNamePath ?? fileName;
             return retVal;
         }
 
@@ -1194,12 +1209,12 @@ namespace Searcher
         /// <returns>String containing user name information.</returns>
         private string GetRunningUserInfo()
         {
-            System.Reflection.AssemblyTitleAttribute assemblyTitleAttribute = (System.Reflection.AssemblyTitleAttribute)Attribute.GetCustomAttribute(System.Reflection.Assembly.GetExecutingAssembly(), typeof(System.Reflection.AssemblyTitleAttribute), false);
+            AssemblyTitleAttribute assemblyTitleAttribute = (AssemblyTitleAttribute)Attribute.GetCustomAttribute(Assembly.GetExecutingAssembly(), typeof(AssemblyTitleAttribute), false);
             string programName = assemblyTitleAttribute != null ? assemblyTitleAttribute.Title : Application.Current.Resources["UnknownAssemblyName"].ToString();
             string userName = string.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
-            System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(System.Security.Principal.WindowsIdentity.GetCurrent());
+            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
 
-            if (principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
+            if (principal.IsInRole(WindowsBuiltInRole.Administrator))
             {
                 userName += " - " + Application.Current.Resources["Administrator"].ToString();
             }
@@ -1212,7 +1227,7 @@ namespace Searcher
         /// </summary>
         /// <param name="sender">The sender object.</param>
         /// <param name="e">The MouseButtonEventArgs object.</param>
-        private void Grid_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if ((this.distinctFilesFound && this.filesToSearch != null && this.filesToSearch.Count > 0) || (this.filesToExclude.Count > 0 || this.directoriesToExclude.Count > 0))
             {
@@ -1278,7 +1293,7 @@ namespace Searcher
         /// <param name="e">The EventArgs object.</param>
         private void HideScaleTextBlock(object sender, EventArgs e)
         {
-            this.TxtBlkScaleValue.Visibility = System.Windows.Visibility.Hidden;
+            this.TxtBlkScaleValue.Visibility = Visibility.Hidden;
             this.zoomLabelTimer.Stop();
         }
 
@@ -1340,7 +1355,7 @@ namespace Searcher
         /// </summary>
         /// <param name="sender">The sender object.</param>
         /// <param name="e">The MouseButtonEventArgs object.</param>
-        private void Link_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Link_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is Hyperlink)
             {
@@ -1663,7 +1678,7 @@ namespace Searcher
         /// <param name="e">The RoutedEventArgs object.</param>
         private void SaveAllResultsToFile_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Forms.SaveFileDialog sfd = new System.Windows.Forms.SaveFileDialog();
+            SaveFileDialog sfd = new SaveFileDialog();
             if (!string.IsNullOrEmpty(this.CmbDirectory.Text))
             {
                 sfd.InitialDirectory = this.CmbDirectory.Text.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Last().Trim();
@@ -1672,7 +1687,7 @@ namespace Searcher
 
             if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                System.IO.File.WriteAllText(sfd.FileName, new TextRange(this.TxtResults.Document.ContentStart, this.TxtResults.Document.ContentEnd).Text);
+                File.WriteAllText(sfd.FileName, new TextRange(this.TxtResults.Document.ContentStart, this.TxtResults.Document.ContentEnd).Text);
             }
         }
 
@@ -1716,20 +1731,19 @@ namespace Searcher
 
             try
             {
-                matchedLines = await Task.Run<List<MatchedLine>>(
-                    () =>
-                    {
-                        string longestRunningFile = this.GetLongestRunningFile(fileName);
-                        this.SetProgressInformation(string.Format("{0}: {1}", Application.Current.Resources["Searching"].ToString(), longestRunningFile));
-                        return this.matcherObj.GetMatch(fileName, termsToSearch);
-                    },
-                this.cancellationTokenSource.Token);
+                matchedLines = await Task.Run(() =>
+                                              {
+                                                  var longestRunningFile = GetLongestRunningFile(fileName);
+                                                  SetProgressInformation(String.Format("{0}: {1}", Application.Current.Resources["Searching"], longestRunningFile));
+                                                  return FileSearchHandlerFactory.Search(fileName, termsToSearch, matcherObj);
+                                              },
+                                              cancellationTokenSource.Token);
             }
             catch (Exception ex)
             {
                 if (ex.Message != "A task was canceled.")
                 {
-                    this.SetSearchError(ex.Message);
+                    SetSearchError(ex.Message);
                 }
             }
 
@@ -1827,7 +1841,7 @@ namespace Searcher
         /// </summary>
         /// <param name="sender">The sender object.</param>
         /// <param name="e">The ElapsedEventArgs object.</param>
-        private void SearchTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void SearchTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             try
             {
@@ -1863,7 +1877,7 @@ namespace Searcher
 
             try
             {
-                this.applicationBackColour = (SolidColorBrush)new System.Windows.Media.BrushConverter().ConvertFromString(backGroundColourValue);
+                this.applicationBackColour = (SolidColorBrush)new BrushConverter().ConvertFromString(backGroundColourValue);
                 this.Background = this.applicationBackColour;
                 this.CmbDirectory.Background = this.applicationBackColour;
                 this.CmbFindWhat.Background = this.applicationBackColour;
@@ -1940,7 +1954,7 @@ namespace Searcher
 
             foreach (ComboBoxItem item in this.CmbLanguage.Items)
             {
-                if (item.Tag.ToString() == System.Globalization.CultureInfo.CurrentUICulture.Name)
+                if (item.Tag.ToString() == CultureInfo.CurrentUICulture.Name)
                 {
                     this.culture = item.Tag.ToString();
                     this.CmbLanguage.SelectedItem = item;
@@ -2133,7 +2147,7 @@ namespace Searcher
 
             try
             {
-                SolidColorBrush newColour = (SolidColorBrush)new System.Windows.Media.BrushConverter().ConvertFromString(highlightResultColourValue);
+                SolidColorBrush newColour = (SolidColorBrush)new BrushConverter().ConvertFromString(highlightResultColourValue);
                 this.highlightResultBackColour = newColour;
             }
             catch (FormatException)
@@ -2207,7 +2221,7 @@ namespace Searcher
                     }
 
                     this.GrdRowErrors.Height = (GridLength)new GridLengthConverter().ConvertFromString(string.IsNullOrEmpty(this.TxtErrors.Text) ? "auto" : "2*");
-                    this.BrdrErrors.Visibility = string.IsNullOrEmpty(this.TxtErrors.Text) ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
+                    this.BrdrErrors.Visibility = string.IsNullOrEmpty(this.TxtErrors.Text) ? Visibility.Collapsed : Visibility.Visible;
                 });
             }
             catch (TaskCanceledException)
@@ -2418,7 +2432,7 @@ namespace Searcher
         /// <param name="e">The MouseWheelEventArgs object.</param>
         private void TxtResults_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (System.Windows.Input.Keyboard.IsKeyDown(Key.LeftCtrl) || System.Windows.Input.Keyboard.IsKeyDown(Key.RightCtrl))
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
                 bool zoomIn = e.Delta > 0;
                 bool scaleChanged = false;
@@ -2436,7 +2450,7 @@ namespace Searcher
 
                 if (scaleChanged)
                 {
-                    this.TxtBlkScaleValue.Visibility = System.Windows.Visibility.Visible;
+                    this.TxtBlkScaleValue.Visibility = Visibility.Visible;
 
                     this.zoomLabelTimer.Interval = new TimeSpan(0, 0, 2);
                     this.zoomLabelTimer.Tick += this.HideScaleTextBlock;
@@ -2486,7 +2500,7 @@ namespace Searcher
         /// </summary>
         /// <param name="sender">The sender object.</param>
         /// <param name="e">The CancelEventArgs object.</param>
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, CancelEventArgs e)
         {
             if (shouldSavePreferences && PreferencesHandler.PreferencesFile != null)
             {
@@ -2539,7 +2553,7 @@ namespace Searcher
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             // Set focus on search combo box if Ctrl+F is clicked.
-            if ((System.Windows.Input.Keyboard.IsKeyDown(Key.LeftCtrl) || System.Windows.Input.Keyboard.IsKeyDown(Key.RightCtrl)) && e.Key == Key.F)
+            if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) && e.Key == Key.F)
             {
                 this.CmbFindWhat.Focus();
             }

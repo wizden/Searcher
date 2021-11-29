@@ -1,10 +1,30 @@
-﻿// <copyright file="SearchExcel.cs" company="dennjose">
+﻿// <copyright file="ExcelSearchHandler.cs" company="dennjose">
 //     www.dennjose.com. All rights reserved.
 // </copyright>
 // <author>Dennis Joseph</author>
 
 namespace SearcherLibrary.FileExtensions
 {
+    /*
+     * Searcher - Utility to search file content
+     * Copyright (C) 2018  Dennis Joseph
+     * 
+     * This file is part of Searcher.
+
+     * Searcher is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, either version 3 of the License, or
+     * (at your option) any later version.
+     * 
+     * Searcher is distributed in the hope that it will be useful,
+     * but WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     * GNU General Public License for more details.
+     * 
+     * You should have received a copy of the GNU General Public License
+     * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
+     */
+
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -15,10 +35,12 @@ namespace SearcherLibrary.FileExtensions
     using DocumentFormat.OpenXml.Spreadsheet;
 
     /// <summary>
-    /// Class to search Excel files.
+    /// Class to search XLSX/XLSM files.
     /// </summary>
-    internal class SearchExcel : SearchOtherExtensions
+    public class ExcelSearchHandler : FileSearchHandler
     {
+        #region Private Fields
+
         /// <summary>
         /// The maximum date value in excel (see https://support.office.com/en-us/article/move-data-from-excel-to-access-90c35a40-bcc3-46d9-aa7f-4106f78850b4).
         /// </summary>
@@ -29,14 +51,27 @@ namespace SearcherLibrary.FileExtensions
         /// </summary>
         private const double MinExcelDate = -657434;
 
+        #endregion Private Fields
+
+        #region Public Properties
+
         /// <summary>
-        /// Search for matches in XLSX files.
+        /// Handles files with the .PDF extension.
+        /// </summary>
+        public static new List<string> Extensions => new List<string> { ".XLSX", ".XLSM" };
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        /// <summary>
+        /// Search for matches in .XLSX/.XLSM files.
         /// </summary>
         /// <param name="fileName">The name of the file.</param>
         /// <param name="searchTerms">The terms to search.</param>
         /// <param name="matcher">The matcher object to determine search criteria.</param>
         /// <returns>The matched lines containing the search terms.</returns>
-        internal List<MatchedLine> GetMatchesInExcel(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
+        public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
             int matchCounter = 0;
             List<MatchedLine> matchedLines = new List<MatchedLine>();
@@ -154,6 +189,10 @@ namespace SearcherLibrary.FileExtensions
             return matchedLines;
         }
 
+        #endregion Public Methods
+
+        #region Private Methods
+
         /// <summary>
         /// Gets the content of the spread sheet cell based on the data type of the cell.
         /// </summary>
@@ -240,11 +279,17 @@ namespace SearcherLibrary.FileExtensions
             return retVal;
         }
 
+        #endregion Private Methods
+
+        #region Protected Internal Classes
+
         /// <summary>
         /// Internal class to hold the cell information of an spread sheet document.
         /// </summary>
         protected internal class SpreadsheetCellDetail
         {
+            #region Internal Properties
+
             /// <summary>
             /// Gets or sets the content of the cell.
             /// </summary>
@@ -259,6 +304,10 @@ namespace SearcherLibrary.FileExtensions
             /// Gets or sets the name displayed for the sheet.
             /// </summary>
             internal string SheetName { get; set; }
+
+            #endregion Internal Properties
         }
+
+        #endregion Protected Internal Classes
     }
 }

@@ -60,11 +60,6 @@ namespace SearcherLibrary
         /// </summary>
         private const int MaxStringLengthDisplayIndexStart = 100;
 
-        /// <summary>
-        /// Private field to store class that allows searching NON-ASCII files.
-        /// </summary>
-        private SearchOtherExtensions otherExtensions = new SearchOtherExtensions();
-
         #endregion Private Fields
 
         #region Public Constructors
@@ -231,7 +226,7 @@ namespace SearcherLibrary
         /// <returns>The matched lines containing the search terms.</returns>
         private List<MatchedLine> FileSearchInNonASCII(string fileName, IEnumerable<string> searchTerms)
         {
-            List<MatchedLine> retVal = this.otherExtensions.SearchFileForMatch(fileName, searchTerms, this);
+            List<MatchedLine> retVal = FileSearchHandlerFactory.Search(fileName, searchTerms, this);
             this.ClearInvalidResults(retVal, searchTerms);
             return retVal;
         }

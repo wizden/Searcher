@@ -1,10 +1,30 @@
-﻿// <copyright file="SearchArchive.cs" company="dennjose">
+﻿// <copyright file="ArchiveSearchHandler.cs" company="dennjose">
 //     www.dennjose.com. All rights reserved.
 // </copyright>
 // <author>Dennis Joseph</author>
 
 namespace SearcherLibrary.FileExtensions
 {
+    /*
+     * Searcher - Utility to search file content
+     * Copyright (C) 2018  Dennis Joseph
+     * 
+     * This file is part of Searcher.
+
+     * Searcher is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, either version 3 of the License, or
+     * (at your option) any later version.
+     * 
+     * Searcher is distributed in the hope that it will be useful,
+     * but WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     * GNU General Public License for more details.
+     * 
+     * You should have received a copy of the GNU General Public License
+     * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
+     */
+
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -14,62 +34,70 @@ namespace SearcherLibrary.FileExtensions
     using SharpCompress.Readers;
 
     /// <summary>
-    /// Class to search archive file.
+    /// Class to search archive files.
     /// </summary>
-    internal class SearchArchive : SearchOtherExtensions
+    public class ArchiveSearchHandler : FileSearchHandler
     {
+        #region Public Properties
+
         /// <summary>
-        /// Search for matches in zipped files.
+        /// Handles files with the .PDF extension.
+        /// </summary>
+        public static new List<string> Extensions => new List<string> { ".7Z", ".GZ", ".RAR", ".TAR", ".ZIP" };
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        /// <summary>
+        /// Search for matches in archive files.
         /// </summary>
         /// <param name="fileName">The name of the file.</param>
         /// <param name="searchTerms">The terms to search.</param>
         /// <param name="matcher">The matcher object to determine search criteria.</param>
         /// <returns>The matched lines containing the search terms.</returns>
-        internal List<MatchedLine> GetMatchesInZip(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
+        public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
             List<MatchedLine> matchedLines = new List<MatchedLine>();
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
 
-            try
+            Directory.CreateDirectory(tempDirPath);
+            SharpCompress.Archives.IArchive archive = null;
+
+            if (fileName.ToUpper().EndsWith(".GZ") && SharpCompress.Archives.GZip.GZipArchive.IsGZipFile(fileName))
             {
-                Directory.CreateDirectory(tempDirPath);
-                SharpCompress.Archives.IArchive archive = null;
-
-                if (fileName.ToUpper().EndsWith(".GZ") && SharpCompress.Archives.GZip.GZipArchive.IsGZipFile(fileName))
-                {
-                    archive = SharpCompress.Archives.GZip.GZipArchive.Open(fileName);
-                }
-                else if (fileName.ToUpper().EndsWith(".RAR") && SharpCompress.Archives.Rar.RarArchive.IsRarFile(fileName))
-                {
-                    archive = SharpCompress.Archives.Rar.RarArchive.Open(fileName);
-                }
-                else if (fileName.ToUpper().EndsWith(".7Z") && SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(fileName))
-                {
-                    archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fileName);
-                }
-                else if (fileName.ToUpper().EndsWith(".TAR") && SharpCompress.Archives.Tar.TarArchive.IsTarFile(fileName))
-                {
-                    archive = SharpCompress.Archives.Tar.TarArchive.Open(fileName);
-                }
-                else if (fileName.ToUpper().EndsWith(".ZIP") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
-                {
-                    archive = SharpCompress.Archives.Zip.ZipArchive.Open(fileName);
-                }
-
-                if (archive != null)
-                {
-                    matchedLines = this.GetMatchedLinesInZipArchive(fileName, searchTerms, tempDirPath, archive, matcher);
-                    archive.Dispose();
-                }
-
-                this.RemoveTempDirectory(tempDirPath);
-                return matchedLines;
+                archive = SharpCompress.Archives.GZip.GZipArchive.Open(fileName);
             }
-            catch (Exception)
+            else if (fileName.ToUpper().EndsWith(".RAR") && SharpCompress.Archives.Rar.RarArchive.IsRarFile(fileName))
             {
-                throw;
+                archive = SharpCompress.Archives.Rar.RarArchive.Open(fileName);
             }
+            else if (fileName.ToUpper().EndsWith(".7Z") && SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(fileName))
+            {
+                archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fileName);
+            }
+            else if (fileName.ToUpper().EndsWith(".TAR") && SharpCompress.Archives.Tar.TarArchive.IsTarFile(fileName))
+            {
+                archive = SharpCompress.Archives.Tar.TarArchive.Open(fileName);
+            }
+            else if (fileName.ToUpper().EndsWith(".ZIP") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
+            {
+                archive = SharpCompress.Archives.Zip.ZipArchive.Open(fileName);
+            }
+
+            if (archive != null)
+            {
+                matchedLines = this.GetMatchedLinesInZipArchive(fileName, searchTerms, tempDirPath, archive, matcher);
+                archive.Dispose();
+            }
+
+            this.RemoveTempDirectory(tempDirPath);
+            return matchedLines;
         }
+
+        #endregion Public Methods
+
+        #region Private Methods
 
         /// <summary>
         /// Decompress a GZIP file stream.
@@ -174,5 +202,7 @@ namespace SearcherLibrary.FileExtensions
 
             return matchedLines;
         }
+
+        #endregion Private Methods
     }
 }
