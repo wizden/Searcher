@@ -1730,22 +1730,19 @@ namespace Searcher
 
             try
             {
-                matchedLines = await Task.Run<List<MatchedLine>>(
-                    () =>
-                    {
-                        string longestRunningFile = this.GetLongestRunningFile(fileName);
-                        this.SetProgressInformation(string.Format("{0}: {1}", Application.Current.Resources["Searching"].ToString(), longestRunningFile));
-                        return FileSearchHandlerFactory.Search(fileName, termsToSearch, matcherObj);
-
-                        //return this.matcherObj.GetMatch(fileName, termsToSearch);
-                    },
-                this.cancellationTokenSource.Token);
+                matchedLines = await Task.Run(() =>
+                                              {
+                                                  var longestRunningFile = GetLongestRunningFile(fileName);
+                                                  SetProgressInformation(String.Format("{0}: {1}", Application.Current.Resources["Searching"], longestRunningFile));
+                                                  return FileSearchHandlerFactory.Search(fileName, termsToSearch, matcherObj);
+                                              },
+                                              cancellationTokenSource.Token);
             }
             catch (Exception ex)
             {
                 if (ex.Message != "A task was canceled.")
                 {
-                    this.SetSearchError(ex.Message);
+                    SetSearchError(ex.Message);
                 }
             }
 
