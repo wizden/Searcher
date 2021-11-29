@@ -1,34 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
-using SearcherLibrary.Resources;
+﻿// <copyright file="DocumentSearchHandler.cs" company="dennjose">
+//     www.dennjose.com. All rights reserved.
+// </copyright>
+// <author>Dennis Joseph</author>
 
 namespace SearcherLibrary.FileExtensions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Wordprocessing;
+    using SearcherLibrary.Resources;
+
+    /// <summary>
+    /// Class to search OpenDocument files.
+    /// </summary>
     public class DocumentSearchHandler : FileSearchHandler
     {
+        #region Private Fields
 
         /// <summary>
-        ///     The maximum length of a content to check. If longer than this, split the search output result to minimise the
-        ///     length of results content displayed.
+        /// The maximum length of a content to check. If longer than this, split the search output result to minimise the length of results content displayed.
         /// </summary>
-        private const Int32 MaxContentLengthCheck = 200;
+        private const int MaxContentLengthCheck = 200;
+
+        #endregion Private Fields
+
+        #region Public Properties
 
         /// <summary>
-        ///     Handles files with the .pdf extension.
+        /// Handle files with the .DOCX/.DOCM extension.
         /// </summary>
-        public new static List<String> Extensions => new List<String> {".DOCX", ".DOCM"};
+        public static new List<string> Extensions => new List<string> { ".DOCX", ".DOCM" };
 
-        public override List<MatchedLine> Search(String fileName, IEnumerable<String> searchTerms, Matcher matcher)
+        #endregion Public Properties
+
+        #region Public Methods
+
+        /// <summary>
+        /// Search for matches in .DOCX/.DOCM files.
+        /// </summary>
+        /// <param name="fileName">The name of the file.</param>
+        /// <param name="searchTerms">The terms to search.</param>
+        /// <param name="matcher">The matcher object to determine search criteria.</param>
+        /// <returns>The matched lines containing the search terms.</returns>
+        public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            var pageNumber   = 1;
-            var startIndex   = 0;
-            var endIndex     = 0;
+            var pageNumber = 1;
+            var startIndex = 0;
+            var endIndex = 0;
             var matchCounter = 0;
             var matchedLines = new List<MatchedLine>();
 
@@ -36,12 +59,9 @@ namespace SearcherLibrary.FileExtensions
             {
                 using (var document = WordprocessingDocument.Open(fileName, false))
                 {
-                    var allContent = String.Empty;
-                    var body       = document.MainDocumentPart.Document.Body;
-                    body.Descendants().
-                         Where(bce => bce is Paragraph && bce.HasChildren).
-                         ToList().
-                         ForEach(bce =>
+                    var allContent = string.Empty;
+                    var body = document.MainDocumentPart.Document.Body;
+                    body.Descendants().Where(bce => bce is Paragraph && bce.HasChildren).ToList().ForEach(bce =>
                                  {
                                      var contentText = new StringBuilder(); // Set content for each paragraph and detect page breaks (dependant on word processing application).
 
@@ -52,9 +72,7 @@ namespace SearcherLibrary.FileExtensions
                                              break;
                                          }
 
-                                         r.Descendants().
-                                           ToList().
-                                           ForEach(rce =>
+                                         r.Descendants().ToList().ForEach(rce =>
                                                    {
                                                        if (rce is Text)
                                                        {
@@ -71,7 +89,7 @@ namespace SearcherLibrary.FileExtensions
                                      var content = contentText.ToString();
                                      allContent = content;
 
-                                     if (!String.IsNullOrEmpty(content))
+                                     if (!string.IsNullOrEmpty(content))
                                      {
                                          foreach (var searchTerm in searchTerms)
                                          {
@@ -99,29 +117,26 @@ namespace SearcherLibrary.FileExtensions
                                                          else
                                                          {
                                                              startIndex = 0;
-                                                             endIndex   = content.Length;
+                                                             endIndex = content.Length;
                                                          }
 
                                                          var matchLine = content.Substring(startIndex, endIndex - startIndex);
-                                                         var searchMatch = Regex.Match(matchLine,
-                                                                                       searchTerm,
-                                                                                       matcher.
-                                                                                           RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
+                                                         var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
 
                                                          // Only add, if it does not already exist (Not sure how the body elements manage to bring back the same content again.
                                                          if (!matchedLines.Any(ml => ml.SearchTerm == searchTerm &&
-                                                                                     ml.Content    == String.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine)))
+                                                                                     ml.Content == string.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine)))
                                                          {
                                                              matchedLines.Add(new MatchedLine
-                                                                              {
-                                                                                  MatchId    = matchCounter++,
-                                                                                  Content    = String.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine),
-                                                                                  SearchTerm = searchTerm,
-                                                                                  FileName   = fileName,
-                                                                                  LineNumber = pageNumber,
-                                                                                  StartIndex = searchMatch.Index + Strings.Page.Length + 3 + pageNumber.ToString().Length,
-                                                                                  Length     = searchMatch.Length
-                                                                              });
+                                                             {
+                                                                 MatchId = matchCounter++,
+                                                                 Content = string.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine),
+                                                                 SearchTerm = searchTerm,
+                                                                 FileName = fileName,
+                                                                 LineNumber = pageNumber,
+                                                                 StartIndex = searchMatch.Index + Strings.Page.Length + 3 + pageNumber.ToString().Length,
+                                                                 Length = searchMatch.Length
+                                                             });
                                                          }
                                                      }
                                                  }
@@ -156,29 +171,26 @@ namespace SearcherLibrary.FileExtensions
                                     foreach (Match match in matches)
                                     {
                                         startIndex = match.Index >= SearchOtherExtensions.IndexBoundary
-                                                         ? GetLocationOfFirstWord(allContent, match.Index - SearchOtherExtensions.IndexBoundary)
+                                                         ? this.GetLocationOfFirstWord(allContent, match.Index - SearchOtherExtensions.IndexBoundary)
                                                          : 0;
                                         endIndex = allContent.Length >= match.Index + match.Length + SearchOtherExtensions.IndexBoundary
-                                                       ? GetLocationOfLastWord(allContent, match.Index + match.Length + SearchOtherExtensions.IndexBoundary)
+                                                       ? this.GetLocationOfLastWord(allContent, match.Index + match.Length + SearchOtherExtensions.IndexBoundary)
                                                        : allContent.Length;
                                         var matchLine = allContent.Substring(startIndex, endIndex - startIndex);
-                                        var searchMatch = Regex.Match(matchLine,
-                                                                      searchTerm,
-                                                                      matcher.
-                                                                          RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
+                                        var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
                                         allContentMatchedLines.Add(new MatchedLine
-                                                                   {
-                                                                       MatchId    = matchCounter++,
-                                                                       Content    = String.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine),
-                                                                       SearchTerm = searchTerm,
-                                                                       FileName   = fileName,
-                                                                       LineNumber = pageNumber,
-                                                                       StartIndex = searchMatch.Index + Strings.Page.Length + 3 + pageNumber.ToString().Length,
-                                                                       Length     = searchMatch.Length
-                                                                   });
+                                        {
+                                            MatchId = matchCounter++,
+                                            Content = string.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine),
+                                            SearchTerm = searchTerm,
+                                            FileName = fileName,
+                                            LineNumber = pageNumber,
+                                            StartIndex = searchMatch.Index + Strings.Page.Length + 3 + pageNumber.ToString().Length,
+                                            Length = searchMatch.Length
+                                        });
                                     }
 
-                                    fileName = String.Empty;
+                                    fileName = string.Empty;
                                 }
                             }
                             catch (ArgumentException aex)
@@ -188,14 +200,8 @@ namespace SearcherLibrary.FileExtensions
                         }
 
                         // Only add those lines that do not already exist in matches found. Do not like the search mechanism below, but it helps to search by excluding the "Page {0}:\t{1}" content.
-                        matchedLines.AddRange(allContentMatchedLines.Where(acm => !matchedLines.Any(ml => acm.Length == ml.Length &&
-                                                                                                          acm.Content.Contains(ml.Content.Substring(Strings.Page.Length +
-                                                                                                               3                                                        +
-                                                                                                               ml.LineNumber.ToString().Length,
-                                                                                                           ml.Content.Length -
-                                                                                                           (Strings.Page.Length +
-                                                                                                            3                   +
-                                                                                                            ml.LineNumber.ToString().Length))))));
+                        matchedLines.AddRange(allContentMatchedLines.Where(acm => !matchedLines.Any(ml => acm.Length == ml.Length 
+                            && acm.Content.Contains(ml.Content.Substring(Strings.Page.Length + 3 + ml.LineNumber.ToString().Length, ml.Content.Length - (Strings.Page.Length + 3 + ml.LineNumber.ToString().Length))))));
                     }
 
                     document.Close();
@@ -222,13 +228,17 @@ namespace SearcherLibrary.FileExtensions
             return matchedLines;
         }
 
+        #endregion Public Methods
+
+        #region Private Methods
+
         /// <summary>
-        ///     Get the position of the first word.
+        /// Get the position of the first word.
         /// </summary>
         /// <param name="content">The match content.</param>
         /// <param name="startIndex">The index boundary.</param>
         /// <returns>Position of the first word.</returns>
-        private Int32 GetLocationOfFirstWord(String content, Int32 startIndex)
+        private int GetLocationOfFirstWord(string content, int startIndex)
         {
             var retVal = startIndex;
 
@@ -246,12 +256,12 @@ namespace SearcherLibrary.FileExtensions
         }
 
         /// <summary>
-        ///     Get the position of the last word.
+        /// Get the position of the last word.
         /// </summary>
         /// <param name="content">The match content.</param>
         /// <param name="endIndex">The index boundary.</param>
         /// <returns>Position of the last word.</returns>
-        private Int32 GetLocationOfLastWord(String content, Int32 endIndex)
+        private int GetLocationOfLastWord(string content, int endIndex)
         {
             var retVal = endIndex;
 
@@ -266,5 +276,6 @@ namespace SearcherLibrary.FileExtensions
             return retVal;
         }
 
+        #endregion Private Methods
     }
 }

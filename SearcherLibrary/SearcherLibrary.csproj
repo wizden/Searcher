@@ -104,8 +104,14 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileExtensions\ArchiveSearchHandler.cs" />
     <Compile Include="FileExtensions\DocumentSearchHandler.cs" />
+    <Compile Include="FileExtensions\ExcelSearchHandler.cs" />
     <Compile Include="FileExtensions\FileSearchHandler.cs" />
+    <Compile Include="FileExtensions\OdpSearchHandler.cs" />
+    <Compile Include="FileExtensions\OdsSearchHandler.cs" />
+    <Compile Include="FileExtensions\OdtSearchHandler.cs" />
+    <Compile Include="FileExtensions\OutlookSearchHandler.cs" />
     <Compile Include="FileExtensions\PdfSearchHandler.cs" />
     <Compile Include="FileExtensions\PresentationSearchHandler.cs" />
     <Compile Include="FileExtensions\SearchArchive.cs" />

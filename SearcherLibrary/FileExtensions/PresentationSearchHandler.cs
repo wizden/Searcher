@@ -1,23 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Presentation;
-using SearcherLibrary.Resources;
+﻿// <copyright file="PresentationSearchHandler.cs" company="dennjose">
+//     www.dennjose.com. All rights reserved.
+// </copyright>
+// <author>Dennis Joseph</author>
 
 namespace SearcherLibrary.FileExtensions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Presentation;
+    using SearcherLibrary.Resources;
+
+    /// <summary>
+    /// Class to search presentation files files.
+    /// </summary>
     public class PresentationSearchHandler : FileSearchHandler
     {
+        #region Public Properties
 
         /// <summary>
-        ///     Handles files with the .pdf extension.
+        /// Handles files with the .PPTX/.PPTM extension.
         /// </summary>
-        public new static List<String> Extensions => new List<String> {".PPTX", ".PPTM"};
+        public static new List<string> Extensions => new List<string> { ".PPTX", ".PPTM" };
 
-        public override List<MatchedLine> Search(String fileName, IEnumerable<String> searchTerms, Matcher matcher)
+        #endregion Public Properties
+
+        #region Public Methods
+
+        /// <summary>
+        /// Search for matches in .PPTX/.PPTM files.
+        /// </summary>
+        /// <param name="fileName">The name of the file.</param>
+        /// <param name="searchTerms">The terms to search.</param>
+        /// <param name="matcher">The matcher object to determine search criteria.</param>
+        /// <returns>The matched lines containing the search terms.</returns>
+        public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
             var matchCounter = 0;
             var matchedLines = new List<MatchedLine>();
@@ -26,7 +46,7 @@ namespace SearcherLibrary.FileExtensions
             {
                 using (var pptDocument = PresentationDocument.Open(fileName, false))
                 {
-                    var slideAllText = GetPresentationSlidesText(pptDocument.PresentationPart);
+                    var slideAllText = this.GetPresentationSlidesText(pptDocument.PresentationPart);
                     pptDocument.Close();
 
                     var startIndex = 0;
@@ -68,20 +88,17 @@ namespace SearcherLibrary.FileExtensions
                                         matchLine = matchLine.Substring(0, matchLine.Length - 1); // Remove lines ending with the newline character.
                                     }
 
-                                    var searchMatch = Regex.Match(matchLine,
-                                                                  searchTerm,
-                                                                  matcher.
-                                                                      RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
+                                    var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
                                     matchedLines.Add(new MatchedLine
-                                                     {
-                                                         MatchId    = matchCounter++,
-                                                         Content    = String.Format("{0} {1}:\t{2}", Strings.Slide, (slideCounter + 1).ToString(), matchLine),
-                                                         SearchTerm = searchTerm,
-                                                         FileName   = fileName,
-                                                         LineNumber = 1,
-                                                         StartIndex = searchMatch.Index + Strings.Slide.Length + 3 + (slideCounter + 1).ToString().Length,
-                                                         Length     = searchMatch.Length
-                                                     });
+                                    {
+                                        MatchId = matchCounter++,
+                                        Content = string.Format("{0} {1}:\t{2}", Strings.Slide, (slideCounter + 1).ToString(), matchLine),
+                                        SearchTerm = searchTerm,
+                                        FileName = fileName,
+                                        LineNumber = 1,
+                                        StartIndex = searchMatch.Index + Strings.Slide.Length + 3 + (slideCounter + 1).ToString().Length,
+                                        Length = searchMatch.Length
+                                    });
                                 }
                             }
                         }
@@ -109,39 +126,41 @@ namespace SearcherLibrary.FileExtensions
             return matchedLines;
         }
 
+        #endregion Public Methods
+
+        #region Private Methods
+
         /// <summary>
-        ///     Returns a string array of the text in the presentation slides.
+        /// Returns a string array of the text in the presentation slides.
         /// </summary>
         /// <param name="presentationPart">The presentation part of the presentation document.</param>
-        /// <returns>String array of the text in the presentation slides.</returns>
-        private String[] GetPresentationSlidesText(PresentationPart presentationPart)
+        /// <returns>string array of the text in the presentation slides.</returns>
+        private string[] GetPresentationSlidesText(PresentationPart presentationPart)
         {
             var presentation    = presentationPart.Presentation;
             var slideParts      = presentationPart.SlideParts.ToList();
-            var retVal          = new String[slideParts.Count()];
-            var relationshipId  = String.Empty;
+            var retVal          = new string[slideParts.Count()];
+            var relationshipId  = string.Empty;
             var tempSlideNumber = 0;
 
             foreach (var slidePart in slideParts)
             {
-                var slide = presentation.SlideIdList.Where(s => ((SlideId) s).RelationshipId == presentationPart.GetIdOfPart(slidePart)).FirstOrDefault();
+                var slide = presentation.SlideIdList.Where(s => ((SlideId)s).RelationshipId == presentationPart.GetIdOfPart(slidePart)).FirstOrDefault();
                 var index = presentation.SlideIdList.ToList().IndexOf(slide);
-                relationshipId = ((SlideId) presentation.SlideIdList.ChildElements[index]).RelationshipId;
-                var titles  = new List<String>();
-                var content = new List<String>();
-                var notes   = new List<String>();
+                relationshipId = ((SlideId)presentation.SlideIdList.ChildElements[index]).RelationshipId;
+                var titles = new List<string>();
+                var content = new List<string>();
+                var notes = new List<string>();
 
-                slidePart.Slide.Descendants<Shape>().
-                          ToList().
-                          ForEach(shape =>
+                slidePart.Slide.Descendants<Shape>().ToList().ForEach(shape =>
                                   {
                                       foreach (var item in shape.Descendants<PlaceholderShape>().Where(i => i.Type != null))
                                       {
                                           if ((item.Type.ToString().ToUpper() == "CenteredTitle".ToUpper() ||
-                                               item.Type.ToString().ToUpper() == "SubTitle".ToUpper()      ||
+                                               item.Type.ToString().ToUpper() == "SubTitle".ToUpper() ||
                                                item.Type.ToString().ToUpper() == "Title".ToUpper()) &&
-                                              shape.TextBody != null                                &&
-                                              !String.IsNullOrWhiteSpace(shape.TextBody.InnerText))
+                                              shape.TextBody != null &&
+                                              !string.IsNullOrWhiteSpace(shape.TextBody.InnerText))
                                           {
                                               titles.AddRange(shape.TextBody.Descendants<DocumentFormat.OpenXml.Drawing.Text>().Select(s => s.Text));
                                           }
@@ -151,28 +170,23 @@ namespace SearcherLibrary.FileExtensions
                 content = slidePart.Slide.Descendants<DocumentFormat.OpenXml.Drawing.Text>().Select(s => s.Text).ToList();
                 content.RemoveAll(s => titles.Any(t => t == s));
 
-                if (slidePart.NotesSlidePart                                  != null &&
-                    slidePart.NotesSlidePart.NotesSlide                       != null &&
-                    slidePart.NotesSlidePart.NotesSlide.Descendants()         != null &&
+                if (slidePart.NotesSlidePart != null &&
+                    slidePart.NotesSlidePart.NotesSlide != null &&
+                    slidePart.NotesSlidePart.NotesSlide.Descendants() != null &&
                     slidePart.NotesSlidePart.NotesSlide.Descendants().Count() > 0)
                 {
-                    notes = slidePart.NotesSlidePart.NotesSlide.Descendants<DocumentFormat.OpenXml.Drawing.Text>().
-                                      Where(s =>
+                    notes = slidePart.NotesSlidePart.NotesSlide.Descendants<DocumentFormat.OpenXml.Drawing.Text>().Where(s =>
                                             {
-                                                return !Int32.TryParse(s.Text, out tempSlideNumber); // Remove the record as it contains the slide number.
-                                            }).
-                                      Select(s => s.Text).
-                                      ToList();
+                                                return !int.TryParse(s.Text, out tempSlideNumber); // Remove the record as it contains the slide number.
+                                            }).Select(s => s.Text).ToList();
                 }
 
-                retVal[index] = String.Join(Environment.NewLine,
-                                            String.Join(Environment.NewLine, titles.ToArray()),
-                                            String.Join(String.Empty,        content.ToArray()),
-                                            String.Join(Environment.NewLine, notes.ToArray()));
+                retVal[index] = string.Join(Environment.NewLine, string.Join(Environment.NewLine, titles.ToArray()), string.Join(string.Empty, content.ToArray()), string.Join(Environment.NewLine, notes.ToArray()));
             }
 
             return retVal;
         }
 
+        #endregion Private Methods
     }
 }
