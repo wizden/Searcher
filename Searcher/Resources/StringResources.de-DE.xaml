@@ -99,6 +99,8 @@
 
     <system:String x:Key="Of">von</system:String>
 
+    <system:String x:Key="OK">Annehmen</system:String>
+
     <system:String x:Key="OpenDirectoryInExplorer">Verzeichnis im Explorer öffnen</system:String>
 
     <system:String x:Key="OpenPreferencesFile">Öffnen Sie die Einstellungsdatei</system:String>

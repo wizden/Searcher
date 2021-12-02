@@ -159,6 +159,7 @@ namespace Searcher
             this.RbtnPermanent.Content = Application.Current.Resources["Permanent"].ToString();
             this.TblkExclusionType.Text = Application.Current.Resources["ExclusionType"].ToString();
             this.BtnCancel.Content = Application.Current.Resources["Cancel"].ToString();
+            this.BtnOk.Content = Application.Current.Resources["OK"].ToString();
         }
 
         /// <summary>

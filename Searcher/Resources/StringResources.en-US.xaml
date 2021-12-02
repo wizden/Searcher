@@ -99,6 +99,8 @@
 
     <system:String x:Key="Of">of</system:String>
 
+    <system:String x:Key="OK">OK</system:String>
+
     <system:String x:Key="OpenDirectoryInExplorer">Open containing directory in explorer</system:String>
 
     <system:String x:Key="OpenPreferencesFile">Open preferences file</system:String>

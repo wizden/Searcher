@@ -99,6 +99,8 @@
 
     <system:String x:Key="Of">की</system:String>
 
+    <system:String x:Key="OK">स्वीकार</system:String>
+
     <system:String x:Key="OpenDirectoryInExplorer">एक्सप्लोरर में फ़ोल्डर युक्त खोलें</system:String>
 
     <system:String x:Key="OpenPreferencesFile">सेटिंग फ़ाइल खोलें</system:String>

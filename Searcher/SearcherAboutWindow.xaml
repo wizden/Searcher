@@ -25,14 +25,13 @@
         xmlns:local="clr-namespace:Searcher"
         mc:Ignorable="d"
         WindowStyle="SingleBorderWindow" ResizeMode="NoResize" ShowInTaskbar="False"
-        Title="About Searcher" Height="250" Width="500" Name="AboutSearcher"
+        Title="About Searcher" Height="280" Width="500" Name="AboutSearcher"
         Loaded="AboutSearcher_Loaded"
         Closing="AboutSearcher_Closing"
         PreviewKeyDown="AboutSearcher_PreviewKeyDown">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="4*" />
-            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="7*" />
         </Grid.ColumnDefinitions>
         <Image Grid.Column="0" Margin="12" Source="../Searcher.ico" />

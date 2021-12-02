@@ -189,6 +189,16 @@
                                                     <Image Grid.Column="1" Name="ImgIndia" Source="Images/hi-IN.png" Width="30" Height="20" />
                                                 </Grid>
                                             </ComboBoxItem>
+                                            <ComboBoxItem Tag="ru-RU">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="70" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Name="TblkRussian" Text="русский"></TextBlock>
+                                                    <Image Grid.Column="1" Name="ImgRussia" Source="Images/ru-RU.png" Width="30" Height="20" />
+                                                </Grid>
+                                            </ComboBoxItem>
                                         </ComboBox>
                                         <Image Name="ImgFlag" Width="30" />
                                     </StackPanel>
