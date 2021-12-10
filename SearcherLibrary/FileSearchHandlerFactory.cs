@@ -31,7 +31,8 @@ namespace SearcherLibrary
     using System.Linq;
     using System.Reflection;
     using System.Threading;
-    using SearcherLibrary.FileExtensions;
+    using Resources;
+    using FileExtensions;
 
     /// <summary>
     /// Factory to determine which handler can process the search on a file.
@@ -86,7 +87,15 @@ namespace SearcherLibrary
         public static List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
             var handler = GetSearchHandler(fileName);
-            return handler.Search(fileName, searchTerms, matcher);
+			
+			try
+            {
+                return handler.Search(fileName, searchTerms, matcher);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(String.Format("{0} {1}. {2}", Strings.ErrorAccessingFile, fileName, ex.Message));
+            }
         }
 
         #endregion Public Methods
