@@ -335,6 +335,16 @@ namespace Searcher
         private double windowHeight = 0;
 
         /// <summary>
+        /// Private store for the window left location.
+        /// </summary>
+        private double windowLeft = 0;
+
+        /// <summary>
+        /// Private store for the window top location.
+        /// </summary>
+        private double windowTop = 0;
+        
+        /// <summary>
         /// Private store for the window width.
         /// </summary>
         private double windowWidth = 0;
@@ -2342,6 +2352,8 @@ namespace Searcher
         private void SetWindowDimensions()
         {
             string strWindowHeight = PreferencesHandler.GetPreferenceValue("WindowHeight");
+            string strWindowLeft = PreferencesHandler.GetPreferenceValue("WindowLeft");
+            string strWindowTop = PreferencesHandler.GetPreferenceValue("WindowTop");
             string strWindowWidth = PreferencesHandler.GetPreferenceValue("WindowWidth");
             string strPopupWindowHeight = PreferencesHandler.GetPreferenceValue("PopupWindowHeight");
             string strPopupWindowWidth = PreferencesHandler.GetPreferenceValue("PopupWindowWidth");
@@ -2350,6 +2362,16 @@ namespace Searcher
             if (double.TryParse(strWindowHeight, out this.windowHeight))
             {
                 this.Height = this.windowHeight;
+            }
+
+            if (double.TryParse(strWindowLeft, out this.windowLeft))
+            {
+                this.Left = this.windowLeft;
+            }
+
+            if (double.TryParse(strWindowTop, out this.windowTop))
+            {
+                this.Top = this.windowTop;
             }
 
             if (double.TryParse(strWindowWidth, out this.windowWidth))
@@ -2511,6 +2533,8 @@ namespace Searcher
                 PreferencesHandler.SetPreferenceValue("MinFileCreateSearchDate", (this.DtpStartDate.SelectedDate != null && this.DtpStartDate.SelectedDate.HasValue) ? this.DtpStartDate.SelectedDate.Value.ToString() : string.Empty);
                 PreferencesHandler.SetPreferenceValue("MaxFileCreateSearchDate", (this.DtpEndDate.SelectedDate != null && this.DtpEndDate.SelectedDate.HasValue) ? this.DtpEndDate.SelectedDate.Value.ToString() : string.Empty);
                 PreferencesHandler.SetPreferenceValue("WindowHeight", this.Height.ToString());
+                PreferencesHandler.SetPreferenceValue("WindowLeft", this.Left.ToString());
+                PreferencesHandler.SetPreferenceValue("WindowTop", this.Top.ToString());
                 PreferencesHandler.SetPreferenceValue("WindowWidth", this.Width.ToString());
                 PreferencesHandler.SetPreferenceValue("PopupWindowHeight", this.popupWindowHeight.ToString());
                 PreferencesHandler.SetPreferenceValue("PopupWindowWidth", this.popupWindowWidth.ToString());

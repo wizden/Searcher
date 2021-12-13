@@ -202,6 +202,14 @@ namespace Searcher
                         {
                             prefFile.Root.Add(new XElement("WindowHeight", mainSearchWindow?.MinHeight ?? 200));
                         }
+                        else if (node == "WindowLeft")
+                        {
+                            prefFile.Root.Add(new XElement("WindowLeft", mainSearchWindow?.Left ?? 200));
+                        }
+                        else if (node == "WindowTop")
+                        {
+                            prefFile.Root.Add(new XElement("WindowTop", mainSearchWindow?.Top ?? 200));
+                        }
                         else if (node == "WindowWidth")
                         {
                             prefFile.Root.Add(new XElement("WindowWidth", mainSearchWindow?.MinWidth ?? 200));
@@ -352,6 +360,8 @@ namespace Searcher
                 new XElement("CheckForUpdates", true),
                 new XElement("LastUpdateCheckDate", DateTime.Today.AddMonths(-1).ToShortDateString()),
                 new XElement("WindowHeight", mainSearchWindow?.MinHeight ?? 200),
+                new XElement("WindowLeft", mainSearchWindow?.Left ?? 200),
+                new XElement("WindowTop", mainSearchWindow?.Top ?? 200),
                 new XElement("WindowWidth", mainSearchWindow?.MinWidth ?? 200),
                 new XElement("PopupWindowHeight", 300),
                 new XElement("PopupWindowWidth", 500),
