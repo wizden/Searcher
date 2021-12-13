@@ -2231,7 +2231,10 @@ namespace Searcher
                     }
 
                     this.GrdRowErrors.Height = (GridLength)new GridLengthConverter().ConvertFromString(string.IsNullOrEmpty(this.TxtErrors.Text) ? "auto" : "2*");
+                    this.GrdRowErrors.MinHeight = string.IsNullOrEmpty(this.TxtErrors.Text) ? 0 : 30;
                     this.BrdrErrors.Visibility = string.IsNullOrEmpty(this.TxtErrors.Text) ? Visibility.Collapsed : Visibility.Visible;
+                    this.GrdRowErrorsGridSplitter.Height = (GridLength)new GridLengthConverter().ConvertFromString(string.IsNullOrEmpty(this.TxtErrors.Text) ? "auto" : "5");
+                    this.SplitterErrors.Visibility = string.IsNullOrEmpty(this.TxtErrors.Text) ? Visibility.Collapsed : Visibility.Visible;
                 });
             }
             catch (TaskCanceledException)

@@ -34,7 +34,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="20" />
-            <RowDefinition Height="5*" />
+            <RowDefinition Height="5*" MinHeight="100" />
+            <RowDefinition Height="5" Name="GrdRowErrorsGridSplitter" />
             <RowDefinition Height="auto" Name="GrdRowErrors" />
         </Grid.RowDefinitions>
 
@@ -247,7 +248,10 @@
             <TextBlock Name="TxtBlkScaleValue" Foreground="Gray" Visibility="Hidden" FontSize="30" HorizontalAlignment="Center" Margin="50" Text="{Binding Scale, StringFormat={}{0:P0}}" />
         </Grid>
 
-        <Border Grid.Row="3" Name="BrdrErrors" Visibility="Collapsed">
+        <GridSplitter Grid.Row="3" Name="SplitterErrors" HorizontalAlignment="Stretch" 
+                      ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" Visibility="Collapsed" />
+
+        <Border Grid.Row="4" Name="BrdrErrors" Visibility="Collapsed">
             <TextBox Grid.Row="3" Name="TxtErrors" IsReadOnly="True" IsReadOnlyCaretVisible="True" Foreground="Red" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" />
         </Border>
     </Grid>
