@@ -9,7 +9,7 @@
 
     <system:String x:Key="All">Все</system:String>
 
-    <system:String x:Key="AlwaysExcluded">Всегда исключено</system:String>
+    <system:String x:Key="AlwaysExcluded">Исключено всегда</system:String>
 
     <system:String x:Key="Any">Любой</system:String>
 
@@ -31,7 +31,7 @@
 
     <system:String x:Key="CreatePreferencesFileQuestion">Настройки поиска не найдены. Вы хотите копить настройки поиска?</system:String>
 
-    <system:String x:Key="Directory">_Каталог</system:String>
+    <system:String x:Key="Directory">_Папка</system:String>
 
     <system:String x:Key="DirectoryPathNotFound">Невозможно получить доступ к путям каталога или пути не найдены</system:String>
 
@@ -65,7 +65,7 @@
 
     <system:String x:Key="Filters">Фильтры</system:String>
 
-    <system:String x:Key="FindKeywords">_Искать термин</system:String>
+    <system:String x:Key="FindKeywords">_Предмет поиска</system:String>
 
     <system:String x:Key="ForDetails">для деталей</system:String>
 
@@ -75,7 +75,7 @@
 
     <system:String x:Key="GNULicenceLink">ссылка на лицензию GNU</system:String>
 
-    <system:String x:Key="HighlightResults">_Выделите результаты</system:String>
+    <system:String x:Key="HighlightResults">_Выделить совпадения фоном</system:String>
 
     <system:String x:Key="In">в</system:String>
 
@@ -129,7 +129,7 @@
 
     <system:String x:Key="SearchComplete">Поиск завершен</system:String>
 
-    <system:String x:Key="SearchedFileList">Список искомых файлов</system:String>
+    <system:String x:Key="SearchedFileList">Список найденных файлов</system:String>
 
     <system:String x:Key="Searching">Проверяемый файл</system:String>
 
@@ -143,7 +143,7 @@
 
     <system:String x:Key="SeparateUsingCharacter">Разделяйте дополнительные записи символом</system:String>
 
-    <system:String x:Key="SpecifySearchDirectory">Укажите каталог и контент для поиска.</system:String>
+    <system:String x:Key="SpecifySearchDirectory">Укажите папку и предмет поиска.</system:String>
 
     <system:String x:Key="StartDate">Дата от</system:String>
 
@@ -151,7 +151,7 @@
 
     <system:String x:Key="Subfolders">_Подпапки</system:String>
 
-    <system:String x:Key="TemporarilyExcluded">Временно исключен</system:String>
+    <system:String x:Key="TemporarilyExcluded">Исключено временно</system:String>
 
     <system:String x:Key="Temporary">Временный</system:String>
 
@@ -165,7 +165,7 @@
 
     <system:String x:Key="TooltipFileCreateStartDate">Создание файла (Дата от)</system:String>
 
-    <system:String x:Key="TooltipHighlightMatches">Выделить фон в полученных выражениях.</system:String>
+    <system:String x:Key="TooltipHighlightMatches">Выделить совпадения фоном в результатах поиска.</system:String>
 
     <system:String x:Key="TooltipMatchCase">Соответствие с учетом регистра.</system:String>
 
