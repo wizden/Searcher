@@ -83,7 +83,7 @@
 
     <system:String x:Key="MatchCase">Учитывать регистр</system:String>
 
-    <system:String x:Key="Matches">совпадений</system:String>
+    <system:String x:Key="Matches">Совпадение(я)</system:String>
 
     <system:String x:Key="MatchOptions">Параметры совпадения</system:String>
 
@@ -101,7 +101,7 @@
 
     <system:String x:Key="OK">Принимать</system:String>
 
-    <system:String x:Key="OpenDirectoryInExplorer">Открыть каталог в проводнике</system:String>
+    <system:String x:Key="OpenDirectoryInExplorer">Открыть папку в Проводнике</system:String>
 
     <system:String x:Key="OpenPreferencesFile">Открыть файл настроек</system:String>
 
