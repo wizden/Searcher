@@ -91,13 +91,15 @@
 
     <system:String x:Key="MonthlyUpdateCheck">Check for updates (monthly)</system:String>
 
-    <system:String x:Key="Multiline">_Multiline?</system:String>
+    <system:String x:Key="Multiline">_Multiline</system:String>
 
     <system:String x:Key="Normal">_Normal</system:String>
 
     <system:String x:Key="NoSearchPreferences">No search preferences</system:String>
 
     <system:String x:Key="Of">of</system:String>
+
+    <system:String x:Key="OK">OK</system:String>
 
     <system:String x:Key="OpenDirectoryInExplorer">Open containing directory in explorer</system:String>
 

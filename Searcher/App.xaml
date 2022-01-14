@@ -60,6 +60,7 @@
                 <ResourceDictionary Source="Resources/StringResources.de-DE.xaml" />
                 <ResourceDictionary Source="Resources/StringResources.en-US.xaml" />
                 <ResourceDictionary Source="Resources/StringResources.hi-IN.xaml" />
+                <ResourceDictionary Source="Resources/StringResources.ru-RU.xaml" />
                 <ResourceDictionary Source="Resources/StringResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

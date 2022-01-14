@@ -91,13 +91,15 @@
 
     <system:String x:Key="MonthlyUpdateCheck">Nach Updates suchen (monatlich)</system:String>
 
-    <system:String x:Key="Multiline">_Mehrzeilig?</system:String>
+    <system:String x:Key="Multiline">_Mehrzeilig</system:String>
 
     <system:String x:Key="Normal">_Normal</system:String>
 
     <system:String x:Key="NoSearchPreferences">Keine Sucheinstellungen</system:String>
 
     <system:String x:Key="Of">von</system:String>
+
+    <system:String x:Key="OK">Annehmen</system:String>
 
     <system:String x:Key="OpenDirectoryInExplorer">Verzeichnis im Explorer öffnen</system:String>
 

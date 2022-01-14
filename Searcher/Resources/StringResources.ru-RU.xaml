@@ -1,0 +1,193 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <system:String x:Key="About">Информация</system:String>
+
+    <system:String x:Key="AboutSearcher">Информация Searcher</system:String>
+
+    <system:String x:Key="Administrator">Администратор</system:String>
+
+    <system:String x:Key="All">Все</system:String>
+
+    <system:String x:Key="AlwaysExcluded">Исключено всегда</system:String>
+
+    <system:String x:Key="Any">Любой</system:String>
+
+    <system:String x:Key="ArchiveFileExclusionNotAllowed">Невозможно исключить файл. Архивированные или заархивированные файлы не могут быть исключены. Будет обработано в будущей версии.</system:String>
+
+    <system:String x:Key="Cancel">Отмена</system:String>
+
+    <system:String x:Key="ClickAboutForUpdates">Нажмите "Информация" для получения обновлений.</system:String>
+
+    <system:String x:Key="CopyAll">Копировать все</system:String>
+
+    <system:String x:Key="CopyFileName">Скопировать имя файла</system:String>
+
+    <system:String x:Key="CopyFileNameNoExtension">Скопируйте имя файла (без расширения)</system:String>
+
+    <system:String x:Key="CopyFullPath">Скопируйте полный путь</system:String>
+
+    <system:String x:Key="Copyright">Авторские права ©</system:String>
+
+    <system:String x:Key="CreatePreferencesFileQuestion">Настройки поиска не найдены. Вы хотите копить настройки поиска?</system:String>
+
+    <system:String x:Key="Directory">_Папка</system:String>
+
+    <system:String x:Key="DirectoryPathNotFound">Невозможно получить доступ к путям каталога или пути не найдены</system:String>
+
+    <system:String x:Key="DistributeSoftware">Это бесплатное ПО. Вы можете распространять его на определённых условиях. Ознакомиться с подробностями</system:String>
+
+    <system:String x:Key="Editor">Редактирование</system:String>
+
+    <system:String x:Key="EndDate">Дата до</system:String>
+
+    <system:String x:Key="ErrorOccurred">Возникла ошибка</system:String>
+
+    <system:String x:Key="Exclude">Исключить</system:String>
+
+    <system:String x:Key="ExcludeArchiveAsFile">Невозможно выполнить действие. Если это архив, исключите его как файл.</system:String>
+
+    <system:String x:Key="ExcludeDirectory">Исключить каталог из поиска</system:String>
+
+    <system:String x:Key="ExcludeFileAlways">Всегда исключать файл из поиска</system:String>
+
+    <system:String x:Key="ExcludeFileTemporarily">Исключить файл из поиска временно</system:String>
+
+    <system:String x:Key="ExclusionType">Тип исключения</system:String>
+
+    <system:String x:Key="ExecutableFiles">Исполняемые файлы</system:String>
+
+    <system:String x:Key="Files">файл (ы)</system:String>
+
+    <system:String x:Key="FilesFound">Файлы найдены</system:String>
+
+    <system:String x:Key="FileMatchCount">Счетчик совпадений</system:String>
+
+    <system:String x:Key="Filters">Фильтры</system:String>
+
+    <system:String x:Key="FindKeywords">_Предмет поиска</system:String>
+
+    <system:String x:Key="ForDetails">для деталей</system:String>
+
+    <system:String x:Key="Found">Найдено</system:String>
+
+    <system:String x:Key="GettingFilesToSearch">Получение файлов в поиск</system:String>
+
+    <system:String x:Key="GNULicenceLink">ссылка на лицензию GNU</system:String>
+
+    <system:String x:Key="HighlightResults">_Выделить совпадения фоном</system:String>
+
+    <system:String x:Key="In">в</system:String>
+
+    <system:String x:Key="Language">Язык</system:String>
+
+    <system:String x:Key="MatchCase">Учитывать регистр</system:String>
+
+    <system:String x:Key="Matches">Совпадение(я)</system:String>
+
+    <system:String x:Key="MatchOptions">Параметры совпадения</system:String>
+
+    <system:String x:Key="Misc">Разное</system:String>
+
+    <system:String x:Key="MonthlyUpdateCheck">Проверять обновления (ежемесячно)</system:String>
+
+    <system:String x:Key="Multiline">_Многострочность</system:String>
+
+    <system:String x:Key="Normal">_Обычный</system:String>
+
+    <system:String x:Key="NoSearchPreferences">Нет настроек поиска</system:String>
+
+    <system:String x:Key="Of">из</system:String>
+
+    <system:String x:Key="OK">Принимать</system:String>
+
+    <system:String x:Key="OpenDirectoryInExplorer">Открыть папку в Проводнике</system:String>
+
+    <system:String x:Key="OpenPreferencesFile">Открыть файл настроек</system:String>
+
+    <system:String x:Key="Options">Параметры</system:String>
+
+    <system:String x:Key="Permanent">перманентный</system:String>
+
+    <system:String x:Key="PopOutResults">Всплывающие результаты</system:String>
+
+    <system:String x:Key="PreferencesFileLoadFailure">Невозможно загрузить файл настроек</system:String>
+
+    <system:String x:Key="ProcessingFiles">Обработано файлов</system:String>
+
+    <system:String x:Key="Regex">_Регулярное выражение</system:String>
+
+    <system:String x:Key="Results">Результаты</system:String>
+
+    <system:String x:Key="ResultsPopout">Всплывающее окно результатов</system:String>
+
+    <system:String x:Key="SaveResultsToFile">Сохранить все результаты в файл</system:String>
+
+    <system:String x:Key="Search">Поиск</system:String>
+
+    <system:String x:Key="SearchCancelled">Поиск отменен</system:String>
+
+    <system:String x:Key="SearchComplete">Поиск завершен</system:String>
+
+    <system:String x:Key="SearchedFileList">Список найденных файлов</system:String>
+
+    <system:String x:Key="Searching">Проверяемый файл</system:String>
+
+    <system:String x:Key="SearchMode">Режим поиска</system:String>
+
+    <system:String x:Key="SelectDate">Выберите дату</system:String>
+
+    <system:String x:Key="SelectDirToExclude">Выберите каталог для исключения</system:String>
+
+    <system:String x:Key="SelectEditor">Выберите редактор</system:String>
+
+    <system:String x:Key="SeparateUsingCharacter">Разделяйте дополнительные записи символом</system:String>
+
+    <system:String x:Key="SpecifySearchDirectory">Укажите папку и предмет поиска.</system:String>
+
+    <system:String x:Key="StartDate">Дата от</system:String>
+
+    <system:String x:Key="StartDateLessThanEndDateError">Дата от не может быть позже даты окончания..</system:String>
+
+    <system:String x:Key="Subfolders">_Подпапки</system:String>
+
+    <system:String x:Key="TemporarilyExcluded">Исключено временно</system:String>
+
+    <system:String x:Key="Temporary">Временный</system:String>
+
+    <system:String x:Key="TimeToSearch">Время, потраченное на поиск файлов</system:String>
+
+    <system:String x:Key="TooltipChangeLanguage">Сменить язык</system:String>
+
+    <system:String x:Key="TooltipEditorForFile">Редактор для открытия файлов</system:String>
+
+    <system:String x:Key="TooltipFileCreateEndDate">Создание файла (дата окончания)</system:String>
+
+    <system:String x:Key="TooltipFileCreateStartDate">Создание файла (Дата от)</system:String>
+
+    <system:String x:Key="TooltipHighlightMatches">Выделить совпадения фоном в результатах поиска.</system:String>
+
+    <system:String x:Key="TooltipMatchCase">Соответствие с учетом регистра.</system:String>
+
+    <system:String x:Key="TooltipMatchWholeWord">Совпадение всего слова</system:String>
+
+    <system:String x:Key="TooltipNormalSearch">Режим поиска по умолчанию</system:String>
+
+    <system:String x:Key="TooltipOpenSearchedFileList">Открыть список файлов, в которых был произведен поиск</system:String>
+
+    <system:String x:Key="TooltipSearchRegex">Поиск с использованием регулярных выражений</system:String>
+
+    <system:String x:Key="TooltipSearchRegexMultiLine">Поиск регулярного выражения в нескольких строках</system:String>
+
+    <system:String x:Key="TooltipSearchSubfolders">Искать в подпапках.</system:String>
+
+    <system:String x:Key="UnknownAssemblyName">Неизвестное имя сборки</system:String>
+
+    <system:String x:Key="Update">Обновлять</system:String>
+
+    <system:String x:Key="UseConfigDelimiterCharacter">Если в конфигурации используется определенный разделитель символов, убедитесь, что он используется при поиске.</system:String>
+
+    <system:String x:Key="WarrantyText">Эта программа поставляется СОВЕРШЕННО БЕЗ ГАРАНТИЙ.</system:String>
+
+    <system:String x:Key="WholeWord">Целое слово</system:String>
+</ResourceDictionary>
