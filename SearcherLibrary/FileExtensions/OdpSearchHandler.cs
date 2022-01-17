@@ -120,7 +120,7 @@ namespace SearcherLibrary.FileExtensions
                                                             matchLine = matchLine.Substring(0, matchLine.Length - 1);                       // Remove lines ending with the newline character.
                                                         }
 
-                                                        Match searchMatch = Regex.Match(matchLine, searchTerm, this.RegexOptions);          // Use this match for the result highlight, based on additional characters being selected before and after the match.
+                                                        Match searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions);          // Use this match for the result highlight, based on additional characters being selected before and after the match.
                                                         matchedLines.Add(new MatchedLine
                                                         {
                                                             MatchId = matchCounter++,
