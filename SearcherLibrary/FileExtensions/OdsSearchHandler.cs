@@ -172,7 +172,7 @@ namespace SearcherLibrary.FileExtensions
 
                             foreach (string searchTerm in searchTerms)
                             {
-                                MatchCollection matches = Regex.Matches(cellContent.Value, searchTerm, this.RegexOptions);
+                                MatchCollection matches = Regex.Matches(cellContent.Value, searchTerm, matcher.RegexOptions);
 
                                 if (matches.Count > 0)
                                 {
