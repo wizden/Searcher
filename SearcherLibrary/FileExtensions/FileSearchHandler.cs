@@ -82,11 +82,6 @@ namespace SearcherLibrary.FileExtensions
         /// </summary>
         public static List<string> Extensions => new List<string>();
 
-        /// <summary>
-        /// Gets or sets the regex options to use when searching.
-        /// </summary>
-        public RegexOptions RegexOptions { get; set; }
-
         #endregion Public Properties
 
         #region Internal Properties
@@ -154,7 +149,7 @@ namespace SearcherLibrary.FileExtensions
                 {
                     try
                     {
-                        var matches = Regex.Matches(searchLine, searchTerm, RegexOptions);
+                        var matches = Regex.Matches(searchLine, searchTerm, matcher.RegexOptions);
 
                         if (matches.Count > 0)
                         {
@@ -169,7 +164,7 @@ namespace SearcherLibrary.FileExtensions
                                                            ? MaxStringLengthDisplayIndexEnd
                                                            : searchLine.Length - (match.Index + match.Length);
                                     tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
-                                    tempMatchObj = Regex.Match(tempSearchLine, searchTerm, RegexOptions);
+                                    tempMatchObj = Regex.Match(tempSearchLine, searchTerm, matcher.RegexOptions);
 
                                     matchedLines.Add(new MatchedLine
                                     {
