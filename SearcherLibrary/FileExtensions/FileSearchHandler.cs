@@ -28,6 +28,7 @@ namespace SearcherLibrary.FileExtensions
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text.RegularExpressions;
     using SearcherLibrary.Resources;
@@ -135,66 +136,106 @@ namespace SearcherLibrary.FileExtensions
             //                         12345   6 7
             var lengthOfLineKeywordPlus3 = Strings.Line.Length + 3;
 
-            foreach (var line in File.ReadAllLines(fileName))
+            if (matcher.RegexOptions.HasFlag(RegexOptions.Multiline))
             {
-                lineCounter++;
-                searchLine = line.Trim();
-
-                if (matcher.CancellationTokenSource.IsCancellationRequested)
+                return GetMultiLineRegexMatches(fileName, searchTerms, matcher);
+            }
+            else
+            {
+                foreach (var line in File.ReadAllLines(fileName))
                 {
-                    break;
-                }
+                    lineCounter++;
+                    searchLine = line.Trim();
 
-                foreach (var searchTerm in searchTerms)
-                {
-                    try
+                    if (matcher.CancellationTokenSource.IsCancellationRequested)
                     {
-                        var matches = Regex.Matches(searchLine, searchTerm, matcher.RegexOptions);
+                        break;
+                    }
 
-                        if (matches.Count > 0)
+                    foreach (var searchTerm in searchTerms)
+                    {
+                        try
                         {
-                            foreach (Match match in matches)
-                            {
-                                if (searchLine.Length >= MaxStringLengthCheck)
-                                {
-                                    // If the lines are exceesively long, handle accordingly.
-                                    tempMatchObj = match;
-                                    lineToDisplayStart = match.Index >= MaxStringLengthDisplayIndexStart ? match.Index - MaxStringLengthDisplayIndexStart : match.Index;
-                                    lineToDisplayEnd = searchLine.Length - (match.Index + match.Length) >= MaxStringLengthDisplayIndexEnd
-                                                           ? MaxStringLengthDisplayIndexEnd
-                                                           : searchLine.Length - (match.Index + match.Length);
-                                    tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
-                                    tempMatchObj = Regex.Match(tempSearchLine, searchTerm, matcher.RegexOptions);
+                            var matches = Regex.Matches(searchLine, searchTerm, matcher.RegexOptions);
 
-                                    matchedLines.Add(new MatchedLine
-                                    {
-                                        MatchId = matchCounter++,
-                                        Content = string.Format("{0} {1}:\t{2}", Strings.Line, lineCounter, tempSearchLine),
-                                        SearchTerm = searchTerm,
-                                        LineNumber = lineCounter,
-                                        StartIndex = tempMatchObj.Index + lengthOfLineKeywordPlus3 + lineCounter.ToString().Length,
-                                        Length = tempMatchObj.Length
-                                    });
-                                }
-                                else
+                            if (matches.Count > 0)
+                            {
+                                foreach (Match match in matches)
                                 {
-                                    matchedLines.Add(new MatchedLine
+                                    if (searchLine.Length >= MaxStringLengthCheck)
                                     {
-                                        MatchId = matchCounter++,
-                                        Content = string.Format("{0} {1}:\t{2}", Strings.Line, lineCounter, searchLine),
-                                        SearchTerm = searchTerm,
-                                        LineNumber = lineCounter,
-                                        StartIndex = match.Index + lengthOfLineKeywordPlus3 + lineCounter.ToString().Length,
-                                        Length = match.Length
-                                    });
+                                        // If the lines are exceesively long, handle accordingly.
+                                        tempMatchObj = match;
+                                        lineToDisplayStart = match.Index >= MaxStringLengthDisplayIndexStart ? match.Index - MaxStringLengthDisplayIndexStart : match.Index;
+                                        lineToDisplayEnd = searchLine.Length - (match.Index + match.Length) >= MaxStringLengthDisplayIndexEnd
+                                                               ? MaxStringLengthDisplayIndexEnd
+                                                               : searchLine.Length - (match.Index + match.Length);
+                                        tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
+                                        tempMatchObj = Regex.Match(tempSearchLine, searchTerm, matcher.RegexOptions);
+
+                                        matchedLines.Add(new MatchedLine
+                                        {
+                                            MatchId = matchCounter++,
+                                            Content = string.Format("{0} {1}:\t{2}", Strings.Line, lineCounter, tempSearchLine),
+                                            SearchTerm = searchTerm,
+                                            LineNumber = lineCounter,
+                                            StartIndex = tempMatchObj.Index + lengthOfLineKeywordPlus3 + lineCounter.ToString().Length,
+                                            Length = tempMatchObj.Length
+                                        });
+                                    }
+                                    else
+                                    {
+                                        matchedLines.Add(new MatchedLine
+                                        {
+                                            MatchId = matchCounter++,
+                                            Content = string.Format("{0} {1}:\t{2}", Strings.Line, lineCounter, searchLine),
+                                            SearchTerm = searchTerm,
+                                            LineNumber = lineCounter,
+                                            StartIndex = match.Index + lengthOfLineKeywordPlus3 + lineCounter.ToString().Length,
+                                            Length = match.Length
+                                        });
+                                    }
                                 }
                             }
                         }
+                        catch (ArgumentException aex)
+                        {
+                            matcher.CancellationTokenSource.Cancel();
+                            throw new ArgumentException(aex.Message + Strings.RegexFailureSearchCancelled);
+                        }
                     }
-                    catch (ArgumentException aex)
+                }
+            }
+
+            return matchedLines;
+        }
+
+        private List<MatchedLine> GetMultiLineRegexMatches(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
+        {
+            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            foreach (var searchTerm in searchTerms)
+            {
+                string allText = File.ReadAllText(fileName);
+                var matches = Regex.Matches(allText, searchTerm, matcher.RegexOptions);
+                
+                if(matches.Count > 0)
+                {
+                    int matchCounter = 0;
+                    var lengthOfLineKeywordPlus3 = Strings.Line.Length + 3;
+
+                    foreach (Match match in matches)
                     {
-                        matcher.CancellationTokenSource.Cancel();
-                        throw new ArgumentException(aex.Message + Strings.RegexFailureSearchCancelled);
+                        int lineNumber = allText.Substring(0, match.Index).Count(nl => nl == '\n') + 1;
+
+                        matchedLines.Add(new MatchedLine
+                        {
+                            MatchId = matchCounter++,
+                            Content = string.Format("{0} {1}:\t{2}", Strings.Line, lineNumber, match.Value),
+                            SearchTerm = searchTerm,
+                            LineNumber = lineNumber,
+                            StartIndex = lengthOfLineKeywordPlus3 + lineNumber.ToString().Length,
+                            Length = match.Length
+                        });
                     }
                 }
             }
