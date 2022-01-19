@@ -21,7 +21,7 @@ namespace SearcherLibrary.Tests
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the" }, new Matcher { RegexOptions = System.Text.RegularExpressions.RegexOptions.IgnoreCase });
-            Assert.True(matchedLines.Count == 2);
+            Assert.Equal(2, matchedLines.Count);
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace SearcherLibrary.Tests
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "The" }, new Matcher { RegexOptions = System.Text.RegularExpressions.RegexOptions.None });
-            Assert.True(matchedLines.Count == 1);
+            Assert.Single(matchedLines);
         }
 
         [Fact]
@@ -37,16 +37,15 @@ namespace SearcherLibrary.Tests
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "th.*qu" }, new Matcher { RegexOptions = System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.IgnoreCase });
-            Assert.True(matchedLines.Count == 1);
+            Assert.Single(matchedLines);
         }
 
         [Fact]
         public void SearchText_Regex_CaseInsensitive_Multiline_MatchesThree()
         {
-            // TODO: Determine if there is a way to give multi-line regex with sensible return value to client.
-            //var test = File.ReadAllText(filePath);
-            //var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "e(.|\n)*?o" }, new Matcher { RegexOptions = System.Text.RegularExpressions.RegexOptions.Multiline | System.Text.RegularExpressions.RegexOptions.IgnoreCase });
-            //Assert.True(matchedLines.Count == 3);
+            var test = File.ReadAllText(filePath);
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "e(.|\n)*?o" }, new Matcher { RegexOptions = System.Text.RegularExpressions.RegexOptions.Multiline | System.Text.RegularExpressions.RegexOptions.IgnoreCase });
+            Assert.Equal(3, matchedLines.Count);
         }
 
         [Fact]
@@ -54,7 +53,7 @@ namespace SearcherLibrary.Tests
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "Th.*qu" }, new Matcher { RegexOptions = System.Text.RegularExpressions.RegexOptions.Singleline });
-            Assert.True(matchedLines.Count == 1);
+            Assert.Single(matchedLines);
         }
 
         [Fact]
@@ -62,7 +61,7 @@ namespace SearcherLibrary.Tests
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the", "quick"}, new Matcher { RegexOptions = System.Text.RegularExpressions.RegexOptions.IgnoreCase });
-            Assert.True(matchedLines.Count == 3);
+            Assert.Equal(3, matchedLines.Count);
         }
 
         [Fact]
@@ -70,7 +69,7 @@ namespace SearcherLibrary.Tests
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the", "quick" }, new Matcher { RegexOptions = System.Text.RegularExpressions.RegexOptions.None });
-            Assert.True(matchedLines.Count == 2);
+            Assert.Equal(2, matchedLines.Count);
         }
 
         #endregion Public Methods

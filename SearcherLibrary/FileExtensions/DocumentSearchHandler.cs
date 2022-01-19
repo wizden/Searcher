@@ -79,7 +79,7 @@ namespace SearcherLibrary.FileExtensions
             {
                 using (var document = WordprocessingDocument.Open(fileName, false))
                 {
-                    var allContent = string.Empty;
+                    var allContentStringBuilder = new StringBuilder();
                     var body = document.MainDocumentPart.Document.Body;
                     body.Descendants().Where(bce => bce is Paragraph && bce.HasChildren).ToList().ForEach(bce =>
                                  {
@@ -107,63 +107,66 @@ namespace SearcherLibrary.FileExtensions
                                      }
 
                                      var content = contentText.ToString();
-                                     allContent = content;
+                                     allContentStringBuilder.AppendLine(content);
 
-                                     if (!string.IsNullOrEmpty(content))
+                                     if (!matcher.RegexOptions.HasFlag(RegexOptions.Multiline))
                                      {
-                                         foreach (var searchTerm in searchTerms)
+                                         if (!string.IsNullOrEmpty(content))
                                          {
-                                             if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
+                                             foreach (var searchTerm in searchTerms)
                                              {
-                                                 break;
-                                             }
-
-                                             try
-                                             {
-                                                 content = content.Trim();
-                                                 var matches = Regex.Matches(content, searchTerm, matcher.RegexOptions); // Use this match for getting the locations of the match.
-
-                                                 if (matches.Count > 0)
+                                                 if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
                                                  {
-                                                     foreach (Match match in matches)
+                                                     break;
+                                                 }
+
+                                                 try
+                                                 {
+                                                     content = content.Trim();
+                                                     var matches = Regex.Matches(content, searchTerm, matcher.RegexOptions); // Use this match for getting the locations of the match.
+
+                                                     if (matches.Count > 0)
                                                      {
-                                                         if (content.Length > MaxContentLengthCheck)
+                                                         foreach (Match match in matches)
                                                          {
-                                                             startIndex = match.Index >= IndexBoundary ? GetLocationOfFirstWord(content, match.Index - IndexBoundary) : 0;
-                                                             endIndex = content.Length >= match.Index + match.Length + IndexBoundary
-                                                                            ? GetLocationOfLastWord(content, match.Index + match.Length + IndexBoundary)
-                                                                            : content.Length;
-                                                         }
-                                                         else
-                                                         {
-                                                             startIndex = 0;
-                                                             endIndex = content.Length;
-                                                         }
-
-                                                         var matchLine = content.Substring(startIndex, endIndex - startIndex);
-                                                         var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
-
-                                                         // Only add, if it does not already exist (Not sure how the body elements manage to bring back the same content again.
-                                                         if (!matchedLines.Any(ml => ml.SearchTerm == searchTerm &&
-                                                                                     ml.Content == string.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine)))
-                                                         {
-                                                             matchedLines.Add(new MatchedLine
+                                                             if (content.Length > MaxContentLengthCheck)
                                                              {
-                                                                 MatchId = matchCounter++,
-                                                                 Content = string.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine),
-                                                                 SearchTerm = searchTerm,
-                                                                 FileName = fileName,
-                                                                 LineNumber = pageNumber,
-                                                                 StartIndex = searchMatch.Index + Strings.Page.Length + 3 + pageNumber.ToString().Length,
-                                                                 Length = searchMatch.Length
-                                                             });
+                                                                 startIndex = match.Index >= IndexBoundary ? GetLocationOfFirstWord(content, match.Index - IndexBoundary) : 0;
+                                                                 endIndex = content.Length >= match.Index + match.Length + IndexBoundary
+                                                                                ? GetLocationOfLastWord(content, match.Index + match.Length + IndexBoundary)
+                                                                                : content.Length;
+                                                             }
+                                                             else
+                                                             {
+                                                                 startIndex = 0;
+                                                                 endIndex = content.Length;
+                                                             }
+
+                                                             var matchLine = content.Substring(startIndex, endIndex - startIndex);
+                                                             var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
+
+                                                             // Only add, if it does not already exist (Not sure how the body elements manage to bring back the same content again.
+                                                             if (!matchedLines.Any(ml => ml.SearchTerm == searchTerm &&
+                                                                                         ml.Content == string.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine)))
+                                                             {
+                                                                 matchedLines.Add(new MatchedLine
+                                                                 {
+                                                                     MatchId = matchCounter++,
+                                                                     Content = string.Format("{0} {1}:\t{2}", Strings.Page, pageNumber, matchLine),
+                                                                     SearchTerm = searchTerm,
+                                                                     FileName = fileName,
+                                                                     LineNumber = pageNumber,
+                                                                     StartIndex = searchMatch.Index + Strings.Page.Length + 3 + pageNumber.ToString().Length,
+                                                                     Length = searchMatch.Length
+                                                                 });
+                                                             }
                                                          }
                                                      }
                                                  }
-                                             }
-                                             catch (ArgumentException aex)
-                                             {
-                                                 throw new ArgumentException(aex.Message + " " + Strings.RegexFailureSearchCancelled);
+                                                 catch (ArgumentException aex)
+                                                 {
+                                                     throw new ArgumentException(aex.Message + " " + Strings.RegexFailureSearchCancelled);
+                                                 }
                                              }
                                          }
                                      }
@@ -183,19 +186,15 @@ namespace SearcherLibrary.FileExtensions
 
                             try
                             {
-                                allContent = allContent.Trim();
+                                var allContent = allContentStringBuilder.ToString().Trim();
                                 var matches = Regex.Matches(allContent, searchTerm, matcher.RegexOptions); // Use this match for getting the locations of the match.
 
                                 if (matches.Count > 0)
                                 {
                                     foreach (Match match in matches)
                                     {
-                                        startIndex = match.Index >= FileSearchHandler.IndexBoundary
-                                                         ? this.GetLocationOfFirstWord(allContent, match.Index - FileSearchHandler.IndexBoundary)
-                                                         : 0;
-                                        endIndex = allContent.Length >= match.Index + match.Length + FileSearchHandler.IndexBoundary
-                                                       ? this.GetLocationOfLastWord(allContent, match.Index + match.Length + FileSearchHandler.IndexBoundary)
-                                                       : allContent.Length;
+                                        startIndex = match.Index;
+                                        endIndex = match.Index + match.Length;
                                         var matchLine = allContent.Substring(startIndex, endIndex - startIndex);
                                         var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
                                         allContentMatchedLines.Add(new MatchedLine

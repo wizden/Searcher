@@ -54,6 +54,9 @@ namespace SearcherLibrary.Tests
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "e(.|\n)*?o" }, new Matcher { RegexOptions = System.Text.RegularExpressions.RegexOptions.Multiline | System.Text.RegularExpressions.RegexOptions.IgnoreCase });
             Assert.Equal(3, matchedLines.Count);
+            Assert.StartsWith("Line 1", matchedLines[0].Content);
+            Assert.StartsWith("Line 2", matchedLines[1].Content);
+            Assert.StartsWith("Line 3", matchedLines[2].Content);
         }
 
         [Fact]
