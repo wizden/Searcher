@@ -29,6 +29,7 @@ namespace SearcherLibrary.FileExtensions
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Xml.Linq;
     using SharpCompress.Common;
     using SharpCompress.Readers;
@@ -86,7 +87,15 @@ namespace SearcherLibrary.FileExtensions
                                     reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
                                     string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
                                     IEnumerable<string> content = XDocument.Load(fullFilePath, LoadOptions.None).Descendants().Where(d => d.Name.LocalName == "p").Select(d => d.Value);
-                                    matchedLines = matcher.GetMatch(content, searchTerms);
+
+                                    if (!matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
+                                    {
+                                        matchedLines = matcher.GetMatch(content, searchTerms);
+                                    }
+                                    else
+                                    {
+                                        matchedLines = matcher.GetMatch(new string[] { string.Join(string.Empty, content) }, searchTerms);
+                                    }
                                 }
                                 catch (PathTooLongException ptlex)
                                 {

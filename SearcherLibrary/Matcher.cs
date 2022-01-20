@@ -69,17 +69,15 @@ namespace SearcherLibrary
         /// </summary>
         /// <param name="matchWholeWord">Is the search to be performed on the word as a whole.</param>
         /// <param name="isRegexSearch">Is the search to be performed as a regular expression search.</param>
-        /// <param name="isMultiLineRegex">Is the regular expression search to be performed across multiple lines.</param>
         /// <param name="allMatchesInFile">Should the search report only those files that match all search terms.</param>
         /// <param name="cancellationTokenSource">The cancellation object.</param>
         /// <param name="regexOptions">The regular expressions options object (e.g. Compiled, Multiline, IgnoreCase).</param>
-        public Matcher(bool matchWholeWord = false, bool isRegexSearch = false, bool isMultiLineRegex = false, bool allMatchesInFile = false, CancellationTokenSource cancellationTokenSource = null, RegexOptions regexOptions = System.Text.RegularExpressions.RegexOptions.None)
+        public Matcher(bool matchWholeWord = false, bool isRegexSearch = false, bool allMatchesInFile = false, CancellationTokenSource cancellationTokenSource = null, RegexOptions regexOptions = System.Text.RegularExpressions.RegexOptions.None)
         {
             this.MatchWholeWord = matchWholeWord;
             this.IsRegexSearch = isRegexSearch;
-            this.IsMultiLineRegex = isMultiLineRegex;
             this.AllMatchesInFile = allMatchesInFile;
-            this.RegexOptions = regexOptions;
+            this.RegularExpressionOptions = regexOptions;
             this.CancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
         }
 
@@ -115,11 +113,6 @@ namespace SearcherLibrary
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the search is across multiple lines using Regex.
-        /// </summary>
-        public bool IsMultiLineRegex { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the search mode uses regex.
         /// </summary>
         public bool IsRegexSearch { get; set; }
@@ -132,7 +125,7 @@ namespace SearcherLibrary
         /// <summary>
         /// Gets or sets the regex options to use when searching.
         /// </summary>
-        public RegexOptions RegexOptions { get; set; }
+        public RegexOptions RegularExpressionOptions { get; set; }
 
         #endregion Public Properties
 
@@ -176,13 +169,13 @@ namespace SearcherLibrary
         /// <param name="searchTerms">The terms to search in the content.</param>
         /// <returns>List of matched lines.</returns>
         /// <exception cref="ArgumentException">Generated when regular expression failures occur.</exception>
-        public List<MatchedLine> GetMatch(IEnumerable<string> content, IEnumerable<string> searchTerms)
+        public List<MatchedLine> GetMatch(IEnumerable<string> content, IEnumerable<string> searchTerms, string locationType = "Line")
         {
             List<MatchedLine> matchedLines = new List<MatchedLine>();
 
-            if (this.IsMultiLineRegex)
+            if (this.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
             {
-                matchedLines = this.GetMatchesForMultilineRegex(content, searchTerms);
+                matchedLines = this.GetMatchesForMultilineRegex(content, searchTerms, locationType);
             }
             else
             {
@@ -258,7 +251,7 @@ namespace SearcherLibrary
         /// <param name="content">The content in which to search.</param>
         /// <param name="searchTerms">The terms to search.</param>
         /// <returns>List of matches found in content based on search terms.</returns>
-        private List<MatchedLine> GetMatchesForMultilineRegex(IEnumerable<string> content, IEnumerable<string> searchTerms)
+        private List<MatchedLine> GetMatchesForMultilineRegex(IEnumerable<string> content, IEnumerable<string> searchTerms, string locationType = "Line")
         {
             int lineToDisplayStart = 0;
             string tempSearchLine = string.Empty;
@@ -273,7 +266,7 @@ namespace SearcherLibrary
                 }
 
                 string termToSearch = searchTerm.Replace(".*", "(.|\n)*");        // Convert the .* to ((.|\n)*) for multiline regex.
-                MatchCollection matches = Regex.Matches(allContent, termToSearch, this.RegexOptions);
+                MatchCollection matches = Regex.Matches(allContent, termToSearch, this.RegularExpressionOptions);
 
                 if (matches.Count > 0)
                 {
@@ -288,10 +281,10 @@ namespace SearcherLibrary
                             //                         12345   6 7
                             matchedLines.Add(new MatchedLine
                             {
-                                Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineToDisplayStart, match.Value),
+                                Content = string.Format("{0} {1}:\t{2}", locationType, lineToDisplayStart, match.Value),
                                 SearchTerm = termToSearch,
                                 LineNumber = lineToDisplayStart,
-                                StartIndex = lineToDisplayStart.ToString().Length + 7,
+                                StartIndex = lineToDisplayStart.ToString().Length + (locationType.Length + 3),  // locationName.Length + 3 => e.g. "Line" + " :\t"
                                 Length = match.Length
                             });
                         }
@@ -301,10 +294,10 @@ namespace SearcherLibrary
 
                             matchedLines.Add(new MatchedLine
                             {
-                                Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Line, lineNumberStart.ToString(), match.Value),
+                                Content = string.Format("{0} {1}:\t{2}", locationType, lineNumberStart.ToString(), match.Value),
                                 SearchTerm = termToSearch,
                                 LineNumber = lineNumberStart + 1,
-                                StartIndex = 7 + lineNumberStart.ToString().Length,
+                                StartIndex = (locationType.Length + 3) + lineNumberStart.ToString().Length,  // locationName.Length + 3 => e.g. "Line" + " :\t"
                                 Length = match.Length
                             });
                         }
@@ -374,7 +367,7 @@ namespace SearcherLibrary
                 {
                     try
                     {
-                        MatchCollection matches = Regex.Matches(searchLine, searchTerm, this.RegexOptions);
+                        MatchCollection matches = Regex.Matches(searchLine, searchTerm, this.RegularExpressionOptions);
 
                         if (matches.Count > 0)
                         {
@@ -387,7 +380,7 @@ namespace SearcherLibrary
                                     lineToDisplayStart = match.Index >= MaxStringLengthDisplayIndexStart ? match.Index - MaxStringLengthDisplayIndexStart : match.Index;
                                     lineToDisplayEnd = searchLine.Length - (match.Index + match.Length) >= MaxStringLengthDisplayIndexEnd ? MaxStringLengthDisplayIndexEnd : searchLine.Length - (match.Index + match.Length);
                                     tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
-                                    tempMatchObj = Regex.Match(tempSearchLine, searchTerm, this.RegexOptions);
+                                    tempMatchObj = Regex.Match(tempSearchLine, searchTerm, this.RegularExpressionOptions);
 
                                     matchedLines.Add(new MatchedLine
                                     {

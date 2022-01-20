@@ -144,7 +144,7 @@ namespace SearcherLibrary.FileExtensions
 
                 foreach (string searchTerm in searchTerms)
                 {
-                    MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegexOptions);            // Use this match for getting the locations of the match.
+                    MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegularExpressionOptions);            // Use this match for getting the locations of the match.
                     if (matches.Count > 0)
                     {
                         foreach (Match match in matches)
@@ -202,7 +202,7 @@ namespace SearcherLibrary.FileExtensions
 
                     foreach (string searchTerm in searchTerms)
                     {
-                        MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegexOptions);            // Use this match for getting the locations of the match.
+                        MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegularExpressionOptions);            // Use this match for getting the locations of the match.
                         if (matches.Count > 0)
                         {
                             foreach (Match match in matches)

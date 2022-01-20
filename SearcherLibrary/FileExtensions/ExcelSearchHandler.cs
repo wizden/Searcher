@@ -141,7 +141,7 @@ namespace SearcherLibrary.FileExtensions
                                 break;
                             }
 
-                            MatchCollection matches = Regex.Matches(ecd.CellContent, searchTerm, matcher.RegexOptions);            // Use this match for getting the locations of the match.
+                            MatchCollection matches = Regex.Matches(ecd.CellContent, searchTerm, matcher.RegularExpressionOptions);            // Use this match for getting the locations of the match.
                             if (matches.Count > 0)
                             {
                                 foreach (Match match in matches)
