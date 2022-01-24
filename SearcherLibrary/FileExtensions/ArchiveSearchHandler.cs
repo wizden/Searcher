@@ -61,6 +61,7 @@ namespace SearcherLibrary.FileExtensions
             List<MatchedLine> matchedLines = new List<MatchedLine>();
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
 
+            // TODO: Clean up, if failure occurs.
             Directory.CreateDirectory(tempDirPath);
             SharpCompress.Archives.IArchive archive = null;
 
