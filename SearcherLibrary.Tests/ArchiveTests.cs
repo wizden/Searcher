@@ -36,65 +36,65 @@ namespace SearcherLibrary.Tests
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_CaseInsensitive_MatchesTwo(string filePath)
+        public void SearchText_CaseInsensitive_Matches24(string filePath)
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the" }, new Matcher { RegularExpressionOptions = System.Text.RegularExpressions.RegexOptions.IgnoreCase });
-            Assert.Equal(18, matchedLines.Count);
+            Assert.Equal(24, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_CaseSensitive_MatchesTen(string filePath)
+        public void SearchText_CaseSensitive_Matches13(string filePath)
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "The" }, new Matcher { RegularExpressionOptions = System.Text.RegularExpressions.RegexOptions.None });
-            Assert.Equal(10, matchedLines.Count);
+            Assert.Equal(13, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_Regex_CaseInsensitive_MatchesEight(string filePath)
+        public void SearchText_Regex_CaseInsensitive_Matches11(string filePath)
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "th.*qu" }, new Matcher { RegularExpressionOptions = System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.IgnoreCase });
-            Assert.Equal(8, matchedLines.Count);
+            Assert.Equal(11, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_Regex_CaseInsensitive_Multiline_Matches96(string filePath)
+        public void SearchText_Regex_CaseInsensitive_Multiline_Matches125(string filePath)
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "e(.|\n)*?o" }, new Matcher { RegularExpressionOptions = System.Text.RegularExpressions.RegexOptions.Multiline | System.Text.RegularExpressions.RegexOptions.IgnoreCase });
-            Assert.Equal(96, matchedLines.Count);
+            Assert.Equal(125, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_Regex_CaseSensitive_MatchesEight(string filePath)
+        public void SearchText_Regex_CaseSensitive_Matches11(string filePath)
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "Th.*qu" }, new Matcher { RegularExpressionOptions = System.Text.RegularExpressions.RegexOptions.Singleline });
-            Assert.Equal(8, matchedLines.Count);
+            Assert.Equal(11, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_TwoWords_CaseInsensitive_Matches26(string filePath)
+        public void SearchText_TwoWords_CaseInsensitive_Matches35(string filePath)
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the", "quick" }, new Matcher { RegularExpressionOptions = System.Text.RegularExpressions.RegexOptions.IgnoreCase });
-            Assert.Equal(26, matchedLines.Count);
+            Assert.Equal(35, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_TwoWords_CaseInsensitive_Matches16(string filePath)
+        public void SearchText_TwoWords_CaseInsensitive_Matches22(string filePath)
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the", "quick" }, new Matcher { RegularExpressionOptions = System.Text.RegularExpressions.RegexOptions.None });
-            Assert.Equal(16, matchedLines.Count);
+            Assert.Equal(22, matchedLines.Count);
         }
 
         #endregion Public Methods
