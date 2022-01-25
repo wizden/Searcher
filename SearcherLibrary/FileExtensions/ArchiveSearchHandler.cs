@@ -60,39 +60,45 @@ namespace SearcherLibrary.FileExtensions
         {
             List<MatchedLine> matchedLines = new List<MatchedLine>();
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
-
-            // TODO: Clean up, if failure occurs.
             Directory.CreateDirectory(tempDirPath);
             SharpCompress.Archives.IArchive archive = null;
+            
+            try
+            {
+                
+                if (fileName.ToUpper().EndsWith(".GZ") && SharpCompress.Archives.GZip.GZipArchive.IsGZipFile(fileName))
+                {
+                    archive = SharpCompress.Archives.GZip.GZipArchive.Open(fileName);
+                }
+                else if (fileName.ToUpper().EndsWith(".RAR") && SharpCompress.Archives.Rar.RarArchive.IsRarFile(fileName))
+                {
+                    archive = SharpCompress.Archives.Rar.RarArchive.Open(fileName);
+                }
+                else if (fileName.ToUpper().EndsWith(".7Z") && SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(fileName))
+                {
+                    archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fileName);
+                }
+                else if (fileName.ToUpper().EndsWith(".TAR") && SharpCompress.Archives.Tar.TarArchive.IsTarFile(fileName))
+                {
+                    archive = SharpCompress.Archives.Tar.TarArchive.Open(fileName);
+                }
+                else if (fileName.ToUpper().EndsWith(".ZIP") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
+                {
+                    archive = SharpCompress.Archives.Zip.ZipArchive.Open(fileName);
+                }
 
-            if (fileName.ToUpper().EndsWith(".GZ") && SharpCompress.Archives.GZip.GZipArchive.IsGZipFile(fileName))
-            {
-                archive = SharpCompress.Archives.GZip.GZipArchive.Open(fileName);
+                if (archive != null)
+                {
+                    matchedLines = this.GetMatchedLinesInZipArchive(fileName, searchTerms, tempDirPath, archive, matcher);
+                    archive.Dispose();
+                }
             }
-            else if (fileName.ToUpper().EndsWith(".RAR") && SharpCompress.Archives.Rar.RarArchive.IsRarFile(fileName))
+            finally
             {
-                archive = SharpCompress.Archives.Rar.RarArchive.Open(fileName);
-            }
-            else if (fileName.ToUpper().EndsWith(".7Z") && SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(fileName))
-            {
-                archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fileName);
-            }
-            else if (fileName.ToUpper().EndsWith(".TAR") && SharpCompress.Archives.Tar.TarArchive.IsTarFile(fileName))
-            {
-                archive = SharpCompress.Archives.Tar.TarArchive.Open(fileName);
-            }
-            else if (fileName.ToUpper().EndsWith(".ZIP") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
-            {
-                archive = SharpCompress.Archives.Zip.ZipArchive.Open(fileName);
+                // Clean up temp directory if any errors occur.
+                this.RemoveTempDirectory(tempDirPath);
             }
 
-            if (archive != null)
-            {
-                matchedLines = this.GetMatchedLinesInZipArchive(fileName, searchTerms, tempDirPath, archive, matcher);
-                archive.Dispose();
-            }
-
-            this.RemoveTempDirectory(tempDirPath);
             return matchedLines;
         }
 
