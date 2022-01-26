@@ -87,20 +87,46 @@ namespace SearcherLibrary
         public static List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
             var handler = GetSearchHandler(fileName);
-			
+            List<MatchedLine> matchedLines = new List<MatchedLine>();
+
 			try
             {
-                return handler.Search(fileName, searchTerms, matcher);
+                matchedLines = handler.Search(fileName, searchTerms, matcher);
+                ClearInvalidResults(matchedLines, searchTerms, matcher);
             }
             catch (Exception ex)
             {
                 throw new Exception(String.Format("{0} {1}. {2}", Strings.ErrorAccessingFile, fileName, ex.Message));
             }
+
+            return matchedLines;
         }
 
         #endregion Public Methods
 
         #region Private Methods
+
+        /// <summary>
+        /// Remove any results that are invalid based on the search type being ANY or ALL.
+        /// </summary>
+        /// <param name="matchedLines">The list of matched lines.</param>
+        /// <param name="searchTerms">The list of terms that were searched.</param>
+        /// <param name="matcher">The matcher object that decides what can be displayed.</param>
+        private static void ClearInvalidResults(List<MatchedLine> matchedLines, IEnumerable<string> searchTerms, Matcher matcher)
+        {
+            bool canShowResult = true;
+
+            if (matcher.AllMatchesInFile)
+            {
+                List<string> test = matchedLines.Select(ml => ml.SearchTerm.ToUpper()).Distinct().ToList();
+                canShowResult = matchedLines.Select(ml => ml.SearchTerm.ToUpper()).Distinct().Count() == searchTerms.Count();
+            }
+
+            if (!canShowResult)
+            {
+                matchedLines.Clear();
+            }
+        }
 
         /// <summary>
         /// Determine the search handler for the file.

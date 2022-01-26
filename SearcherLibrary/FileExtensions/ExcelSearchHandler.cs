@@ -86,8 +86,8 @@ namespace SearcherLibrary.FileExtensions
                     string cellValue = string.Empty;
                     List<OpenXmlElement> sharedStringTable = wkbkPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault()?.SharedStringTable?.ToList();        // Get it in memory for performance.
                     CellFormats cellFormats = wkbkPart.WorkbookStylesPart.Stylesheet.CellFormats;
-                    List<DocumentFormat.OpenXml.Spreadsheet.NumberingFormat> numberingFormats = wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats != null
-                        ? wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats.Elements<DocumentFormat.OpenXml.Spreadsheet.NumberingFormat>().ToList()
+                    List<NumberingFormat> numberingFormats = wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats != null
+                        ? wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats.Elements<NumberingFormat>().ToList()
                         : null;
                     string cellFormatCodeUpper = string.Empty;
                     int counter = 0;
@@ -175,9 +175,7 @@ namespace SearcherLibrary.FileExtensions
             {
                 if (ffx.Message == "File contains corrupted data.")
                 {
-                    string error = fileName.Contains("~$")
-                        ? Resources.Strings.FileCorruptOrLockedByApp
-                        : Resources.Strings.FileCorruptOrProtected;
+                    string error = fileName.Contains("~$") ? Resources.Strings.FileCorruptOrLockedByApp : Resources.Strings.FileCorruptOrProtected;
                     throw new IOException(error, ffx);
                 }
                 else
@@ -201,7 +199,7 @@ namespace SearcherLibrary.FileExtensions
         /// <param name="cellFormats">The cell formats in use.</param>
         /// <param name="numberingFormats">The numbering formats in use.</param>
         /// <returns>The content of the spread sheet cell based on the data type of the cell.</returns>
-        private string GetSpreadsheetCellValue(Cell excelCell, IEnumerable<OpenXmlElement> sharedStringTable, CellFormats cellFormats, IEnumerable<DocumentFormat.OpenXml.Spreadsheet.NumberingFormat> numberingFormats)
+        private string GetSpreadsheetCellValue(Cell excelCell, IEnumerable<OpenXmlElement> sharedStringTable, CellFormats cellFormats, IEnumerable<NumberingFormat> numberingFormats)
         {
             string retVal = string.Empty;
 
@@ -263,7 +261,7 @@ namespace SearcherLibrary.FileExtensions
                     }
                     else if (numberingFormats != null && cellFormat.NumberFormatId != null && cellFormat.NumberFormatId.Value > 163)
                     {
-                        DocumentFormat.OpenXml.Spreadsheet.NumberingFormat cellFormatUsed = numberingFormats.FirstOrDefault(nf => nf.NumberFormatId == cellFormat.NumberFormatId.Value);
+                        NumberingFormat cellFormatUsed = numberingFormats.FirstOrDefault(nf => nf.NumberFormatId == cellFormat.NumberFormatId.Value);
 
                         if (cellFormatUsed.FormatCode.Value.ToUpper().Contains("D") || cellFormatUsed.FormatCode.Value.ToUpper().Contains("M") || cellFormatUsed.FormatCode.Value.ToUpper().Contains("Y"))
                         {

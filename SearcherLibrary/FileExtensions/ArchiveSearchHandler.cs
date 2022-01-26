@@ -135,7 +135,7 @@ namespace SearcherLibrary.FileExtensions
 
             if (!string.IsNullOrWhiteSpace(newFileName))
             {
-                matchedLines.AddRange(matcher.GetMatch(newFileName, searchTerms));
+                matchedLines.AddRange(FileSearchHandlerFactory.Search(newFileName, searchTerms, matcher));
             }
 
             return matchedLines;
@@ -167,8 +167,8 @@ namespace SearcherLibrary.FileExtensions
                             try
                             {
                                 reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                                string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
-                                matchedLines.AddRange(matcher.GetMatch(fullFilePath, searchTerms));
+                                string fullFilePath = Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
+                                matchedLines.AddRange(FileSearchHandlerFactory.Search(fullFilePath, searchTerms, matcher));
 
                                 if (matchedLines != null && matchedLines.Count > 0)
                                 {

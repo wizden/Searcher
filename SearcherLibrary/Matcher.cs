@@ -132,37 +132,6 @@ namespace SearcherLibrary
         #region Public Methods
 
         /// <summary>
-        /// Search for matches in the file based on the search terms.
-        /// </summary>
-        /// <param name="fileName">The name of the file.</param>
-        /// <param name="searchTerms">The terms to search in the file.</param>
-        /// <returns>List of matched lines.</returns>
-        /// <exception cref="ArgumentException">Generated when regular expression failures occur.</exception>
-        /// /// <exception cref="IOException">Generated on issues occurring when dealing with the files being processed.</exception>
-        public List<MatchedLine> GetMatch(string fileName, IEnumerable<string> searchTerms)
-        {
-            List<MatchedLine> matchedLines;
-
-            try
-            {
-                if (this.IsNonAsciiSearch(fileName))
-                {
-                    matchedLines = this.FileSearchInNonASCII(fileName, searchTerms); 
-                }
-                else
-                {
-                    matchedLines = this.GetMatch(File.ReadAllLines(fileName), searchTerms);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(string.Format("{0} {1}. {2}", Resources.Strings.ErrorAccessingFile, fileName, ex.Message));
-            }
-
-            return matchedLines;
-        }
-
-        /// <summary>
         /// Search for matches in the content based on the search terms.
         /// </summary>
         /// <param name="content">The content in which to search.</param>
@@ -182,47 +151,12 @@ namespace SearcherLibrary
                 matchedLines = this.SearchASCIIContent(content, searchTerms);
             }
 
-            this.ClearInvalidResults(matchedLines, searchTerms);
             return matchedLines;
         }
 
         #endregion Public Methods
 
         #region Private Methods
-
-        /// <summary>
-        /// Remove any results that are invalid based on the search type being ANY or ALL.
-        /// </summary>
-        /// <param name="matchedLines">The list of matched lines.</param>
-        /// <param name="searchTerms">The list of terms that were searched.</param>
-        private void ClearInvalidResults(List<MatchedLine> matchedLines, IEnumerable<string> searchTerms)
-        {
-            bool canShowResult = true;
-
-            if (this.AllMatchesInFile)
-            {
-                List<string> test = matchedLines.Select(ml => ml.SearchTerm.ToUpper()).Distinct().ToList();
-                canShowResult = matchedLines.Select(ml => ml.SearchTerm.ToUpper()).Distinct().Count() == searchTerms.Count();
-            }
-
-            if (!canShowResult)
-            {
-                matchedLines.Clear();
-            }
-        }
-
-        /// <summary>
-        /// Search the NON ASCII file for the terms and get the matches.
-        /// </summary>
-        /// <param name="fileName">The file to search.</param>
-        /// <param name="searchTerms">The list of terms to search.</param>
-        /// <returns>The matched lines containing the search terms.</returns>
-        private List<MatchedLine> FileSearchInNonASCII(string fileName, IEnumerable<string> searchTerms)
-        {
-            List<MatchedLine> retVal = FileSearchHandlerFactory.Search(fileName, searchTerms, this);
-            this.ClearInvalidResults(retVal, searchTerms);
-            return retVal;
-        }
 
         /// <summary>
         /// Get the line number in the file based on the index position.
@@ -306,29 +240,6 @@ namespace SearcherLibrary
             }
 
             return matchedLines;
-        }
-
-        /// <summary>
-        /// Search files that are not in the ASCII format.
-        /// </summary>
-        /// <param name="fileName">The name of the file.</param>
-        /// <returns>Boolean indicating whether the file searched is not in ASCII format.</returns>
-        private bool IsNonAsciiSearch(string fileName)
-        {
-            bool retVal = false;
-            string fileExtension = Path.GetExtension(fileName).ToUpper();
-
-            // Determine exceptional names to search first.
-            if (fileExtension.ToUpper() == ".7Z".ToUpper())
-            {
-                retVal = true;
-            }
-            else
-            {
-                retVal = Enum.GetNames(typeof(OtherExtensions)).Any(s => fileExtension.Contains(s.ToUpper()));
-            }
-
-            return retVal;
         }
 
         /// <summary>

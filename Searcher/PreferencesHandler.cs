@@ -266,14 +266,7 @@ namespace Searcher
         /// <returns>XElement nodes for the preference element.</returns>
         public static IEnumerable<XElement> GetPreference(string preference)
         {
-            try
-            {
-                return PreferencesFile.Descendants(preference);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return PreferencesFile.Descendants(preference);
         }
 
         /// <summary>
@@ -283,14 +276,7 @@ namespace Searcher
         /// <returns>Value of the preference element.</returns>
         public static string GetPreferenceValue(string preference)
         {
-            try
-            {
-                return PreferencesFile.Descendants(preference).FirstOrDefault().Value;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return PreferencesFile.Descendants(preference).FirstOrDefault().Value;
         }
 
         /// <summary>
@@ -325,14 +311,7 @@ namespace Searcher
         /// <param name="value">Value of the preference element.</param>
         public static void SetPreferenceValue(string preference, string value)
         {
-            try
-            {
-                PreferencesFile.Descendants(preference).FirstOrDefault().Value = value;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            PreferencesFile.Descendants(preference).FirstOrDefault().Value = value;
         }
 
         /// <summary>

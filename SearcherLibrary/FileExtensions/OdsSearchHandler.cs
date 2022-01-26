@@ -104,10 +104,6 @@ namespace SearcherLibrary.FileExtensions
                     archive.Dispose();
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
             finally
             {
                 this.RemoveTempDirectory(tempDirPath);

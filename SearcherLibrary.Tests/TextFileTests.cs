@@ -35,11 +35,19 @@ namespace SearcherLibrary.Tests
         }
 
         [Fact]
-        public void SearchText_CaseInsensitive_MatchesOne()
+        public void SearchText_LongText_CaseInsensitive_MatchesOne()
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "aa" }, new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase });
             Assert.Single(matchedLines);
+        }
+
+        [Fact]
+        public void SearchText_Exclude_Result_ALL_NotFound()
+        {
+            var test = File.ReadAllText(filePath);
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the", "quicker" }, new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase, AllMatchesInFile = true });
+            Assert.Empty(matchedLines);
         }
 
         [Fact]
