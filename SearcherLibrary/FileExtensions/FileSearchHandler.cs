@@ -136,7 +136,7 @@ namespace SearcherLibrary.FileExtensions
             //                         12345   6 7
             var lengthOfLineKeywordPlus3 = Strings.Line.Length + 3;
 
-            if (matcher.RegexOptions.HasFlag(RegexOptions.Multiline))
+            if (matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
             {
                 return GetMultiLineRegexMatches(fileName, searchTerms, matcher);
             }
@@ -156,7 +156,7 @@ namespace SearcherLibrary.FileExtensions
                     {
                         try
                         {
-                            var matches = Regex.Matches(searchLine, searchTerm, matcher.RegexOptions);
+                            var matches = Regex.Matches(searchLine, searchTerm, matcher.RegularExpressionOptions);
 
                             if (matches.Count > 0)
                             {
@@ -171,7 +171,7 @@ namespace SearcherLibrary.FileExtensions
                                                                ? MaxStringLengthDisplayIndexEnd
                                                                : searchLine.Length - (match.Index + match.Length);
                                         tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
-                                        tempMatchObj = Regex.Match(tempSearchLine, searchTerm, matcher.RegexOptions);
+                                        tempMatchObj = Regex.Match(tempSearchLine, searchTerm, matcher.RegularExpressionOptions);
 
                                         matchedLines.Add(new MatchedLine
                                         {
@@ -216,7 +216,7 @@ namespace SearcherLibrary.FileExtensions
             foreach (var searchTerm in searchTerms)
             {
                 string allText = File.ReadAllText(fileName);
-                var matches = Regex.Matches(allText, searchTerm, matcher.RegexOptions);
+                var matches = Regex.Matches(allText, searchTerm, matcher.RegularExpressionOptions);
                 
                 if(matches.Count > 0)
                 {

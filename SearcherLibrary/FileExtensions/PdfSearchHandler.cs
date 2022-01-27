@@ -27,6 +27,7 @@ namespace SearcherLibrary.FileExtensions
 
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using System.Text.RegularExpressions;
     using iTextSharp.text.pdf;
     using iTextSharp.text.pdf.parser;
@@ -71,6 +72,8 @@ namespace SearcherLibrary.FileExtensions
 
             using (var reader = new PdfReader(fileName))
             {
+                StringBuilder documentAllContent = new StringBuilder();
+
                 for (var pageCounter = 1; pageCounter <= reader.NumberOfPages; pageCounter++)
                 {
                     if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
@@ -83,28 +86,37 @@ namespace SearcherLibrary.FileExtensions
                         ////pdfPage = PdfTextExtractor.GetTextFromPage(reader, pageCounter);                                            // Shows the result with line breaks.
                         var pdfPage = Regex.Replace(PdfTextExtractor.GetTextFromPage(reader, pageCounter), @"\r\n?|\n", " ").Trim();
 
-                        foreach (var searchTerm in searchTerms)
+                        if (matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
                         {
-                            var matches = Regex.Matches(pdfPage, searchTerm, matcher.RegexOptions); // Use this match for getting the locations of the match.
+                            documentAllContent.AppendLine(pdfPage);
+                        }
 
-                            if (matches.Count > 0)
+                        if (!matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
+                        {
+
+                            foreach (var searchTerm in searchTerms)
                             {
-                                foreach (Match match in matches)
+                                var matches = Regex.Matches(pdfPage, searchTerm, matcher.RegularExpressionOptions); // Use this match for getting the locations of the match.
+
+                                if (matches.Count > 0)
                                 {
-                                    var startIndex = match.Index >= MaxIndexBoundary ? match.Index - MaxIndexBoundary : 0;
-                                    var endIndex = pdfPage.Length >= match.Index + match.Length + MaxIndexBoundary ? match.Index + match.Length + MaxIndexBoundary : pdfPage.Length;
-                                    var matchLine = pdfPage.Substring(startIndex, endIndex - startIndex);
-                                    var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
-                                    matchedLines.Add(new MatchedLine
+                                    foreach (Match match in matches)
                                     {
-                                        MatchId = matchCounter++,
-                                        Content = string.Format("{0} {1}:\t{2}", Strings.Page, pageCounter.ToString(), matchLine),
-                                        SearchTerm = searchTerm,
-                                        FileName = fileName,
-                                        LineNumber = 1,
-                                        StartIndex = searchMatch.Index + Strings.Page.Length + 3 + pageCounter.ToString().Length,
-                                        Length = searchMatch.Length
-                                    });
+                                        var startIndex = match.Index >= MaxIndexBoundary ? match.Index - MaxIndexBoundary : 0;
+                                        var endIndex = pdfPage.Length >= match.Index + match.Length + MaxIndexBoundary ? match.Index + match.Length + MaxIndexBoundary : pdfPage.Length;
+                                        var matchLine = pdfPage.Substring(startIndex, endIndex - startIndex);
+                                        var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
+                                        matchedLines.Add(new MatchedLine
+                                        {
+                                            MatchId = matchCounter++,
+                                            Content = string.Format("{0} {1}:\t{2}", Strings.Page, pageCounter.ToString(), matchLine),
+                                            SearchTerm = searchTerm,
+                                            FileName = fileName,
+                                            LineNumber = 1,
+                                            StartIndex = searchMatch.Index + Strings.Page.Length + 3 + pageCounter.ToString().Length,
+                                            Length = searchMatch.Length
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -118,6 +130,11 @@ namespace SearcherLibrary.FileExtensions
                     {
                         matchedLines.Clear();
                     }
+                }
+
+                if (matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
+                {
+                    matchedLines = matcher.GetMatch(new string[] { string.Join(string.Empty, documentAllContent.ToString()) }, searchTerms, Strings.Page);
                 }
 
                 reader.Close();

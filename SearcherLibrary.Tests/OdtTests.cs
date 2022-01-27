@@ -6,12 +6,12 @@ using Xunit;
 
 namespace SearcherLibrary.Tests
 {
-    public class DocxTests
+    public class OdtTests
     {
         #region Private Fields
 
         private static string rootDirectory = "FilesToTest";
-        string filePath = Path.Combine(Directory.GetParent(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath).FullName, rootDirectory, "Docx.docx");
+        string filePath = Path.Combine(Directory.GetParent(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath).FullName, rootDirectory, "Odt.odt");
 
         #endregion Private Fields
 
@@ -42,11 +42,11 @@ namespace SearcherLibrary.Tests
         }
 
         [Fact]
-        public void SearchText_Regex_CaseInsensitive_Multiline_MatchesThree()
+        public void SearchText_Regex_CaseInsensitive_Multiline_Matches80()
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "e(.|\n)*?o" }, new Matcher { RegularExpressionOptions = RegexOptions.Multiline | RegexOptions.IgnoreCase });
-            Assert.Equal(3, matchedLines.Count);
+            Assert.Equal(80, matchedLines.Count);
         }
 
         [Fact]
@@ -54,6 +54,14 @@ namespace SearcherLibrary.Tests
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "Th.*qu" }, new Matcher { RegularExpressionOptions = RegexOptions.Singleline });
+            Assert.Single(matchedLines);
+        }
+
+        [Fact]
+        public void SearchText_LongText_CaseInsensitive_MatchesOne()
+        {
+            var test = File.ReadAllText(filePath);
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "aa" }, new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase });
             Assert.Single(matchedLines);
         }
 

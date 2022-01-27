@@ -29,8 +29,10 @@ namespace SearcherLibrary.FileExtensions
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
+    using SearcherLibrary.Resources;
     using SharpCompress.Common;
     using SharpCompress.Readers;
 
@@ -87,6 +89,7 @@ namespace SearcherLibrary.FileExtensions
                                 {
                                     reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
                                     string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
+                                    StringBuilder presentationAllText = new StringBuilder();
 
                                     foreach (XElement element in XDocument.Load(fullFilePath, LoadOptions.None).Descendants().Where(d => d.Name.LocalName == "page"))
                                     {
@@ -98,43 +101,55 @@ namespace SearcherLibrary.FileExtensions
                                         {
                                             string slideAllText = string.Join(Environment.NewLine, element.Descendants().Where(sc => sc.Name.LocalName == "span").Select(sc => sc.Value));
 
-                                            foreach (string searchTerm in searchTerms)
+                                            if (!matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
                                             {
-                                                MatchCollection matches = Regex.Matches(slideAllText, searchTerm, matcher.RegexOptions);            // Use this match for getting the locations of the match.
-
-                                                if (matches.Count > 0)
+                                                foreach (string searchTerm in searchTerms)
                                                 {
-                                                    foreach (Match match in matches)
+                                                    MatchCollection matches = Regex.Matches(slideAllText, searchTerm, matcher.RegularExpressionOptions);            // Use this match for getting the locations of the match.
+
+                                                    if (matches.Count > 0)
                                                     {
-                                                        int startIndex = match.Index >= IndexBoundary ? match.Index - IndexBoundary : 0;
-                                                        int endIndex = (slideAllText.Length >= match.Index + match.Length + IndexBoundary) ? match.Index + match.Length + IndexBoundary : slideAllText.Length;
-                                                        string matchLine = slideAllText.Substring(startIndex, endIndex - startIndex);
-
-                                                        while (matchLine.StartsWith("\r") || matchLine.StartsWith("\n"))
+                                                        foreach (Match match in matches)
                                                         {
-                                                            matchLine = matchLine.Substring(1, matchLine.Length - 1);                       // Remove lines starting with the newline character.
+                                                            int startIndex = match.Index >= IndexBoundary ? match.Index - IndexBoundary : 0;
+                                                            int endIndex = (slideAllText.Length >= match.Index + match.Length + IndexBoundary) ? match.Index + match.Length + IndexBoundary : slideAllText.Length;
+                                                            string matchLine = slideAllText.Substring(startIndex, endIndex - startIndex);
+
+                                                            while (matchLine.StartsWith("\r") || matchLine.StartsWith("\n"))
+                                                            {
+                                                                matchLine = matchLine.Substring(1, matchLine.Length - 1);                       // Remove lines starting with the newline character.
+                                                            }
+
+                                                            while ((matchLine.EndsWith("\r") || matchLine.EndsWith("\n")) && matchLine.Length > 2)
+                                                            {
+                                                                matchLine = matchLine.Substring(0, matchLine.Length - 1);                       // Remove lines ending with the newline character.
+                                                            }
+
+                                                            Match searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions);          // Use this match for the result highlight, based on additional characters being selected before and after the match.
+                                                            matchedLines.Add(new MatchedLine
+                                                            {
+                                                                MatchId = matchCounter++,
+                                                                Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Slide, slideNumber.ToString(), matchLine),
+                                                                SearchTerm = searchTerm,
+                                                                FileName = fileName,
+                                                                LineNumber = 1,
+                                                                StartIndex = searchMatch.Index + Resources.Strings.Slide.Length + 3 + slideNumber.ToString().Length,
+                                                                Length = searchMatch.Length
+                                                            });
                                                         }
-
-                                                        while ((matchLine.EndsWith("\r") || matchLine.EndsWith("\n")) && matchLine.Length > 2)
-                                                        {
-                                                            matchLine = matchLine.Substring(0, matchLine.Length - 1);                       // Remove lines ending with the newline character.
-                                                        }
-
-                                                        Match searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions);          // Use this match for the result highlight, based on additional characters being selected before and after the match.
-                                                        matchedLines.Add(new MatchedLine
-                                                        {
-                                                            MatchId = matchCounter++,
-                                                            Content = string.Format("{0} {1}:\t{2}", Resources.Strings.Slide, slideNumber.ToString(), matchLine),
-                                                            SearchTerm = searchTerm,
-                                                            FileName = fileName,
-                                                            LineNumber = 1,
-                                                            StartIndex = searchMatch.Index + Resources.Strings.Slide.Length + 3 + slideNumber.ToString().Length,
-                                                            Length = searchMatch.Length
-                                                        });
                                                     }
                                                 }
                                             }
+                                            else
+                                            {
+                                                presentationAllText.AppendLine(slideAllText);
+                                            }
                                         }
+                                    }
+
+                                    if (matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
+                                    {
+                                        matchedLines = matcher.GetMatch(new string[] { string.Join(Environment.NewLine, presentationAllText.ToString()) }, searchTerms, Strings.Slide);
                                     }
                                 }
                                 catch (PathTooLongException ptlex)
@@ -152,10 +167,6 @@ namespace SearcherLibrary.FileExtensions
 
                     archive.Dispose();
                 }
-            }
-            catch (Exception)
-            {
-                throw;
             }
             finally
             {

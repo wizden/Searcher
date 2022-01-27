@@ -109,7 +109,7 @@ namespace SearcherLibrary.FileExtensions
                                      var content = contentText.ToString();
                                      allContentStringBuilder.AppendLine(content);
 
-                                     if (!matcher.RegexOptions.HasFlag(RegexOptions.Multiline))
+                                     if (!matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
                                      {
                                          if (!string.IsNullOrEmpty(content))
                                          {
@@ -123,7 +123,7 @@ namespace SearcherLibrary.FileExtensions
                                                  try
                                                  {
                                                      content = content.Trim();
-                                                     var matches = Regex.Matches(content, searchTerm, matcher.RegexOptions); // Use this match for getting the locations of the match.
+                                                     var matches = Regex.Matches(content, searchTerm, matcher.RegularExpressionOptions); // Use this match for getting the locations of the match.
 
                                                      if (matches.Count > 0)
                                                      {
@@ -143,7 +143,7 @@ namespace SearcherLibrary.FileExtensions
                                                              }
 
                                                              var matchLine = content.Substring(startIndex, endIndex - startIndex);
-                                                             var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
+                                                             var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
 
                                                              // Only add, if it does not already exist (Not sure how the body elements manage to bring back the same content again.
                                                              if (!matchedLines.Any(ml => ml.SearchTerm == searchTerm &&
@@ -172,7 +172,7 @@ namespace SearcherLibrary.FileExtensions
                                      }
                                  });
 
-                    if (matcher.RegexOptions.HasFlag(RegexOptions.Multiline))
+                    if (matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
                     {
                         // Get matches not found in above list, if using Regex, since the above code will not catch matches that span across "Run" content.
                         var allContentMatchedLines = new List<MatchedLine>();
@@ -187,7 +187,7 @@ namespace SearcherLibrary.FileExtensions
                             try
                             {
                                 var allContent = allContentStringBuilder.ToString().Trim();
-                                var matches = Regex.Matches(allContent, searchTerm, matcher.RegexOptions); // Use this match for getting the locations of the match.
+                                var matches = Regex.Matches(allContent, searchTerm, matcher.RegularExpressionOptions); // Use this match for getting the locations of the match.
 
                                 if (matches.Count > 0)
                                 {
@@ -196,7 +196,7 @@ namespace SearcherLibrary.FileExtensions
                                         startIndex = match.Index;
                                         endIndex = match.Index + match.Length;
                                         var matchLine = allContent.Substring(startIndex, endIndex - startIndex);
-                                        var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegexOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
+                                        var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
                                         allContentMatchedLines.Add(new MatchedLine
                                         {
                                             MatchId = matchCounter++,

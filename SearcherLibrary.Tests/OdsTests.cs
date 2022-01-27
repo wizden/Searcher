@@ -6,12 +6,12 @@ using Xunit;
 
 namespace SearcherLibrary.Tests
 {
-    public class DocxTests
+    public class OdsTests
     {
         #region Private Fields
 
         private static string rootDirectory = "FilesToTest";
-        string filePath = Path.Combine(Directory.GetParent(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath).FullName, rootDirectory, "Docx.docx");
+        string filePath = Path.Combine(Directory.GetParent(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath).FullName, rootDirectory, "Ods.ods");
 
         #endregion Private Fields
 
@@ -46,7 +46,7 @@ namespace SearcherLibrary.Tests
         {
             var test = File.ReadAllText(filePath);
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "e(.|\n)*?o" }, new Matcher { RegularExpressionOptions = RegexOptions.Multiline | RegexOptions.IgnoreCase });
-            Assert.Equal(3, matchedLines.Count);
+            Assert.Single(matchedLines);
         }
 
         [Fact]

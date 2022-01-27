@@ -60,38 +60,45 @@ namespace SearcherLibrary.FileExtensions
         {
             List<MatchedLine> matchedLines = new List<MatchedLine>();
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
-
             Directory.CreateDirectory(tempDirPath);
             SharpCompress.Archives.IArchive archive = null;
+            
+            try
+            {
+                
+                if (fileName.ToUpper().EndsWith(".GZ") && SharpCompress.Archives.GZip.GZipArchive.IsGZipFile(fileName))
+                {
+                    archive = SharpCompress.Archives.GZip.GZipArchive.Open(fileName);
+                }
+                else if (fileName.ToUpper().EndsWith(".RAR") && SharpCompress.Archives.Rar.RarArchive.IsRarFile(fileName))
+                {
+                    archive = SharpCompress.Archives.Rar.RarArchive.Open(fileName);
+                }
+                else if (fileName.ToUpper().EndsWith(".7Z") && SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(fileName))
+                {
+                    archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fileName);
+                }
+                else if (fileName.ToUpper().EndsWith(".TAR") && SharpCompress.Archives.Tar.TarArchive.IsTarFile(fileName))
+                {
+                    archive = SharpCompress.Archives.Tar.TarArchive.Open(fileName);
+                }
+                else if (fileName.ToUpper().EndsWith(".ZIP") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
+                {
+                    archive = SharpCompress.Archives.Zip.ZipArchive.Open(fileName);
+                }
 
-            if (fileName.ToUpper().EndsWith(".GZ") && SharpCompress.Archives.GZip.GZipArchive.IsGZipFile(fileName))
-            {
-                archive = SharpCompress.Archives.GZip.GZipArchive.Open(fileName);
+                if (archive != null)
+                {
+                    matchedLines = this.GetMatchedLinesInZipArchive(fileName, searchTerms, tempDirPath, archive, matcher);
+                    archive.Dispose();
+                }
             }
-            else if (fileName.ToUpper().EndsWith(".RAR") && SharpCompress.Archives.Rar.RarArchive.IsRarFile(fileName))
+            finally
             {
-                archive = SharpCompress.Archives.Rar.RarArchive.Open(fileName);
-            }
-            else if (fileName.ToUpper().EndsWith(".7Z") && SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(fileName))
-            {
-                archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fileName);
-            }
-            else if (fileName.ToUpper().EndsWith(".TAR") && SharpCompress.Archives.Tar.TarArchive.IsTarFile(fileName))
-            {
-                archive = SharpCompress.Archives.Tar.TarArchive.Open(fileName);
-            }
-            else if (fileName.ToUpper().EndsWith(".ZIP") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
-            {
-                archive = SharpCompress.Archives.Zip.ZipArchive.Open(fileName);
+                // Clean up temp directory if any errors occur.
+                this.RemoveTempDirectory(tempDirPath);
             }
 
-            if (archive != null)
-            {
-                matchedLines = this.GetMatchedLinesInZipArchive(fileName, searchTerms, tempDirPath, archive, matcher);
-                archive.Dispose();
-            }
-
-            this.RemoveTempDirectory(tempDirPath);
             return matchedLines;
         }
 
@@ -128,7 +135,7 @@ namespace SearcherLibrary.FileExtensions
 
             if (!string.IsNullOrWhiteSpace(newFileName))
             {
-                matchedLines.AddRange(matcher.GetMatch(newFileName, searchTerms));
+                matchedLines.AddRange(FileSearchHandlerFactory.Search(newFileName, searchTerms, matcher));
             }
 
             return matchedLines;
@@ -160,8 +167,8 @@ namespace SearcherLibrary.FileExtensions
                             try
                             {
                                 reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                                string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
-                                matchedLines.AddRange(matcher.GetMatch(fullFilePath, searchTerms));
+                                string fullFilePath = Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
+                                matchedLines.AddRange(FileSearchHandlerFactory.Search(fullFilePath, searchTerms, matcher));
 
                                 if (matchedLines != null && matchedLines.Count > 0)
                                 {

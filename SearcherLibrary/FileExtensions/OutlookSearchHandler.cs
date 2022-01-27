@@ -70,24 +70,17 @@ namespace SearcherLibrary.FileExtensions
         {
             List<MatchedLine> matchedLines = new List<MatchedLine>();
 
-            try
-            {
-                string fileExtension = Path.GetExtension(fileName).ToUpper();
+            string fileExtension = Path.GetExtension(fileName).ToUpper();
 
-                switch (fileExtension)
-                {
-                    case ".OFT":
-                    case ".MSG":
-                        matchedLines = this.GetMatchesInMsgOftFiles(fileName, searchTerms, matcher);
-                        break;
-                    case ".EML":
-                        matchedLines = this.GetMatchesInEmlFiles(fileName, searchTerms, matcher);
-                        break;
-                }
-            }
-            catch (Exception)
+            switch (fileExtension)
             {
-                throw;
+                case ".OFT":
+                case ".MSG":
+                    matchedLines = this.GetMatchesInMsgOftFiles(fileName, searchTerms, matcher);
+                    break;
+                case ".EML":
+                    matchedLines = this.GetMatchesInEmlFiles(fileName, searchTerms, matcher);
+                    break;
             }
 
             return matchedLines;
@@ -144,7 +137,7 @@ namespace SearcherLibrary.FileExtensions
 
                 foreach (string searchTerm in searchTerms)
                 {
-                    MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegexOptions);            // Use this match for getting the locations of the match.
+                    MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegularExpressionOptions);            // Use this match for getting the locations of the match.
                     if (matches.Count > 0)
                     {
                         foreach (Match match in matches)
@@ -202,7 +195,7 @@ namespace SearcherLibrary.FileExtensions
 
                     foreach (string searchTerm in searchTerms)
                     {
-                        MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegexOptions);            // Use this match for getting the locations of the match.
+                        MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegularExpressionOptions);            // Use this match for getting the locations of the match.
                         if (matches.Count > 0)
                         {
                             foreach (Match match in matches)

@@ -104,10 +104,6 @@ namespace SearcherLibrary.FileExtensions
                     archive.Dispose();
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
             finally
             {
                 this.RemoveTempDirectory(tempDirPath);
@@ -166,33 +162,29 @@ namespace SearcherLibrary.FileExtensions
                         }
 
                         // Loop through each table-cell content.
-                        foreach (XElement cellContent in rowContent.Elements().Where(e => e.Name.LocalName == "p"))
+                        string rowColumnLocation = $"{GetSpreadsheetColumnNameFromIndex(colCount)}{rowCount}";
+
+                        foreach (string searchTerm in searchTerms)
                         {
-                            string rowColumnLocation = $"{GetSpreadsheetColumnNameFromIndex(colCount)}{rowCount}";
+                            string cellContent = string.Join(Environment.NewLine, rowContent.Elements().Where(e => e.Name.LocalName == "p").Select(e => e.Value));
+                            MatchCollection matches = Regex.Matches(cellContent, searchTerm, matcher.RegularExpressionOptions);
 
-                            foreach (string searchTerm in searchTerms)
+                            if (matches.Count > 0)
                             {
-                                MatchCollection matches = Regex.Matches(cellContent.Value, searchTerm, matcher.RegexOptions);
-
-                                if (matches.Count > 0)
+                                foreach (Match match in matches)
                                 {
-                                    foreach (Match match in matches)
+                                    matchedLines.Add(new MatchedLine
                                     {
-                                        matchedLines.Add(new MatchedLine
-                                        {
-                                            MatchId = matchCounter++,
-                                            Content = string.Format("{0}\\{1}\t\t{2}", sheetName, rowColumnLocation, cellContent.Value),
-                                            SearchTerm = searchTerm,
-                                            FileName = fileName,
-                                            LineNumber = 1,
-                                            StartIndex = match.Index + (sheetName.Length + rowColumnLocation.Length + 3),
-                                            Length = match.Length
-                                        });
-                                    }
+                                        MatchId = matchCounter++,
+                                        Content = string.Format("{0}\\{1}\t\t{2}", sheetName, rowColumnLocation, cellContent),
+                                        SearchTerm = searchTerm,
+                                        FileName = fileName,
+                                        LineNumber = 1,
+                                        StartIndex = match.Index + (sheetName.Length + rowColumnLocation.Length + 3),
+                                        Length = match.Length
+                                    });
                                 }
                             }
-
-                            colCount++;
                         }
                     }
                 }

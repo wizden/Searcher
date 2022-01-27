@@ -120,6 +120,7 @@ namespace Searcher
                         }
                         else
                         {
+                            // Throw only if the exception is not of type IOException or InvalidDataException.
                             throw;
                         }
                     }

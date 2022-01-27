@@ -1800,9 +1800,8 @@ namespace Searcher
             this.filesSearchedCounter = 0;
             this.matcherObj.MatchWholeWord = this.matchWholeWord;
             this.matcherObj.IsRegexSearch = this.searchModeRegex;
-            this.matcherObj.IsMultiLineRegex = this.multilineRegex;
             this.matcherObj.AllMatchesInFile = this.searchTypeAll;
-            this.matcherObj.RegexOptions = this.regexOptions;
+            this.matcherObj.RegularExpressionOptions = this.regexOptions;
             this.matcherObj.CancellationTokenSource = this.cancellationTokenSource;
             List<Task> searchTasks = new List<Task>();
 
