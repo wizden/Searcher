@@ -33,6 +33,7 @@ namespace SearcherLibrary
     using System.Threading;
     using Resources;
     using FileExtensions;
+    using System.Diagnostics;
 
     /// <summary>
     /// Factory to determine which handler can process the search on a file.
@@ -135,9 +136,7 @@ namespace SearcherLibrary
         /// <returns>The <see cref="IFileSearchHandler" /> search handler to search file content.</returns>
         private static IFileSearchHandler GetSearchHandler(string fileName)
         {
-            var searchHandler = LazySearchHandlers.Value.FirstOrDefault(sh => sh.Key == Path.GetExtension(fileName).ToUpper()).Value;
-
-            if (searchHandler != null)
+            if (LazySearchHandlers.Value.TryGetValue(Path.GetExtension(fileName).ToUpper(), out IFileSearchHandler searchHandler))
             {
                 return searchHandler;
             }
