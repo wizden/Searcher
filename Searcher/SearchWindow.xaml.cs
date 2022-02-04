@@ -1442,19 +1442,12 @@ namespace Searcher
         {
             try
             {
-                if (Enum.GetNames(typeof(OtherExtensions)).Any(oe => Path.GetExtension(e.Uri.LocalPath).ToUpper().Contains(oe.ToUpper())))
-                {
-                    Process.Start(e.Uri.LocalPath);
-                }
-                else
-                {
-                    Process.Start(this.editorNamePath, "\"" + e.Uri.LocalPath + "\"");
-                }
+                Process.Start(e.Uri.LocalPath);
             }
-            catch (Exception)
+            catch (Win32Exception)
             {
+                // Fallback to open up using notepad for exception message - "No application is associated with the specified file for this operation".
                 Process.Start("notepad", e.Uri.LocalPath);
-                this.editorNamePath = "notepad";
             }
         }
 
