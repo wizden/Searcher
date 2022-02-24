@@ -29,3 +29,5 @@ Special thanks to the creators of the following libraries that is used by Search
 
 ## Additional Links
 [Using Searcher](https://github.com/wizden/Searcher/wiki/Using-Searcher)
+
+[Build Status] (https://ci.appveyor.com/api/projects/status/github/wizden/searcher?branch=master&svg=true)
