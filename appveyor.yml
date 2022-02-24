@@ -1,0 +1,9 @@
+configuration: Release
+
+# Restore nuget packages before running MSBuild
+before_build:
+  - nuget restore
+  
+# Build solution
+build:
+  verbosity: minimal
