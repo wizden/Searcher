@@ -31,6 +31,8 @@
 
     <system:String x:Key="CreatePreferencesFileQuestion">Keine Sucheinstellungen gefunden. Möchten Sie Ihre Sucheinstellungen speichern?</system:String>
 
+    <system:String x:Key="DeleteToRemoveItem">Drücken Sie Löschen, um Elemente zu entfernen</system:String>
+
     <system:String x:Key="Directory">Verzeichnis</system:String>
 
     <system:String x:Key="DirectoryPathNotFound">Zugriff auf Verzeichnis Pfad nicht möglich oder Pfad nicht gefunden</system:String>
