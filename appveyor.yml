@@ -7,3 +7,6 @@ before_build:
 # Build solution
 build:
   verbosity: minimal
+
+image:
+  Visual Studio 2022
