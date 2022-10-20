@@ -31,6 +31,8 @@
 
     <system:String x:Key="CreatePreferencesFileQuestion">Настройки поиска не найдены. Вы хотите копить настройки поиска?</system:String>
 
+    <system:String x:Key="DeleteToRemoveItem">Нажмите стирать, чтобы удалить элементы</system:String>
+
     <system:String x:Key="Directory">_Папка</system:String>
 
     <system:String x:Key="DirectoryPathNotFound">Невозможно получить доступ к путям каталога или пути не найдены</system:String>

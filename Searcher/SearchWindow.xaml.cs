@@ -1276,9 +1276,6 @@ namespace Searcher
                     searchedFileList = new SearchedFileList(this.filesToSearch);
                 }
 
-                Point windowLocation = this.PgBarSearch.PointToScreen(new Point(0, 0));
-                searchedFileList.Left = windowLocation.X + (this.PgBarSearch.ActualWidth / 4);
-                searchedFileList.Top = windowLocation.Y;
                 searchedFileList.Owner = this;
                 searchedFileList.ShowDialog();
 

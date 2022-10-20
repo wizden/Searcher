@@ -31,6 +31,8 @@
 
     <system:String x:Key="CreatePreferencesFileQuestion">No search preferences found. Do you want to save your search preferences?</system:String>
 
+    <system:String x:Key="DeleteToRemoveItem">Press Delete to remove item(s)</system:String>
+
     <system:String x:Key="Directory">_Directory</system:String>
 
     <system:String x:Key="DirectoryPathNotFound">Unable to access directory path(s) or path(s) cannot be found</system:String>

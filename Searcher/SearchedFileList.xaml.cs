@@ -47,6 +47,16 @@ namespace Searcher
         private static double windowHeight;
 
         /// <summary>
+        /// Private filed to retain window left position between instances.
+        /// </summary>
+        private static double windowLeft;
+
+        /// <summary>
+        /// Private filed to retain window top position between instances.
+        /// </summary>
+        private static double windowTop;
+
+        /// <summary>
         /// Private filed to retain window width between instances.
         /// </summary>
         private static double windowWidth;
@@ -64,10 +74,12 @@ namespace Searcher
             this.FilesToInclude = new List<string>();
             this.SetContentBasedOnLanguage();
 
-            if (windowWidth > 0 && windowHeight > 0)
+            if (windowWidth > 0 && windowHeight > 0 && windowLeft > 0 && windowTop > 0)
             {
                 this.Height = windowHeight;
                 this.Width = windowWidth;
+                this.Left = windowLeft;
+                this.Top = windowTop;
             }
         }
 
@@ -275,6 +287,8 @@ namespace Searcher
             this.BtnCopyList.Content = Application.Current.Resources["CopyAll"].ToString();
             this.ExpandAlwaysExcluded.Header = Application.Current.Resources["AlwaysExcluded"].ToString();
             this.ExpandTemporarilyExcluded.Header = Application.Current.Resources["TemporarilyExcluded"].ToString();
+            this.LstTemporarilyExcluded.ToolTip = Application.Current.Resources["DeleteToRemoveItem"].ToString();
+            this.LstAlwaysExcluded.ToolTip = Application.Current.Resources["DeleteToRemoveItem"].ToString();
         }
 
         /// <summary>
@@ -284,8 +298,10 @@ namespace Searcher
         /// <param name="e">The parameter is not used.</param>
         private void Window_Closed(object sender, EventArgs e)
         {
-            windowWidth = this.Width;
             windowHeight = this.Height;
+            windowLeft = this.Left;
+            windowTop = this.Top;
+            windowWidth = this.Width;
         }
 
         #endregion Private Methods  

@@ -31,6 +31,8 @@
 
     <system:String x:Key="CreatePreferencesFileQuestion">कोई खोज सेटिंग नहीं मिली। क्या आप अपनी खोज सेटिंग बनाना चाहते हैं?</system:String>
 
+    <system:String x:Key="DeleteToRemoveItem">आइटम को हटाने के लिए "डिलीट" दबाएं</system:String>
+
     <system:String x:Key="Directory">फ़ोल्डर</system:String>
 
     <system:String x:Key="DirectoryPathNotFound">फ़ोल्डर पथ (राशियों) या पथ तक पहुंचने में असमर्थ</system:String>
