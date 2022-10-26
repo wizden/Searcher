@@ -33,6 +33,7 @@ namespace Searcher
     using System.Windows.Controls;
     using System.Windows.Documents;
     using System.Windows.Input;
+    using System.Windows.Media;
 
     /// <summary>
     /// Interaction logic for SearchedFileList class.
@@ -72,7 +73,7 @@ namespace Searcher
         {
             this.InitializeComponent();
             this.FilesToInclude = new List<string>();
-            this.SetContentBasedOnLanguage();
+            this.SetUI();
 
             if (windowWidth > 0 && windowHeight > 0 && windowLeft > 0 && windowTop > 0)
             {
@@ -279,6 +280,29 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Set the custom background colour for the window.
+        /// </summary>
+        private void SetApplicationCustomBackground()
+        {
+            this.Background = PreferencesHandler.ApplicationBackColour;
+            this.LstFileList.Background = PreferencesHandler.ApplicationBackColour;
+            this.LstTemporarilyExcluded.Background = PreferencesHandler.ApplicationBackColour;
+            this.LstAlwaysExcluded.Background = PreferencesHandler.ApplicationBackColour;
+        }
+
+        /// <summary>
+        /// Set the custom foreground colour for the window.
+        /// </summary>
+        private void SetApplicationCustomForeground()
+        {
+            this.LstFileList.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.LstTemporarilyExcluded.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.LstAlwaysExcluded.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ExpandTemporarilyExcluded.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ExpandAlwaysExcluded.Foreground = PreferencesHandler.ApplicationForeColour;
+        }
+
+        /// <summary>
         /// Set readable content based on selected language.
         /// </summary>
         private void SetContentBasedOnLanguage()
@@ -289,6 +313,16 @@ namespace Searcher
             this.ExpandTemporarilyExcluded.Header = Application.Current.Resources["TemporarilyExcluded"].ToString();
             this.LstTemporarilyExcluded.ToolTip = Application.Current.Resources["DeleteToRemoveItem"].ToString();
             this.LstAlwaysExcluded.ToolTip = Application.Current.Resources["DeleteToRemoveItem"].ToString();
+        }
+
+        /// <summary>
+        /// Set up the UI to display.
+        /// </summary>
+        private void SetUI()
+        {
+            this.SetApplicationCustomBackground();
+            this.SetApplicationCustomForeground();
+            this.SetContentBasedOnLanguage();
         }
 
         /// <summary>

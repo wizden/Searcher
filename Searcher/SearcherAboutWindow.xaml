@@ -42,7 +42,7 @@
                 <RowDefinition Height="3*" />
                 <RowDefinition Height="30" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="Searcher" FontSize="30" />
+            <TextBlock Grid.Row="0" Name="TblkSearcher" Text="Searcher" FontSize="30" />
             <TextBlock Grid.Row="1" Name="TblkVersionNumber" />
             <TextBlock Grid.Row="2" Name="TblkShortLicenceNotice" TextWrapping="Wrap" />
             <StackPanel Grid.Row="3" Orientation="Horizontal">

@@ -32,6 +32,7 @@ namespace Searcher
     using System.Windows;
     using System.Windows.Documents;
     using System.Windows.Input;
+    using System.Windows.Media;
 
     /// <summary>
     /// Interaction logic for SearcherAbout window.
@@ -167,7 +168,7 @@ namespace Searcher
         /// </summary>
         private void InitialiseControls()
         {
-            this.SetContentBasedOnLanguage();
+            this.SetUI();
 
             this.TblkVersionNumber.Text = Common.VersionNumber;
             string yearInfo = DateTime.Today.Year > 2018
@@ -196,11 +197,22 @@ namespace Searcher
         }
 
         /// <summary>
-        /// Setup the about window without the preferences file.
+        /// Set the custom background colour for the window.
         /// </summary>
-        private void SetupAppWithoutPreferences()
+        private void SetApplicationCustomBackground()
         {
-            this.ChkUpdatesCheck.Visibility = Visibility.Collapsed;
+            this.Background = PreferencesHandler.ApplicationBackColour;
+        }
+
+        /// <summary>
+        /// Set the custom foreground colour for the window.
+        /// </summary>
+        private void SetApplicationCustomForeground()
+        {
+            this.TblkSearcher.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.TblkVersionNumber.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.TblkShortLicenceNotice.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ChkUpdatesCheck.Foreground = PreferencesHandler.ApplicationForeColour;
         }
 
         /// <summary>
@@ -211,6 +223,28 @@ namespace Searcher
             this.Title = Application.Current.Resources["AboutSearcher"].ToString();
             this.ChkUpdatesCheck.Content = Application.Current.Resources["MonthlyUpdateCheck"].ToString();
             this.BtnUpdateSearcher.Content = Application.Current.Resources["Update"].ToString();
+        }
+
+        /// <summary>
+        /// Set up the UI to display.
+        /// </summary>
+        private void SetUI()
+        {
+            if (PreferencesHandler.HasPreferences)
+            {
+                this.SetApplicationCustomBackground();
+                this.SetApplicationCustomForeground();
+            }
+
+            this.SetContentBasedOnLanguage();
+        }
+
+        /// <summary>
+        /// Setup the about window without the preferences file.
+        /// </summary>
+        private void SetupAppWithoutPreferences()
+        {
+            this.ChkUpdatesCheck.Visibility = Visibility.Collapsed;
         }
 
         #endregion Private Methods        

@@ -32,6 +32,7 @@ namespace Searcher
     using System.Text;
     using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Media;
     using System.Xml.Linq;
 
     /// <summary>
@@ -40,6 +41,16 @@ namespace Searcher
     public static class PreferencesHandler
     {
         #region Fields
+
+        /// <summary>
+        /// Private store for the background colour of the application
+        /// </summary>
+        private static SolidColorBrush applicationBackColour;
+
+        /// <summary>
+        /// Private store for the foreground colour of the application
+        /// </summary>
+        private static SolidColorBrush applicationForeColour;
 
         /// <summary>
         /// Private store for the main search window.
@@ -61,9 +72,67 @@ namespace Searcher
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SearcherPreferences.xml");
             }
         }
+
         #endregion Fields
 
         #region Properties
+
+        /// <summary>
+        /// Gets the background colour of the application
+        /// </summary>
+        public static SolidColorBrush ApplicationBackColour
+        {
+            get
+            {
+                if (applicationBackColour == null)
+                {
+                    applicationBackColour = new SolidColorBrush(Colors.White);
+
+                    if (HasPreferences)
+                    {
+                        string backGroundColourValue = PreferencesHandler.GetPreferenceValue("BackGroundColour");
+                        backGroundColourValue = backGroundColourValue.StartsWith("#") ? backGroundColourValue : "#" + backGroundColourValue;
+                        applicationBackColour = (SolidColorBrush)new BrushConverter().ConvertFromString(backGroundColourValue);
+                    }
+                }
+                
+                return applicationBackColour;
+            }
+        }
+
+        /// <summary>
+        /// Gets the foreground colour of the application
+        /// </summary>
+        public static SolidColorBrush ApplicationForeColour
+        {
+            get
+            {
+                if (applicationForeColour == null)
+                {
+                    applicationForeColour = new SolidColorBrush(Colors.Black);
+
+                    if (HasPreferences)
+                    {
+                        string foreGroundColourValue = PreferencesHandler.GetPreferenceValue("ForeGroundColour");
+                        foreGroundColourValue = foreGroundColourValue.StartsWith("#") ? foreGroundColourValue : "#" + foreGroundColourValue;
+                        applicationForeColour = (SolidColorBrush)new BrushConverter().ConvertFromString(foreGroundColourValue);
+                    }
+                }
+
+                return applicationForeColour;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether preferences have been set.
+        /// </summary>
+        public static bool HasPreferences
+        {
+            get
+            {
+                return PreferencesFile.Descendants("NoPreferences").Count() != 1;
+            }
+        }
 
         /// <summary>
         /// Gets the preferences file.
@@ -124,7 +193,7 @@ namespace Searcher
                 throw new IOException(string.Format("{0} {1}. {2}", Application.Current.Resources["PreferencesFileLoadFailure"].ToString(), fileName, ioe.Message));
             }
 
-            if (PreferencesFile != null)
+            if (HasPreferences)
             {
                 IOrderedEnumerable<string> defaultNodes = CreatePreferencesFile().Descendants().Select(t => t.Name.LocalName).OrderBy(t => t);
                 IOrderedEnumerable<string> prefFileNodes = prefFile.Descendants().Select(t => t.Name.LocalName).OrderBy(t => t);
@@ -181,6 +250,10 @@ namespace Searcher
                         else if (node == "BackGroundColour")
                         {
                             prefFile.Root.Add(new XElement("BackGroundColour", "#FFFFFF"));
+                        }
+                        else if (node == "ForeGroundColour")
+                        {
+                            prefFile.Root.Add(new XElement("ForeGroundColour", "#000000"));
                         }
                         else if (node == "HighlightResultsColour")
                         {
@@ -318,6 +391,16 @@ namespace Searcher
         /// Create a preference file.
         /// </summary>
         /// <returns>The search preference file.</returns>
+        public static void CreateEmptyPreferencesFile()
+        {
+            preferencesFile = XDocument.Parse(new XElement("NoPreferences").ToString(), LoadOptions.None);
+            PreferencesFile.Save(PreferenceFilePath);
+        }
+
+        /// <summary>
+        /// Create a preference file.
+        /// </summary>
+        /// <returns>The search preference file.</returns>
         private static XDocument CreatePreferencesFile()
         {
             // Not bothering with XSD, as this is a one-off config operation, and not used for data exchange with other systems.
@@ -334,6 +417,7 @@ namespace Searcher
                 new XElement("ShowExecutionTime", false),
                 new XElement("SeparatorCharacter", ";"),
                 new XElement("BackGroundColour", "#FFFFFF"),
+                new XElement("ForeGroundColour", "#000000"),
                 new XElement("HighlightResultsColour", "#FFDAB9"),        // Brushes.PeachPuff
                 new XElement("CustomEditor", string.Empty),
                 new XElement("CheckForUpdates", true),

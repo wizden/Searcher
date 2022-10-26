@@ -115,11 +115,6 @@ namespace Searcher
         private static object syncRoot = new object();
 
         /// <summary>
-        /// Private store for the background colour of the application
-        /// </summary>
-        private SolidColorBrush applicationBackColour = new SolidColorBrush();
-
-        /// <summary>
         /// Cancellation token source object to cancel file search.
         /// </summary>
         private CancellationTokenSource cancellationTokenSource;
@@ -479,7 +474,7 @@ namespace Searcher
 
                             if (this.showMatchCount)
                             {
-                                retVal.Add(new Run(matchCountStr));
+                                retVal.Add(AddRun(matchCountStr));
                             }
 
                             retVal.Add(new Run(Environment.NewLine));
@@ -489,12 +484,12 @@ namespace Searcher
                     this.matchesFound++;
                     this.Dispatcher.Invoke(() =>
                     {
-                        retVal.Add(new Run(ml.Content.Substring(0, ml.StartIndex)));
+                        retVal.Add(AddRun(ml.Content.Substring(0, ml.StartIndex)));
                         retVal.Add(new Run(Regex.Unescape(Regex.Escape(ml.Content.Substring(ml.StartIndex, ml.Length))))
                         {
-                            Background = this.highlightResults ? this.highlightResultBackColour : this.applicationBackColour
+                            Background = this.highlightResults ? this.highlightResultBackColour : PreferencesHandler.ApplicationBackColour
                         });
-                        retVal.Add(new Run(ml.Content.Substring(ml.StartIndex + ml.Length, ml.Content.Length - (ml.StartIndex + ml.Length))));
+                        retVal.Add(AddRun(ml.Content.Substring(ml.StartIndex + ml.Length, ml.Content.Length - (ml.StartIndex + ml.Length))));
 
                         retVal.Add(new Run(Environment.NewLine));
                     });
@@ -537,6 +532,19 @@ namespace Searcher
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Add a "Run" with the specified string
+        /// </summary>
+        /// <param name="content">The content to add.</param>
+        /// <returns>A "Run" document object with the specified string.</returns>
+        private Run AddRun(string content)
+        {
+            Run retVal = new Run(content);
+            retVal.Foreground = PreferencesHandler.ApplicationForeColour;
+            retVal.Background = PreferencesHandler.ApplicationBackColour;
+            return retVal;
         }
 
         /// <summary>
@@ -605,7 +613,7 @@ namespace Searcher
         {
             SearcherAboutWindow saw = new SearcherAboutWindow();
 
-            if (PreferencesHandler.PreferencesFile != null)
+            if (PreferencesHandler.HasPreferences)
             {
                 saw.AppHasPreferencesFile = PreferencesHandler.PreferencesFile != null;
                 saw.CanCheckForUpdates = PreferencesHandler.GetPreferenceValue("CheckForUpdates") == true.ToString();
@@ -614,7 +622,7 @@ namespace Searcher
             saw.Owner = this;
             saw.ShowDialog();
 
-            if (PreferencesHandler.PreferencesFile != null)
+            if (PreferencesHandler.HasPreferences)
             {
                 PreferencesHandler.SetPreferenceValue("CheckForUpdates", saw.CanCheckForUpdates.ToString());
             }
@@ -897,7 +905,7 @@ namespace Searcher
         private async void DownloadUpdates()
         {
             // This method is async void because if the search for update fails, we do not worry further as it does not impact the application usage.
-            if (PreferencesHandler.PreferencesFile != null && PreferencesHandler.GetPreferenceValue("CheckForUpdates").ToUpper() == true.ToString().ToUpper())
+            if (PreferencesHandler.HasPreferences && PreferencesHandler.GetPreferenceValue("CheckForUpdates").ToUpper() == true.ToString().ToUpper())
             {
                 UpdateApp updateApp = new UpdateApp(PreferencesHandler.PreferencesFile);
 
@@ -1316,7 +1324,6 @@ namespace Searcher
 
                 if (!File.Exists(PreferencesHandler.PreferenceFilePath))
                 {
-                    string test = Application.Current.Resources["CreatePreferencesFileQuestion"].ToString();
                     if (MessageBox.Show(Application.Current.Resources["CreatePreferencesFileQuestion"].ToString(), Application.Current.Resources["NoSearchPreferences"].ToString(), MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes, MessageBoxOptions.None) == MessageBoxResult.Yes)
                     {
                         PreferencesHandler.SetMainSearchWindow(this);
@@ -1324,24 +1331,30 @@ namespace Searcher
                     }
                     else
                     {
-                        shouldSavePreferences = false;
                         this.SetupAppWithoutPreferences();
                     }
                 }
                 else
                 {
-                    PreferencesHandler.SetMainSearchWindow(this);
-                    PreferencesHandler.CheckPreferencesFile(PreferencesHandler.PreferenceFilePath);
-                    this.SetInitialSearchOptions();
+                    if (!PreferencesHandler.HasPreferences)
+                    {
+                        this.SetupAppWithoutPreferences();
+                    }
+                    else
+                    {
+                        PreferencesHandler.SetMainSearchWindow(this);
+                        PreferencesHandler.CheckPreferencesFile(PreferencesHandler.PreferenceFilePath);
+                        this.SetInitialSearchOptions();
 
-                    this.AddPreferencesToItems(this.CmbDirectory, "SearchDirectories");
-                    this.AddPreferencesToItems(this.CmbFindWhat, "SearchContents");
-                    this.AddPreferencesToItems(this.CmbFilters, "SearchFilters");
-                    this.LoadPathsToAlwaysExlude();
+                        this.AddPreferencesToItems(this.CmbDirectory, "SearchDirectories");
+                        this.AddPreferencesToItems(this.CmbFindWhat, "SearchContents");
+                        this.AddPreferencesToItems(this.CmbFilters, "SearchFilters");
+                        this.LoadPathsToAlwaysExlude();
 
-                    this.CmbDirectory.Text = this.CmbDirectory.Items.Count > 0 ? this.CmbDirectory.Items[0].ToString() : string.Empty;
-                    this.CmbFindWhat.Text = this.CmbFindWhat.Items.Count > 0 ? this.CmbFindWhat.Items[0].ToString() : string.Empty;
-                    this.CmbFilters.Text = this.CmbFilters.Items.Count > 0 ? this.CmbFilters.Items[0].ToString() : string.Empty;
+                        this.CmbDirectory.Text = this.CmbDirectory.Items.Count > 0 ? this.CmbDirectory.Items[0].ToString() : string.Empty;
+                        this.CmbFindWhat.Text = this.CmbFindWhat.Items.Count > 0 ? this.CmbFindWhat.Items[0].ToString() : string.Empty;
+                        this.CmbFilters.Text = this.CmbFilters.Items.Count > 0 ? this.CmbFilters.Items[0].ToString() : string.Empty;
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(PreferencesHandler.PreferenceFilePath) && File.Exists(PreferencesHandler.PreferenceFilePath))
@@ -1425,6 +1438,9 @@ namespace Searcher
                 excludeDirectory.Tag = sender;
                 excludeDirectory.Click += this.ExcludeDirectory_Click;
                 mnu.Items.Add(excludeDirectory);
+
+                mnu.Background = PreferencesHandler.ApplicationBackColour;
+                mnu.Foreground = PreferencesHandler.ApplicationForeColour;
 
                 ((Hyperlink)sender).ContextMenu = mnu;
             }
@@ -1551,7 +1567,7 @@ namespace Searcher
             double horizontalOffset = this.TxtResults.HorizontalOffset;
             double verticalOffset = this.TxtResults.VerticalOffset;
             ResultsPopout newWnd = new ResultsPopout();
-            newWnd.TxtResults.Background = this.applicationBackColour;
+            newWnd.TxtResults.Background = PreferencesHandler.ApplicationBackColour;
             newWnd.Width = this.Width;
             newWnd.Height = this.TxtResults.ActualHeight;
             newWnd.Title = string.Format("{0} - {1}", Application.Current.Resources["Results"].ToString(), this.CmbFindWhat.Text.Substring(0, Math.Min(this.CmbFindWhat.Text.Length, 50)));
@@ -1577,23 +1593,6 @@ namespace Searcher
             }
 
             newWnd.Show();
-        }
-
-        /// <summary>
-        /// If filters exclusion is set, remove the files that are to be exlcuded from search.
-        /// </summary>
-        /// <param name="filtersToUse">The list of filters to exclude.</param>
-        private async Task RemoveFilesForFilterExclusion(List<string> filtersToUse)
-        {
-            await Task.Run(() =>
-            {
-                filesToSearch = filesToSearch.Distinct().ToList();
-
-                foreach (string filter in filtersToUse)
-                {
-                    filesToSearch.RemoveAll(f => Regex.Matches(f, filter.Replace("*", ".*"), RegexOptions.IgnoreCase).Count > 0);
-                }
-            });
         }
 
         /// <summary>
@@ -1652,6 +1651,22 @@ namespace Searcher
             });
         }
 
+        /// <summary>
+        /// If filters exclusion is set, remove the files that are to be exlcuded from search.
+        /// </summary>
+        /// <param name="filtersToUse">The list of filters to exclude.</param>
+        private async Task RemoveFilesForFilterExclusion(List<string> filtersToUse)
+        {
+            await Task.Run(() =>
+            {
+                filesToSearch = filesToSearch.Distinct().ToList();
+
+                foreach (string filter in filtersToUse)
+                {
+                    filesToSearch.RemoveAll(f => Regex.Matches(f, filter.Replace("*", ".*"), RegexOptions.IgnoreCase).Count > 0);
+                }
+            });
+        }
         /// <summary>
         /// Reset the search progress on initiating a search.
         /// </summary>
@@ -1871,27 +1886,40 @@ namespace Searcher
         /// </summary>
         private void SetApplicationCustomBackground()
         {
-            string backGroundColourValue = PreferencesHandler.GetPreferenceValue("BackGroundColour");
-            backGroundColourValue = backGroundColourValue.StartsWith("#") ? backGroundColourValue : "#" + backGroundColourValue;
+            this.Background = PreferencesHandler.ApplicationBackColour;
+            this.CmbDirectory.Background = PreferencesHandler.ApplicationBackColour;
+            this.CmbFindWhat.Background = PreferencesHandler.ApplicationBackColour;
+            this.CmbFilters.Background = PreferencesHandler.ApplicationBackColour;
+            this.TxtErrors.Background = PreferencesHandler.ApplicationBackColour;
+            this.TxtEditor.Background = PreferencesHandler.ApplicationBackColour;
+            this.DtpStartDate.Background = PreferencesHandler.ApplicationBackColour;
+            this.DtpEndDate.Background = PreferencesHandler.ApplicationBackColour;
+            this.TxtResults.Background = PreferencesHandler.ApplicationBackColour;
+        }
 
-            try
-            {
-                this.applicationBackColour = (SolidColorBrush)new BrushConverter().ConvertFromString(backGroundColourValue);
-                this.Background = this.applicationBackColour;
-                this.CmbDirectory.Background = this.applicationBackColour;
-                this.CmbFindWhat.Background = this.applicationBackColour;
-                this.CmbFilters.Background = this.applicationBackColour;
-                this.TxtErrors.Background = this.applicationBackColour;
-                this.TxtEditor.Background = this.applicationBackColour;
-                this.DtpStartDate.Background = this.applicationBackColour;
-                this.DtpEndDate.Background = this.applicationBackColour;
-                this.TxtResults.Background = this.applicationBackColour;
-            }
-            catch (FormatException)
-            {
-                // Do nothing. Leave the background colour as default.
-                PreferencesHandler.SetPreferenceValue("HighlightResultsColour", "#FFFFFF");
-            }
+        /// <summary>
+        /// Set the custom foreground colour for the window.
+        /// </summary>
+        private void SetApplicationCustomForeground()
+        {
+            this.LblDirectory.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.LblFindWhat.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.LblFilters.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.TxtErrors.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.TxtEditor.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.TblkStartDate.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.TblkEndDate.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ChkExcludeFilters.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ChkHighlightResults.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ChkMatchCase.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ChkMatchWholeWord.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ChkRegexMultiline.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ChkSearchSubfolders.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ChkShowMatchCount.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.RbtnNormalSearch.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.RbtnRegexSearch.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.ExpndrOptions.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.TblkLanguage.Foreground = PreferencesHandler.ApplicationForeColour;
         }
 
         /// <summary>
@@ -2023,11 +2051,7 @@ namespace Searcher
 
             this.SetSearchDate(this.DtpStartDate, "MinFileCreateSearchDate");
             this.SetSearchDate(this.DtpEndDate, "MaxFileCreateSearchDate");
-            this.SetWindowDimensions();
-            this.SetApplicationCustomBackground();
-            this.SetResultHighlightColour();
-            this.SetSearchItemsSeparator();
-            this.SetLanguage();
+            this.SetUI();
 
             if (!int.TryParse(PreferencesHandler.GetPreferenceValue("MaxDropDownItems"), out this.maxDropDownItems))
             {
@@ -2330,12 +2354,27 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Set up the UI to display.
+        /// </summary>
+        private void SetUI()
+        {
+            this.SetWindowDimensions();
+            this.SetApplicationCustomBackground();
+            this.SetApplicationCustomForeground();
+            this.SetResultHighlightColour();
+            this.SetSearchItemsSeparator();
+            this.SetLanguage();
+        }
+
+        /// <summary>
         /// Setup the application without the preferences file.
         /// </summary>
         private void SetupAppWithoutPreferences()
         {
+            shouldSavePreferences = false;
             this.BtnChangeEditor.Visibility = Visibility.Collapsed;
             this.SetDefaultCulture();
+            PreferencesHandler.CreateEmptyPreferencesFile();
         }
 
         /// <summary>

@@ -31,7 +31,7 @@ namespace Searcher
         public DirectoryExclude()
         {
             this.InitializeComponent();
-            this.SetContentBasedOnLanguage();
+            this.SetUI();
         }
         
         /// <summary>
@@ -58,6 +58,8 @@ namespace Searcher
                 item.Header = dirPath;
                 item.IsExpanded = true;
                 item.IsSelected = true;
+                item.Background = PreferencesHandler.ApplicationBackColour;
+                item.Foreground = PreferencesHandler.ApplicationForeColour;
 
                 if (this.TvDirectoryStructure.Items == null || this.TvDirectoryStructure.Items.Count == 0)
                 {
@@ -150,6 +152,31 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Set the custom background colour for the window.
+        /// </summary>
+        private void SetApplicationCustomBackground()
+        {
+            this.Background = PreferencesHandler.ApplicationBackColour;
+            this.TvDirectoryStructure.Background = PreferencesHandler.ApplicationBackColour;
+            this.TblkExclusionType.Background = PreferencesHandler.ApplicationBackColour;
+            this.RbtnTemporary.Background = PreferencesHandler.ApplicationBackColour;
+            this.RbtnPermanent.Background = PreferencesHandler.ApplicationBackColour;
+        }
+
+        /// <summary>
+        /// Set the custom foreground colour for the window.
+        /// </summary>
+        private void SetApplicationCustomForeground()
+        {
+            this.TvDirectoryStructure.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.TblkExclusionType.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.RbtnTemporary.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.RbtnTemporary.BorderBrush = PreferencesHandler.ApplicationForeColour;
+            this.RbtnPermanent.Foreground = PreferencesHandler.ApplicationForeColour;
+            this.RbtnPermanent.BorderBrush = PreferencesHandler.ApplicationForeColour;
+        }
+
+        /// <summary>
         /// Set readable content based on selected language.
         /// </summary>
         private void SetContentBasedOnLanguage()
@@ -163,13 +190,26 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Set up the UI to display.
+        /// </summary>
+        private void SetUI()
+        {
+            if (PreferencesHandler.HasPreferences)
+            {
+                this.SetApplicationCustomBackground();
+                this.SetApplicationCustomForeground();
+                this.SetContentBasedOnLanguage();
+            }
+        }
+
+        /// <summary>
         /// Set up window for display.
         /// </summary>
         /// <param name="sender">The parameter is not used.</param>
         /// <param name="e">The parameter is not used.</param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            this.GrdExclusionType.Visibility = this.PreferenceFileExists ? Visibility.Visible : Visibility.Collapsed;
+            this.GrdExclusionType.Visibility = PreferencesHandler.HasPreferences ? Visibility.Visible : Visibility.Collapsed;
             this.TvDirectoryStructure.Focus();
         }
     }
