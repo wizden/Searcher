@@ -61,6 +61,15 @@ namespace Searcher
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SearcherPreferences.xml");
             }
         }
+
+        public static string NoPreferenceFilePath
+        {
+            get
+            {
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NoPrefs");
+            }
+        }
+
         #endregion Fields
 
         #region Properties
@@ -76,7 +85,7 @@ namespace Searcher
                 {
                     if (File.Exists(PreferenceFilePath))
                     {
-                        LoadPreferences();
+                        preferencesFile = XDocument.Load(PreferenceFilePath);
                     }
                     else
                     {
@@ -280,14 +289,6 @@ namespace Searcher
         }
 
         /// <summary>
-        /// Load the preferences file.
-        /// </summary>
-        public static void LoadPreferences()
-        {
-            preferencesFile = XDocument.Load(PreferenceFilePath);
-        }
-
-        /// <summary>
         /// Save the preferences file.
         /// </summary>
         public static void SavePreferences()
@@ -311,7 +312,10 @@ namespace Searcher
         /// <param name="value">Value of the preference element.</param>
         public static void SetPreferenceValue(string preference, string value)
         {
-            PreferencesFile.Descendants(preference).FirstOrDefault().Value = value;
+            if (PreferencesHandler.PreferencesFile != null)
+            {
+                PreferencesFile.Descendants(preference).FirstOrDefault().Value = value;
+            }
         }
 
         /// <summary>
