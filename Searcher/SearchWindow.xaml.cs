@@ -614,10 +614,7 @@ namespace Searcher
             saw.Owner = this;
             saw.ShowDialog();
 
-            if (PreferencesHandler.PreferencesFile != null)
-            {
-                PreferencesHandler.SetPreferenceValue("CheckForUpdates", saw.CanCheckForUpdates.ToString());
-            }
+            PreferencesHandler.SetPreferenceValue("CheckForUpdates", saw.CanCheckForUpdates.ToString());
 
             if (saw.ClosingForUpdate)
             {
@@ -1316,15 +1313,20 @@ namespace Searcher
 
                 if (!File.Exists(PreferencesHandler.PreferenceFilePath))
                 {
-                    string test = Application.Current.Resources["CreatePreferencesFileQuestion"].ToString();
-                    if (MessageBox.Show(Application.Current.Resources["CreatePreferencesFileQuestion"].ToString(), Application.Current.Resources["NoSearchPreferences"].ToString(), MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes, MessageBoxOptions.None) == MessageBoxResult.Yes)
+                    if (!File.Exists(PreferencesHandler.NoPreferenceFilePath))
                     {
-                        PreferencesHandler.SetMainSearchWindow(this);
-                        PreferencesHandler.SavePreferences();
+                        if (MessageBox.Show(Application.Current.Resources["CreatePreferencesFileQuestion"].ToString(), Application.Current.Resources["NoSearchPreferences"].ToString(), MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes, MessageBoxOptions.None) == MessageBoxResult.Yes)
+                        {
+                            PreferencesHandler.SetMainSearchWindow(this);
+                            PreferencesHandler.SavePreferences();
+                        }
+                        else
+                        {
+                            this.SetupAppWithoutPreferences();
+                        }
                     }
                     else
                     {
-                        shouldSavePreferences = false;
                         this.SetupAppWithoutPreferences();
                     }
                 }
@@ -2006,7 +2008,6 @@ namespace Searcher
         /// </summary>
         private void SetInitialSearchOptions()
         {
-            PreferencesHandler.LoadPreferences();
             this.ChkMatchWholeWord.IsChecked = PreferencesHandler.GetPreferenceValue("MatchWholeWord").ToUpper() == true.ToString().ToUpper();
             this.ChkMatchCase.IsChecked = PreferencesHandler.GetPreferenceValue("MatchCase").ToUpper() == true.ToString().ToUpper();
             this.searchModeNormal = this.RbtnNormalSearch.IsChecked.Value == true;
@@ -2334,8 +2335,10 @@ namespace Searcher
         /// </summary>
         private void SetupAppWithoutPreferences()
         {
+            shouldSavePreferences = false;
             this.BtnChangeEditor.Visibility = Visibility.Collapsed;
             this.SetDefaultCulture();
+            File.Create(PreferencesHandler.NoPreferenceFilePath);
         }
 
         /// <summary>
