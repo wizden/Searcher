@@ -90,29 +90,9 @@ namespace Searcher
         private const int MaxSearchTextLength = 200;
 
         /// <summary>
-        /// Private store for limiting display of long strings.
-        /// </summary>
-        private const int MaxStringLengthCheck = 2000;
-
-        /// <summary>
-        /// Private store for setting the end index for strings where the length exceeds MaxStringLengthCheck.
-        /// </summary>
-        private const int MaxStringLengthDisplayIndexEnd = 200;
-
-        /// <summary>
-        /// Private store for setting the start index for strings where the length exceeds MaxStringLengthCheck.
-        /// </summary>
-        private const int MaxStringLengthDisplayIndexStart = 100;
-
-        /// <summary>
         /// The minimum scale value allowed.
         /// </summary>
         private const double MinScaleValue = 0.5;
-
-        /// <summary>
-        /// Lock object to determine matches from which file will update the UI.
-        /// </summary>
-        private static object syncRoot = new object();
 
         /// <summary>
         /// Private store for the background colour of the application
@@ -158,11 +138,6 @@ namespace Searcher
         /// Variable to store stopwatch that calculates execution time.
         /// </summary>
         private Stopwatch executionTime = new Stopwatch();
-
-        /// <summary>
-        /// Private store for the file name that will be used to update the UI when lots of matches exist.
-        /// </summary>
-        private string fileBeingDisplayed = string.Empty;
 
         /// <summary>
         /// Private store for the list of files that have already been searched.
@@ -648,12 +623,14 @@ namespace Searcher
         /// <param name="e">The RoutedEventArgs object.</param>
         private void BtnChangeEditor_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = Application.Current.Resources["ExecutableFiles"].ToString() + " (*.exe)|*.exe";
-            ofd.Multiselect = false;
-            ofd.InitialDirectory = @"C:\Windows\System32";
-            ofd.RestoreDirectory = true;
-            ofd.Title = Application.Current.Resources["SelectEditor"].ToString();
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = Application.Current.Resources["ExecutableFiles"].ToString() + " (*.exe)|*.exe",
+                Multiselect = false,
+                InitialDirectory = @"C:\Windows\System32",
+                RestoreDirectory = true,
+                Title = Application.Current.Resources["SelectEditor"].ToString()
+            };
 
             if (PreferencesHandler.GetPreference("CustomEditor") != null && PreferencesHandler.GetPreference("CustomEditor").Count() == 1
                 && PreferencesHandler.GetPreference("CustomEditor").FirstOrDefault() != null && !string.IsNullOrWhiteSpace(PreferencesHandler.GetPreferenceValue("CustomEditor")))
@@ -993,9 +970,11 @@ namespace Searcher
 
             if (!string.IsNullOrEmpty(fullFilePath))
             {
-                DirectoryExclude dirExcludeWindow = new DirectoryExclude(fullFilePath);
-                dirExcludeWindow.PreferenceFileExists = PreferencesHandler.PreferencesFile != null;
-                dirExcludeWindow.Owner = this;
+                DirectoryExclude dirExcludeWindow = new DirectoryExclude(fullFilePath)
+                {
+                    PreferenceFileExists = PreferencesHandler.PreferencesFile != null,
+                    Owner = this
+                };
 
                 if (dirExcludeWindow.ShowDialog() == true)
                 {
@@ -1422,9 +1401,11 @@ namespace Searcher
                     mnu.Items.Add(excludeFileAlways);
                 }
 
-                MenuItem excludeDirectory = new MenuItem();
-                excludeDirectory.Header = Application.Current.Resources["ExcludeDirectory"].ToString();
-                excludeDirectory.Tag = sender;
+                MenuItem excludeDirectory = new MenuItem
+                {
+                    Header = Application.Current.Resources["ExcludeDirectory"].ToString(),
+                    Tag = sender
+                };
                 excludeDirectory.Click += this.ExcludeDirectory_Click;
                 mnu.Items.Add(excludeDirectory);
 
@@ -2425,12 +2406,14 @@ namespace Searcher
                 {
                     try
                     {
-                        this.contentPopup = new ContentPopup(file, lineNo);
-                        this.contentPopup.Width = this.popupWindowWidth;
-                        this.contentPopup.Height = this.popupWindowHeight;
-                        this.contentPopup.WindowCloseTimeoutSeconds = (this.popupWindowTimeoutSeconds < 2 || this.popupWindowTimeoutSeconds > 20)
+                        this.contentPopup = new ContentPopup(file, lineNo)
+                        {
+                            Width = this.popupWindowWidth,
+                            Height = this.popupWindowHeight,
+                            WindowCloseTimeoutSeconds = (this.popupWindowTimeoutSeconds < 2 || this.popupWindowTimeoutSeconds > 20)
                             ? 4
-                            : this.popupWindowTimeoutSeconds;
+                            : this.popupWindowTimeoutSeconds
+                        };
                         this.contentPopup.Show();
                         this.contentPopup.Closed += this.ContentPopup_Closed;
                     }
