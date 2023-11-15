@@ -67,7 +67,6 @@ namespace SearcherLibrary.FileExtensions
                 using (var pptDocument = PresentationDocument.Open(fileName, false))
                 {
                     var slideAllText = this.GetPresentationSlidesText(pptDocument.PresentationPart);
-                    pptDocument.Close();
 
                     var startIndex = 0;
                     var endIndex   = 0;
