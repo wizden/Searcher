@@ -222,8 +222,6 @@ namespace SearcherLibrary.FileExtensions
                         matchedLines.AddRange(allContentMatchedLines.Where(acm => !matchedLines.Any(ml => acm.Length == ml.Length 
                             && acm.Content.Contains(ml.Content.Substring(Strings.Page.Length + 3 + ml.LineNumber.ToString().Length, ml.Content.Length - (Strings.Page.Length + 3 + ml.LineNumber.ToString().Length))))));
                     }
-
-                    document.Close();
                 }
 
                 if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
