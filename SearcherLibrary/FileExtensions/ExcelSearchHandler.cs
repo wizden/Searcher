@@ -86,9 +86,7 @@ namespace SearcherLibrary.FileExtensions
                     string cellValue = string.Empty;
                     List<OpenXmlElement> sharedStringTable = wkbkPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault()?.SharedStringTable?.ToList();        // Get it in memory for performance.
                     CellFormats cellFormats = wkbkPart.WorkbookStylesPart.Stylesheet.CellFormats;
-                    List<NumberingFormat> numberingFormats = wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats != null
-                        ? wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats.Elements<NumberingFormat>().ToList()
-                        : null;
+                    List<NumberingFormat> numberingFormats = wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats?.Elements<NumberingFormat>().ToList();
                     string cellFormatCodeUpper = string.Empty;
                     int counter = 0;
 
@@ -99,9 +97,8 @@ namespace SearcherLibrary.FileExtensions
                             throw new ArgumentException(Resources.Strings.SheetNotFound);
                         }
 
-                        WorksheetPart workSheetPart = wkbkPart.GetPartById(sheet.Id) as WorksheetPart;
 
-                        if (workSheetPart != null)
+                        if (wkbkPart.GetPartById(sheet.Id) is WorksheetPart workSheetPart)
                         {
                             foreach (Cell cell in ((WorksheetPart)wkbkPart.GetPartById(sheet.Id)).Worksheet.Descendants<Cell>())
                             {
@@ -126,8 +123,6 @@ namespace SearcherLibrary.FileExtensions
                             }
                         }
                     }
-
-                    document.Close();
                 }
 
                 foreach (string searchTerm in searchTerms)
@@ -206,27 +201,24 @@ namespace SearcherLibrary.FileExtensions
             retVal = excelCell.InnerText;
             if (excelCell.DataType != null)
             {
-                switch (excelCell.DataType.Value)
+                if (excelCell.DataType.Value == CellValues.SharedString)
                 {
-                    case CellValues.SharedString:
-                        if (sharedStringTable != null)
-                        {
-                            retVal = sharedStringTable.ElementAt(int.Parse(retVal)).InnerText;
-                        }
-
-                        break;
-                    case CellValues.Boolean:
-                        switch (retVal)
-                        {
-                            case "0":
-                                retVal = "FALSE";
-                                break;
-                            default:
-                                retVal = "TRUE";
-                                break;
-                        }
-
-                        break;
+                    if (sharedStringTable != null)
+                    {
+                        retVal = sharedStringTable.ElementAt(int.Parse(retVal)).InnerText;
+                    }
+                }
+                else if (excelCell.DataType.Value == CellValues.Boolean)
+                {
+                    switch (retVal)
+                    {
+                        case "0":
+                            retVal = "FALSE";
+                            break;
+                        default:
+                            retVal = "TRUE";
+                            break;
+                    }
                 }
             }
             else

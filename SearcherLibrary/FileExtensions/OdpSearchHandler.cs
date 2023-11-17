@@ -94,10 +94,9 @@ namespace SearcherLibrary.FileExtensions
                                     foreach (XElement element in XDocument.Load(fullFilePath, LoadOptions.None).Descendants().Where(d => d.Name.LocalName == "page"))
                                     {
                                         string slideName = element.Attributes().Where(sn => sn.Name.LocalName == "name").Select(sn => sn.Value).FirstOrDefault();
-                                        int slideNumber;
 
                                         // Search based on keyword "Slide", not the resources translation.
-                                        if (int.TryParse(slideName.Replace("Slide", string.Empty), out slideNumber))
+                                        if (int.TryParse(slideName.Replace("Slide", string.Empty), out int slideNumber))
                                         {
                                             string slideAllText = string.Join(Environment.NewLine, element.Descendants().Where(sc => sc.Name.LocalName == "span").Select(sc => sc.Value));
 
