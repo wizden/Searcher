@@ -26,6 +26,7 @@ namespace Searcher
      */
 
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -155,6 +156,10 @@ namespace Searcher
                 // Check for updates monthly. Why bother the user more frequently. Can look to make this configurable in the future.
                 if (this.lastUpdateCheckDate.AddMonths(1) < DateTime.Today)
                 {
+                    bool hasRuntime = this.IsNETWindowsDesktopRuntimeInstalled();
+                    var downloadUrl = await this.GetGitHubDownloadLinkAsync(hasRuntime);
+
+
                     retVal = await this.NewReleaseFoundOnlineAsync();
                 }
             }
@@ -345,6 +350,72 @@ namespace Searcher
             });
 
             return retVal;
+        }
+
+        private bool IsNETWindowsDesktopRuntimeInstalled()
+        {
+            bool retVal = false;
+            Process prcDesktopRuntimeInstalled = new Process();
+            prcDesktopRuntimeInstalled.StartInfo = new ProcessStartInfo
+            {
+                FileName = "dotnet.exe",
+                Arguments = "--list-runtimes",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+
+            try
+            {
+                prcDesktopRuntimeInstalled.Start();
+                string output = prcDesktopRuntimeInstalled.StandardOutput.ReadToEnd();
+                string error = prcDesktopRuntimeInstalled.StandardError.ReadToEnd();
+
+                if (string.IsNullOrWhiteSpace(error))
+                {
+                    string desktopRuntimeName = "Microsoft.WindowsDesktop.App";
+
+                    if (output.Contains(desktopRuntimeName))
+                    {
+                        short appNetRuntimeVersion = 6;
+                        var desktopRuntimes = output.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                            .Where(rt => rt.Contains(desktopRuntimeName));
+                        var versions = desktopRuntimes.Select(rt =>
+                            Version.Parse(rt.Substring(desktopRuntimeName.Length, rt.IndexOf("[") - desktopRuntimeName.Length).Trim()));
+                        retVal = versions.Any(v => v.Major >= appNetRuntimeVersion);
+                    }
+                }
+            }
+            catch
+            {
+                retVal = false; // Could not find dotnet runtime.
+            }
+
+            return retVal;
+        }
+
+        private async Task<string> GetGitHubDownloadLinkAsync(bool isNETWindowsDesktopRuntimeInstalled)
+        {
+            string processorArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString();
+            //  Searcher.2.0.0.Light.x86.exe
+            //  Searcher.2.0.0.Light.x64.exe
+            //  Searcher.2.0.0.Portable.x86.exe 
+            //  Searcher.2.0.0.Portable.x64.exe 
+            string portableType = isNETWindowsDesktopRuntimeInstalled ? "Light" : "Portable";
+            string urlSubstring = $"{portableType}.{processorArchitecture}";
+
+            string downloadUrl = string.Empty;
+            Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("searcher"));
+            Octokit.Release latestRelease = await client.Repository.Release.GetLatest("wizden", "searcher");
+
+            if (latestRelease != null && latestRelease.Assets != null && latestRelease.Assets.Count > 0)
+            {
+                downloadUrl = latestRelease.Assets
+                    .FirstOrDefault(a => a.BrowserDownloadUrl.ToLower()
+                        .Contains(urlSubstring.ToLower()))?.BrowserDownloadUrl ?? string.Empty;
+            }
+
+            return downloadUrl;
         }
 
         #endregion Private Methods
