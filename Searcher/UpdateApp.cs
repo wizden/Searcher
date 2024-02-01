@@ -261,7 +261,8 @@ namespace Searcher
                 if (!retVal && await this.NewReleaseExistsInGitHubAsync_NETCore())
                 {
                     this.siteWithLatestUpdate = "GitHub";
-                    downloadUrl = await this.GetLatestReleaseDownloadPathInGitHubAsync();
+                    bool hasRuntime = this.IsNETWindowsDesktopRuntimeInstalled();
+                    downloadUrl = await this.GetGitHubDownloadLinkAsync_NETCore(hasRuntime);
                     downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
                     retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
