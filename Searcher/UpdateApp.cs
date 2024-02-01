@@ -156,10 +156,6 @@ namespace Searcher
                 // Check for updates monthly. Why bother the user more frequently. Can look to make this configurable in the future.
                 if (this.lastUpdateCheckDate.AddMonths(1) < DateTime.Today)
                 {
-                    bool hasRuntime = this.IsNETWindowsDesktopRuntimeInstalled();
-                    var downloadUrl = await this.GetGitHubDownloadLinkAsync(hasRuntime);
-
-
                     retVal = await this.NewReleaseFoundOnlineAsync();
                 }
             }
@@ -261,6 +257,14 @@ namespace Searcher
                     downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
                     retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
+
+                if (!retVal && await this.NewReleaseExistsInGitHubAsync_NETCore())
+                {
+                    this.siteWithLatestUpdate = "GitHub";
+                    downloadUrl = await this.GetLatestReleaseDownloadPathInGitHubAsync();
+                    downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
+                    retVal = !string.IsNullOrEmpty(downloadedFile);
+                }
             }
 
             return retVal;
@@ -292,6 +296,54 @@ namespace Searcher
                 {
                     string searchValue = "/Searcher_v";
                     string strSiteVersion = latestReleaseDownloadUrl.Substring(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length).Replace(".zip", string.Empty);
+                    Version appVersion = new Version(Common.VersionNumber);
+                    Version siteVersion;
+
+                    if (Version.TryParse(strSiteVersion, out siteVersion))
+                    {
+                        newReleaseExists = siteVersion > appVersion;
+                    }
+                }
+
+                return newReleaseExists;
+            });
+
+            return retVal;
+        }
+
+
+        /// <summary>
+        /// Check if a new version exists on GitHub for the NETCore version.
+        /// </summary>
+        /// <returns>Boolean indicating whether a new version exists.</returns>
+        private async Task<bool> NewReleaseExistsInGitHubAsync_NETCore()
+        {
+            bool retVal = false;
+
+            retVal = await Task.Run<bool>(async () =>
+            {
+                bool newReleaseExists = false;
+                string latestReleaseDownloadUrl = string.Empty;
+
+                try
+                {
+                    bool hasRuntime = this.IsNETWindowsDesktopRuntimeInstalled();
+                    latestReleaseDownloadUrl = await this.GetGitHubDownloadLinkAsync_NETCore(hasRuntime);
+                }
+                catch
+                {
+                    // Cannot do much. Failed to access/retrieve data from the website.
+                }
+
+                if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
+                {
+                    string searchValue = "/Searcher_v";
+                    string strSiteVersion = latestReleaseDownloadUrl.Substring(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length)
+                        .Replace(".Portable", string.Empty)
+                        .Replace(".Light", string.Empty)
+                        .Replace(".x64", string.Empty)
+                        .Replace(".x86", string.Empty)
+                        .Replace(".zip", string.Empty);
                     Version appVersion = new Version(Common.VersionNumber);
                     Version siteVersion;
 
@@ -394,13 +446,13 @@ namespace Searcher
             return retVal;
         }
 
-        private async Task<string> GetGitHubDownloadLinkAsync(bool isNETWindowsDesktopRuntimeInstalled)
+        private async Task<string> GetGitHubDownloadLinkAsync_NETCore(bool isNETWindowsDesktopRuntimeInstalled)
         {
             string processorArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString();
-            //  Searcher.2.0.0.Light.x86.exe
-            //  Searcher.2.0.0.Light.x64.exe
-            //  Searcher.2.0.0.Portable.x86.exe 
-            //  Searcher.2.0.0.Portable.x64.exe 
+            //  Searcher_v2.x.x.Light.x86.exe
+            //  Searcher_v2.x.x.Light.x64.exe
+            //  Searcher_v2.x.x.Portable.x86.exe 
+            //  Searcher_v2.x.x.Portable.x64.exe 
             string portableType = isNETWindowsDesktopRuntimeInstalled ? "Light" : "Portable";
             string urlSubstring = $"{portableType}.{processorArchitecture}";
 

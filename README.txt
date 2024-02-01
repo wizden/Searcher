@@ -31,7 +31,6 @@ Searcher  is free software distributed under the GNU GPL.
   README.txt    - This file
 
   Special thanks to the creators of the following libraries that is used by Searcher:
-   - Costura Fody  - combine libraries into executable
    - iTextSharp    - reading pdf files.
    - OpenXml       - reading files saved using openxml format.
    - SharpCompress - library to deal with many compression types and formats.
