@@ -26,6 +26,7 @@ namespace Searcher
      */
 
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -210,11 +211,11 @@ namespace Searcher
         /// Gets the download path of the latest release in GitHub.
         /// </summary>
         /// <returns>The download path of the latest release in GitHub.</returns>
-        private async Task<string> GetLatestReleaseDownloadPathInGitHubAsync()
+        private async Task<string> GetLatestReleaseNetFrameworkDownloadPathInGitHubAsync()
         {
             string downloadUrl = string.Empty;
             Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("searcher"));
-            Octokit.Release latestRelease = await client.Repository.Release.GetLatest("wizden", "searcher");
+            Octokit.Release latestRelease = await client.Repository.Release.Get("wizden", "searcher", "v1.0.46");
 
             if (latestRelease != null && latestRelease.Assets != null && latestRelease.Assets.Count > 0)
             {
@@ -252,7 +253,16 @@ namespace Searcher
                 if (!retVal && await this.NewReleaseExistsInGitHubAsync())
                 {
                     this.siteWithLatestUpdate = "GitHub";
-                    downloadUrl = await this.GetLatestReleaseDownloadPathInGitHubAsync();
+                    downloadUrl = await this.GetLatestReleaseNetFrameworkDownloadPathInGitHubAsync();
+                    downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
+                    retVal = !string.IsNullOrEmpty(downloadedFile);
+                }
+
+                if (!retVal && await this.NewReleaseExistsInGitHubAsync_NETCore())
+                {
+                    this.siteWithLatestUpdate = "GitHub";
+                    bool hasRuntime = this.IsNETWindowsDesktopRuntimeInstalled();
+                    downloadUrl = await this.GetGitHubDownloadLinkAsync_NETCore(hasRuntime);
                     downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
                     retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
@@ -276,7 +286,7 @@ namespace Searcher
 
                 try
                 {
-                    latestReleaseDownloadUrl = await this.GetLatestReleaseDownloadPathInGitHubAsync();
+                    latestReleaseDownloadUrl = await this.GetLatestReleaseNetFrameworkDownloadPathInGitHubAsync();
                 }
                 catch
                 {
@@ -287,6 +297,54 @@ namespace Searcher
                 {
                     string searchValue = "/Searcher_v";
                     string strSiteVersion = latestReleaseDownloadUrl.Substring(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length).Replace(".zip", string.Empty);
+                    Version appVersion = new Version(Common.VersionNumber);
+                    Version siteVersion;
+
+                    if (Version.TryParse(strSiteVersion, out siteVersion))
+                    {
+                        newReleaseExists = siteVersion > appVersion;
+                    }
+                }
+
+                return newReleaseExists;
+            });
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// Check if a new version exists on GitHub for the NETCore version.
+        /// </summary>
+        /// <returns>Boolean indicating whether a new version exists.</returns>
+        private async Task<bool> NewReleaseExistsInGitHubAsync_NETCore()
+        {
+            bool retVal = false;
+
+            retVal = await Task.Run<bool>(async () =>
+            {
+                bool newReleaseExists = false;
+                string latestReleaseDownloadUrl = string.Empty;
+
+                try
+                {
+                    bool hasRuntime = this.IsNETWindowsDesktopRuntimeInstalled();
+                    latestReleaseDownloadUrl = await this.GetGitHubDownloadLinkAsync_NETCore(hasRuntime);
+                }
+                catch
+                {
+                    // Cannot do much. Failed to access/retrieve data from the website.
+                }
+
+                if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
+                {
+                    string searchValue = "/Searcher_v";
+                    string strSiteVersion = latestReleaseDownloadUrl.Substring(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length)
+                        .Replace(".Portable", string.Empty)
+                        .Replace(".Light", string.Empty)
+                        .Replace(".x64", string.Empty)
+                        .Replace(".x86", string.Empty)
+                        .Replace(".exe", string.Empty)
+                        .Replace(".zip", string.Empty);
                     Version appVersion = new Version(Common.VersionNumber);
                     Version siteVersion;
 
@@ -345,6 +403,81 @@ namespace Searcher
             });
 
             return retVal;
+        }
+
+        /// <summary>
+        /// Checks if dotnet runtime is installed on the system.
+        /// </summary>
+        /// <returns>Boolean indicating whether the dotnet runtime is installed on the system.</returns>
+        private bool IsNETWindowsDesktopRuntimeInstalled()
+        {
+            bool retVal = false;
+            Process prcDesktopRuntimeInstalled = new Process();
+            prcDesktopRuntimeInstalled.StartInfo = new ProcessStartInfo
+            {
+                FileName = "dotnet.exe",
+                Arguments = "--list-runtimes",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+
+            try
+            {
+                prcDesktopRuntimeInstalled.Start();
+                string output = prcDesktopRuntimeInstalled.StandardOutput.ReadToEnd();
+                string error = prcDesktopRuntimeInstalled.StandardError.ReadToEnd();
+
+                if (string.IsNullOrWhiteSpace(error))
+                {
+                    string desktopRuntimeName = "Microsoft.WindowsDesktop.App";
+
+                    if (output.Contains(desktopRuntimeName))
+                    {
+                        short appNetRuntimeVersion = 6;     // .NET 6 minimum version must be installed.
+                        var desktopRuntimes = output.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                            .Where(rt => rt.Contains(desktopRuntimeName));
+                        var versions = desktopRuntimes.Select(rt =>
+                            Version.Parse(rt.Substring(desktopRuntimeName.Length, rt.IndexOf("[") - desktopRuntimeName.Length).Trim()));
+                        retVal = versions.Any(v => v.Major >= appNetRuntimeVersion);
+                    }
+                }
+            }
+            catch
+            {
+                retVal = false; // Could not find dotnet runtime.
+            }
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// Gets the download link in GitHub for the NET Core version of the software.
+        /// </summary>
+        /// <param name="isNETWindowsDesktopRuntimeInstalled">Is the .NET Windows Desktop Runtime installed. Used to determine whether we get the SelfContained or FrameworkDependant version.</param>
+        /// <returns>String contianing the download URL for the application.</returns>
+        private async Task<string> GetGitHubDownloadLinkAsync_NETCore(bool isNETWindowsDesktopRuntimeInstalled)
+        {
+            string processorArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString();
+            //  Searcher_v2.x.x.Light.x86.exe
+            //  Searcher_v2.x.x.Light.x64.exe
+            //  Searcher_v2.x.x.Portable.x86.exe 
+            //  Searcher_v2.x.x.Portable.x64.exe 
+            string portableType = isNETWindowsDesktopRuntimeInstalled ? "Light" : "Portable";
+            string urlSubstring = $"{portableType}.{processorArchitecture}";
+
+            string downloadUrl = string.Empty;
+            Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("searcher"));
+            Octokit.Release latestRelease = await client.Repository.Release.GetLatest("wizden", "searcher");
+
+            if (latestRelease != null && latestRelease.Assets != null && latestRelease.Assets.Count > 0)
+            {
+                downloadUrl = latestRelease.Assets
+                    .FirstOrDefault(a => a.BrowserDownloadUrl.ToLower()
+                        .Contains(urlSubstring.ToLower()))?.BrowserDownloadUrl ?? string.Empty;
+            }
+
+            return downloadUrl;
         }
 
         #endregion Private Methods
