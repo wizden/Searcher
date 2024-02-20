@@ -211,11 +211,11 @@ namespace Searcher
         /// Gets the download path of the latest release in GitHub.
         /// </summary>
         /// <returns>The download path of the latest release in GitHub.</returns>
-        private async Task<string> GetLatestReleaseDownloadPathInGitHubAsync()
+        private async Task<string> GetLatestReleaseNetFrameworkDownloadPathInGitHubAsync()
         {
             string downloadUrl = string.Empty;
             Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("searcher"));
-            Octokit.Release latestRelease = await client.Repository.Release.GetLatest("wizden", "searcher");
+            Octokit.Release latestRelease = await client.Repository.Release.Get("wizden", "searcher", "v1.0.46");
 
             if (latestRelease != null && latestRelease.Assets != null && latestRelease.Assets.Count > 0)
             {
@@ -253,7 +253,7 @@ namespace Searcher
                 if (!retVal && await this.NewReleaseExistsInGitHubAsync())
                 {
                     this.siteWithLatestUpdate = "GitHub";
-                    downloadUrl = await this.GetLatestReleaseDownloadPathInGitHubAsync();
+                    downloadUrl = await this.GetLatestReleaseNetFrameworkDownloadPathInGitHubAsync();
                     downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
                     retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
@@ -286,7 +286,7 @@ namespace Searcher
 
                 try
                 {
-                    latestReleaseDownloadUrl = await this.GetLatestReleaseDownloadPathInGitHubAsync();
+                    latestReleaseDownloadUrl = await this.GetLatestReleaseNetFrameworkDownloadPathInGitHubAsync();
                 }
                 catch
                 {
@@ -311,7 +311,6 @@ namespace Searcher
 
             return retVal;
         }
-
 
         /// <summary>
         /// Check if a new version exists on GitHub for the NETCore version.
@@ -344,6 +343,7 @@ namespace Searcher
                         .Replace(".Light", string.Empty)
                         .Replace(".x64", string.Empty)
                         .Replace(".x86", string.Empty)
+                        .Replace(".exe", string.Empty)
                         .Replace(".zip", string.Empty);
                     Version appVersion = new Version(Common.VersionNumber);
                     Version siteVersion;
@@ -405,6 +405,10 @@ namespace Searcher
             return retVal;
         }
 
+        /// <summary>
+        /// Checks if dotnet runtime is installed on the system.
+        /// </summary>
+        /// <returns>Boolean indicating whether the dotnet runtime is installed on the system.</returns>
         private bool IsNETWindowsDesktopRuntimeInstalled()
         {
             bool retVal = false;
@@ -430,7 +434,7 @@ namespace Searcher
 
                     if (output.Contains(desktopRuntimeName))
                     {
-                        short appNetRuntimeVersion = 6;
+                        short appNetRuntimeVersion = 6;     // .NET 6 minimum version must be installed.
                         var desktopRuntimes = output.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
                             .Where(rt => rt.Contains(desktopRuntimeName));
                         var versions = desktopRuntimes.Select(rt =>
@@ -447,6 +451,11 @@ namespace Searcher
             return retVal;
         }
 
+        /// <summary>
+        /// Gets the download link in GitHub for the NET Core version of the software.
+        /// </summary>
+        /// <param name="isNETWindowsDesktopRuntimeInstalled">Is the .NET Windows Desktop Runtime installed. Used to determine whether we get the SelfContained or FrameworkDependant version.</param>
+        /// <returns>String contianing the download URL for the application.</returns>
         private async Task<string> GetGitHubDownloadLinkAsync_NETCore(bool isNETWindowsDesktopRuntimeInstalled)
         {
             string processorArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString();
