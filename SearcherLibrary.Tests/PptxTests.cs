@@ -11,7 +11,7 @@ namespace SearcherLibrary.Tests
         #region Private Fields
 
         private static string rootDirectory = "FilesToTest";
-        string filePath = Path.Combine(Directory.GetParent(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath).FullName, rootDirectory, "Pptx.pptx");
+        string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).Parent.Parent.Parent.FullName, rootDirectory, "Pptx.pptx");
 
         #endregion Private Fields
 

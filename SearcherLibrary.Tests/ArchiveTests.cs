@@ -23,7 +23,7 @@ namespace SearcherLibrary.Tests
         /// <returns>List of file names as an object array expected by <see cref="MemberDataAttribute"/>.</returns>
         public static List<object[]> GetFileNames()
         {
-            string rootPath = Path.Combine(Directory.GetParent(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath).FullName, rootDirectory);
+            string rootPath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).Parent.Parent.Parent.FullName, rootDirectory);
 
             return new List<object[]>()
             {

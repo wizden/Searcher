@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.RegularExpressions;
-using Xunit;
 
 namespace SearcherLibrary.Tests
 {
@@ -13,7 +9,7 @@ namespace SearcherLibrary.Tests
         {
             public SearchText_Regex_CaseInsensitive_Multiline_DataGenerator()
             {
-                string rootPath = Path.Combine(Directory.GetParent(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath).FullName, rootDirectory);
+                string rootPath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).Parent.Parent.Parent.FullName, rootDirectory);
                 Add(Path.Combine(rootPath, "Eml.eml"), 11);
                 Add(Path.Combine(rootPath, "Msg.msg"), 11);
                 Add(Path.Combine(rootPath, "Oft.oft"), 7);
@@ -24,7 +20,7 @@ namespace SearcherLibrary.Tests
         {
             public SearchText_DataGenerator()
             {
-                string rootPath = Path.Combine(Directory.GetParent(new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath).FullName, rootDirectory);
+                string rootPath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).Parent.Parent.Parent.FullName, rootDirectory);
                 Add(Path.Combine(rootPath, "Eml.eml"));
                 Add(Path.Combine(rootPath, "Msg.msg"));
                 Add(Path.Combine(rootPath, "Oft.oft"));
@@ -33,7 +29,7 @@ namespace SearcherLibrary.Tests
 
         #region Private Fields
 
-        private static string rootDirectory = "FilesToTest";
+        private static readonly string rootDirectory = "FilesToTest";
 
         #endregion Private Fields
 
