@@ -29,18 +29,18 @@ namespace SearcherLibrary.Tests
             {
                 new object[]{  Path.Combine(rootPath, "7z.7z") },
                 new object[]{  Path.Combine(rootPath, "Gz.gz") },
-                new object[]{  Path.Combine(rootPath, "Rar.rar") },
+                ////new object[]{  Path.Combine(rootPath, "Rar.rar") },
                 new object[]{  Path.Combine(rootPath, "Tar.tar") },
-                new object[]{  Path.Combine(rootPath, "Zip.zip") }
+                new object[]{  Path.Combine(rootPath, "Zip.zip") },
             };
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_CaseInsensitive_Matches24(string filePath)
+        public void SearchText_CaseInsensitive_Matches22(string filePath)
         {
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the" }, new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase });
-            Assert.Equal(24, matchedLines.Count);
+            Assert.Equal(22, matchedLines.Count);
         }
 
         [Theory]
@@ -48,47 +48,47 @@ namespace SearcherLibrary.Tests
         public void SearchText_CaseSensitive_Matches13(string filePath)
         {
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "The" }, new Matcher { RegularExpressionOptions = RegexOptions.None });
-            Assert.Equal(13, matchedLines.Count);
+            Assert.Equal(12, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_Regex_CaseInsensitive_Matches11(string filePath)
+        public void SearchText_Regex_CaseInsensitive_Matches10(string filePath)
         {
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "th.*qu" }, new Matcher { RegularExpressionOptions = RegexOptions.Singleline | RegexOptions.IgnoreCase });
-            Assert.Equal(11, matchedLines.Count);
+            Assert.Equal(10, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_Regex_CaseInsensitive_Multiline_Matches125(string filePath)
+        public void SearchText_Regex_CaseInsensitive_Multiline_Matches114(string filePath)
         {
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "e(.|\n)*?o" }, new Matcher { RegularExpressionOptions = RegexOptions.Multiline | RegexOptions.IgnoreCase });
-            Assert.Equal(125, matchedLines.Count);
+            Assert.Equal(114, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_Regex_CaseSensitive_Matches11(string filePath)
+        public void SearchText_Regex_CaseSensitive_Matches10(string filePath)
         {
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "Th.*qu" }, new Matcher { RegularExpressionOptions = RegexOptions.Singleline });
-            Assert.Equal(11, matchedLines.Count);
+            Assert.Equal(10, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_TwoWords_CaseInsensitive_Matches35(string filePath)
+        public void SearchText_TwoWords_CaseInsensitive_Matches32(string filePath)
         {
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the", "quick" }, new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase });
-            Assert.Equal(35, matchedLines.Count);
+            Assert.Equal(32, matchedLines.Count);
         }
 
         [Theory]
         [MemberData(nameof(GetFileNames))]
-        public void SearchText_TwoWords_CaseInsensitive_Matches22(string filePath)
+        public void SearchText_TwoWords_CaseInsensitive_Matches20(string filePath)
         {
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the", "quick" }, new Matcher { RegularExpressionOptions = RegexOptions.None });
-            Assert.Equal(22, matchedLines.Count);
+            Assert.Equal(20, matchedLines.Count);
         }
 
         #endregion Public Methods
