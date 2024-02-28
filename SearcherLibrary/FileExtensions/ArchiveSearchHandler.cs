@@ -59,9 +59,9 @@ namespace SearcherLibrary.FileExtensions
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
             List<MatchedLine> matchedLines = new List<MatchedLine>();
-            string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
+            string tempDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
             Directory.CreateDirectory(tempDirPath);
-            SharpCompress.Archives.IArchive archive = null;
+            SharpCompress.Archives.IArchive? archive = null;
             
             try
             {
@@ -168,7 +168,7 @@ namespace SearcherLibrary.FileExtensions
                             {
                                 reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
                                 string fullFilePath = Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
-                                matchedLines.AddRange(FileSearchHandlerFactory.Search(fullFilePath, searchTerms, matcher));
+                                matchedLines!.AddRange(FileSearchHandlerFactory.Search(fullFilePath, searchTerms, matcher));
 
                                 if (matchedLines != null && matchedLines.Count > 0)
                                 {
@@ -188,7 +188,7 @@ namespace SearcherLibrary.FileExtensions
 
                 if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
                 {
-                    matchedLines.Clear();
+                    matchedLines!.Clear();
                 }
             }
             catch (ArgumentNullException ane)
@@ -207,7 +207,7 @@ namespace SearcherLibrary.FileExtensions
                 }
             }
 
-            return matchedLines;
+            return matchedLines!;
         }
 
         #endregion Private Methods
