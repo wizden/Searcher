@@ -21,7 +21,6 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Searcher"
-        Icon="Searcher.ico"
         Closing="Window_Closing"
         MinHeight="350" MinWidth="740"
         Loaded="Window_Loaded"
@@ -167,7 +166,7 @@
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Grid.Column="0" Name="TblkEnglish" Text="English"></TextBlock>
-                                                    <Image Grid.Column="1" Name="ImgEnglish" Source="Images/en-US.png" Width="30" Height="20" />
+                                                    <Image Grid.Column="1" Name="ImgEnglish" Source="pack://application:,,,/Images/en-US.png" Width="30" Height="20" />
                                                 </Grid>
                                             </ComboBoxItem>
                                             <ComboBoxItem Tag="de-DE">
@@ -177,7 +176,7 @@
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Grid.Column="0" Name="TblkDeutsch" Text="Deutsch"></TextBlock>
-                                                    <Image Grid.Column="1" Name="ImgDeutsch" Source="Images/de-DE.png" Width="30" Height="20" />
+                                                    <Image Grid.Column="1" Name="ImgDeutsch" Source="pack://application:,,,/Images/de-DE.png" Width="30" Height="20" />
                                                 </Grid>
                                             </ComboBoxItem>
                                             <ComboBoxItem Tag="hi-IN">
@@ -187,7 +186,7 @@
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Grid.Column="0" Name="TblkHindi" Text="हिन्दी"></TextBlock>
-                                                    <Image Grid.Column="1" Name="ImgIndia" Source="Images/hi-IN.png" Width="30" Height="20" />
+                                                    <Image Grid.Column="1" Name="ImgIndia" Source="pack://application:,,,/Images/hi-IN.png" Width="30" Height="20" />
                                                 </Grid>
                                             </ComboBoxItem>
                                             <ComboBoxItem Tag="ru-RU">
@@ -197,7 +196,7 @@
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Grid.Column="0" Name="TblkRussian" Text="русский"></TextBlock>
-                                                    <Image Grid.Column="1" Name="ImgRussia" Source="Images/ru-RU.png" Width="30" Height="20" />
+                                                    <Image Grid.Column="1" Name="ImgRussia" Source="pack://application:,,,/Images/ru-RU.png" Width="30" Height="20" />
                                                 </Grid>
                                             </ComboBoxItem>
                                         </ComboBox>

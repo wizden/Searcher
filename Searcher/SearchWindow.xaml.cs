@@ -42,7 +42,6 @@ namespace Searcher
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
-    using System.Windows.Forms;
     using System.Windows.Input;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
@@ -50,6 +49,7 @@ namespace Searcher
     using System.Windows.Shell;
     using System.Windows.Threading;
     using System.Xml.Linq;
+    using Microsoft.Win32;
     using SearcherLibrary;
     using Application = System.Windows.Application;
     using Clipboard = System.Windows.Clipboard;
@@ -649,7 +649,7 @@ namespace Searcher
                 }
             }
 
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (ofd.ShowDialog() == true)
             {
                 this.editorNamePath = ofd.FileName;
                 this.TxtEditor.Text = Path.GetFileNameWithoutExtension(ofd.FileName);
@@ -1422,7 +1422,14 @@ namespace Searcher
         {
             try
             {
-                Process.Start(e.Uri.LocalPath);
+                new Process
+                {
+                    StartInfo = new ProcessStartInfo(e.Uri.LocalPath)
+                    {
+                        UseShellExecute = true
+                    }
+                }.Start();
+
             }
             catch (Win32Exception)
             {
@@ -1668,7 +1675,7 @@ namespace Searcher
                 sfd.Filter = "txt files (*.txt)|*.txt";
             }
 
-            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (sfd.ShowDialog() == true)
             {
                 File.WriteAllText(sfd.FileName, new TextRange(this.TxtResults.Document.ContentStart, this.TxtResults.Document.ContentEnd).Text);
             }

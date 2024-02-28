@@ -34,7 +34,7 @@
             <ColumnDefinition Width="4*" />
             <ColumnDefinition Width="7*" />
         </Grid.ColumnDefinitions>
-        <Image Grid.Column="0" Margin="12" Source="../Searcher.ico" />
+        <Image Grid.Column="0" Margin="12" Source="pack://application:,,,/Searcher.ico" />
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />

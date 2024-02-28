@@ -205,7 +205,7 @@ namespace Searcher
             {
                 System.Windows.Controls.ContextMenu mnu = new System.Windows.Controls.ContextMenu();
                 MenuItem openContainingDirectoryInExplorer = new MenuItem();
-                openContainingDirectoryInExplorer.Header = "Open containing directory in explorer";
+                openContainingDirectoryInExplorer.Header = Application.Current.Resources["OpenDirectoryInExplorer"].ToString();
                 openContainingDirectoryInExplorer.Tag = sender;
                 openContainingDirectoryInExplorer.Click += this.OpenContainingDirectoryInExplorer_Click;
 

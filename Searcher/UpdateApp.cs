@@ -31,6 +31,7 @@ namespace Searcher
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Xml.Linq;
 
@@ -387,7 +388,11 @@ namespace Searcher
                     if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
                     {
                         Newtonsoft.Json.Linq.JObject jsonSiteVersion = Newtonsoft.Json.Linq.JObject.Parse(latestReleaseDownloadUrl);
-                        string fileName = jsonSiteVersion["release"]["filename"].ToString();
+                        string fileName = jsonSiteVersion["platform_releases"]["windows"]["filename"].ToString();
+                        string strSiteVersionNetCore = Regex.Replace(Path.GetFileName(fileName)
+                            .Replace("Searcher_v", string.Empty)
+                            .Replace(".zip", string.Empty),
+                            ".[A-Z].*", "");
                         string strSiteVersion = fileName.Replace("/Searcher_v", string.Empty).Replace(".zip", string.Empty);
                         Version appVersion = new Version(Common.VersionNumber);
                         Version siteVersion;
