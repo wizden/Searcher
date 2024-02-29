@@ -68,7 +68,7 @@ namespace SearcherLibrary.FileExtensions
             try
             {
                 Directory.CreateDirectory(tempDirPath);
-                SharpCompress.Archives.IArchive archive = null;
+                SharpCompress.Archives.IArchive? archive = null;
 
                 if (fileName.ToUpper().EndsWith(".ODP") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
                 {
@@ -93,7 +93,7 @@ namespace SearcherLibrary.FileExtensions
 
                                     foreach (XElement element in XDocument.Load(fullFilePath, LoadOptions.None).Descendants().Where(d => d.Name.LocalName == "page"))
                                     {
-                                        string slideName = element.Attributes().Where(sn => sn.Name.LocalName == "name").Select(sn => sn.Value).FirstOrDefault();
+                                        string slideName = element.Attributes().Where(sn => sn.Name.LocalName == "name").Select(sn => sn.Value).FirstOrDefault() ?? string.Empty;
 
                                         // Search based on keyword "Slide", not the resources translation.
                                         if (int.TryParse(slideName.Replace("Slide", string.Empty), out int slideNumber))

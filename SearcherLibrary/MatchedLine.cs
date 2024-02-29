@@ -35,7 +35,7 @@ namespace SearcherLibrary
         /// <summary>
         /// Gets or sets the content of the line.
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets a value indicating whether the file has been processed for display.
@@ -45,7 +45,7 @@ namespace SearcherLibrary
         /// <summary>
         /// Gets or sets the name of the file.
         /// </summary>
-        public string FileName { get; set; }
+        public string FileName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the length of the match instance.
@@ -65,7 +65,7 @@ namespace SearcherLibrary
         /// <summary>
         /// Gets or sets the search term for which the match exists.
         /// </summary>
-        public string SearchTerm { get; set; }
+        public string SearchTerm { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the start index at which a match exists.
