@@ -6,30 +6,30 @@
 namespace Searcher
 {
     /*
-     * Searcher - Utility to search file content
-     * Copyright (C) 2018  Dennis Joseph
-     * 
-     * This file is part of Searcher.
+* Searcher - Utility to search file content
+* Copyright (C) 2018  Dennis Joseph
+* 
+* This file is part of Searcher.
 
-     * Searcher is free software: you can redistribute it and/or modify
-     * it under the terms of the GNU General Public License as published by
-     * the Free Software Foundation, either version 3 of the License, or
-     * (at your option) any later version.
-     * 
-     * Searcher is distributed in the hope that it will be useful,
-     * but WITHOUT ANY WARRANTY; without even the implied warranty of
-     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     * GNU General Public License for more details.
-     * 
-     * You should have received a copy of the GNU General Public License
-     * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
-     */
+* Searcher is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* Searcher is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+* 
+* You should have received a copy of the GNU General Public License
+* along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Net;
     using System.Net.Http;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
@@ -76,7 +76,7 @@ namespace Searcher
 
             if (this.preferenceFile.Descendants("LastUpdateCheckDate") != null && this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault() != null)
             {
-                DateTime.TryParse(this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault().Value, out this.lastUpdateCheckDate);
+                DateTime.TryParse(this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault()?.Value, out lastUpdateCheckDate);
             }
         }
 
@@ -152,7 +152,7 @@ namespace Searcher
         private async Task<bool> NewerVersionExistsAsync()
         {
             bool retVal = false;
-            if (this.preferenceFile.Descendants("CheckForUpdates").FirstOrDefault().Value.ToUpper() == true.ToString().ToUpper())
+            if (preferenceFile.Descendants("CheckForUpdates").FirstOrDefault()?.Value.ToUpper() == true.ToString().ToUpper())
             {
                 // Check for updates monthly. Why bother the user more frequently. Can look to make this configurable in the future.
                 if (this.lastUpdateCheckDate.AddMonths(1) < DateTime.Today)
@@ -173,7 +173,7 @@ namespace Searcher
         {
             string retVal = string.Empty;
 
-            retVal = await Task.Run<string>(() =>
+            retVal = await Task.Run<string>(async () =>
             {
                 string newFileName = string.Empty;
 
@@ -188,10 +188,16 @@ namespace Searcher
                                 File.Delete(this.latestReleaseDefaultFileName);
                             }
 
-                            using (WebClient client = new WebClient())
+                            using (HttpClient client = new HttpClient())
                             {
-                                client.DownloadFile(new Uri(downloadUrl), this.latestReleaseDefaultFileName);
                                 newFileName = this.latestReleaseDefaultFileName;
+                                var response = await client.GetAsync(new Uri(downloadUrl), HttpCompletionOption.ResponseContentRead,
+                                    new CancellationTokenSource(new TimeSpan(0, 5, 0)).Token);
+                                
+                                using (var fs = new FileStream(newFileName, FileMode.CreateNew))
+                                {
+                                    await response.Content.CopyToAsync(fs);
+                                }
                             }
                         }
                         catch
@@ -299,7 +305,7 @@ namespace Searcher
                     string searchValue = "/Searcher_v";
                     string strSiteVersion = latestReleaseDownloadUrl.Substring(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length).Replace(".zip", string.Empty);
                     Version appVersion = new Version(Common.VersionNumber);
-                    Version siteVersion;
+                    Version? siteVersion;
 
                     if (Version.TryParse(strSiteVersion, out siteVersion))
                     {
@@ -347,7 +353,7 @@ namespace Searcher
                         .Replace(".exe", string.Empty)
                         .Replace(".zip", string.Empty);
                     Version appVersion = new Version(Common.VersionNumber);
-                    Version siteVersion;
+                    Version? siteVersion;
 
                     if (Version.TryParse(strSiteVersion, out siteVersion))
                     {
@@ -387,19 +393,22 @@ namespace Searcher
 
                     if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
                     {
-                        Newtonsoft.Json.Linq.JObject jsonSiteVersion = Newtonsoft.Json.Linq.JObject.Parse(latestReleaseDownloadUrl);
-                        string fileName = jsonSiteVersion["platform_releases"]["windows"]["filename"].ToString();
-                        string strSiteVersionNetCore = Regex.Replace(Path.GetFileName(fileName)
-                            .Replace("Searcher_v", string.Empty)
-                            .Replace(".zip", string.Empty),
-                            ".[A-Z].*", "");
-                        string strSiteVersion = fileName.Replace("/Searcher_v", string.Empty).Replace(".zip", string.Empty);
-                        Version appVersion = new Version(Common.VersionNumber);
-                        Version siteVersion;
+                        JObject jsonSiteVersion = JObject.Parse(latestReleaseDownloadUrl);
+                        string fileName = jsonSiteVersion["platform_releases"]?["windows"]?["filename"]?.ToString() ?? string.Empty;
 
-                        if (Version.TryParse(strSiteVersion, out siteVersion))
+                        if (!string.IsNullOrWhiteSpace(fileName))
                         {
-                            newReleaseExists = siteVersion > appVersion;
+                            string strSiteVersion = Regex.Replace(Path.GetFileName(fileName)
+                                .Replace("Searcher_v", string.Empty)
+                                .Replace(".zip", string.Empty),
+                                ".[A-Z].*", "");
+                            Version appVersion = new Version(Common.VersionNumber);
+                            Version? siteVersion;
+
+                            if (Version.TryParse(strSiteVersion, out siteVersion))
+                            {
+                                newReleaseExists = siteVersion > appVersion;
+                            }
                         }
                     }
 
