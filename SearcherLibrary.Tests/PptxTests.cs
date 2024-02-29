@@ -1,8 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.RegularExpressions;
-using Xunit;
 
 namespace SearcherLibrary.Tests
 {
@@ -11,7 +8,7 @@ namespace SearcherLibrary.Tests
         #region Private Fields
 
         private static string rootDirectory = "FilesToTest";
-        string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).Parent.Parent.Parent.FullName, rootDirectory, "Pptx.pptx");
+        string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Pptx.pptx");
 
         #endregion Private Fields
 
