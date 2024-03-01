@@ -215,24 +215,6 @@ namespace Searcher
         }
 
         /// <summary>
-        /// Gets the download path of the latest release in GitHub.
-        /// </summary>
-        /// <returns>The download path of the latest release in GitHub.</returns>
-        private async Task<string> GetLatestReleaseNetFrameworkDownloadPathInGitHubAsync()
-        {
-            string downloadUrl = string.Empty;
-            Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("searcher"));
-            Octokit.Release latestRelease = await client.Repository.Release.Get("wizden", "searcher", "v1.0.46");
-
-            if (latestRelease != null && latestRelease.Assets != null && latestRelease.Assets.Count > 0)
-            {
-                downloadUrl = latestRelease.Assets[0].BrowserDownloadUrl;
-            }
-
-            return downloadUrl;
-        }
-
-        /// <summary>
         /// Determine if a new application version exists.
         /// </summary>
         /// <returns>Boolean indicating whether a new application version exists.</returns>
@@ -257,14 +239,6 @@ namespace Searcher
                     retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
 
-                if (!retVal && await this.NewReleaseExistsInGitHubAsync())
-                {
-                    this.siteWithLatestUpdate = "GitHub";
-                    downloadUrl = await this.GetLatestReleaseNetFrameworkDownloadPathInGitHubAsync();
-                    downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
-                    retVal = !string.IsNullOrEmpty(downloadedFile);
-                }
-
                 if (!retVal && await this.NewReleaseExistsInGitHubAsync_NETCore())
                 {
                     this.siteWithLatestUpdate = "GitHub";
@@ -274,47 +248,6 @@ namespace Searcher
                     retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
             }
-
-            return retVal;
-        }
-
-        /// <summary>
-        /// Check if a new version exists on GitHub.
-        /// </summary>
-        /// <returns>Boolean indicating whether a new version exists.</returns>
-        private async Task<bool> NewReleaseExistsInGitHubAsync()
-        {
-            bool retVal = false;
-
-            retVal = await Task.Run<bool>(async () =>
-            {
-                bool newReleaseExists = false;
-                string latestReleaseDownloadUrl = string.Empty;
-
-                try
-                {
-                    latestReleaseDownloadUrl = await this.GetLatestReleaseNetFrameworkDownloadPathInGitHubAsync();
-                }
-                catch
-                {
-                    // Cannot do much. Failed to access/retrieve data from the website.
-                }
-
-                if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
-                {
-                    string searchValue = "/Searcher_v";
-                    string strSiteVersion = latestReleaseDownloadUrl.Substring(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length).Replace(".zip", string.Empty);
-                    Version appVersion = new Version(Common.VersionNumber);
-                    Version? siteVersion;
-
-                    if (Version.TryParse(strSiteVersion, out siteVersion))
-                    {
-                        newReleaseExists = siteVersion > appVersion;
-                    }
-                }
-
-                return newReleaseExists;
-            });
 
             return retVal;
         }

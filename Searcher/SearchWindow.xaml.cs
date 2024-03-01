@@ -593,7 +593,7 @@ namespace Searcher
 
             if (saw.ClosingForUpdate)
             {
-                Process.Start(Application.ResourceAssembly.Location);
+                Process.Start(Path.Combine(AppContext.BaseDirectory, Common.ApplicationExecutableName));
                 this.Close();
             }
         }

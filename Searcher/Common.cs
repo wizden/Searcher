@@ -40,6 +40,11 @@ namespace Searcher
     public class Common
     {
         /// <summary>
+        /// Gets the name of the application executable.
+        /// </summary>
+        public static string ApplicationExecutableName => "Searcher.exe";
+
+        /// <summary>
         /// Gets a value indicating whether an application update has been downloaded and is pending to be applied.
         /// </summary>
         public static bool ApplicationUpdateExists
