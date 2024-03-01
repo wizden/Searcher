@@ -72,7 +72,7 @@ namespace SearcherLibrary
         /// <param name="allMatchesInFile">Should the search report only those files that match all search terms.</param>
         /// <param name="cancellationTokenSource">The cancellation object.</param>
         /// <param name="regexOptions">The regular expressions options object (e.g. Compiled, Multiline, IgnoreCase).</param>
-        public Matcher(bool matchWholeWord = false, bool isRegexSearch = false, bool allMatchesInFile = false, CancellationTokenSource cancellationTokenSource = null, RegexOptions regexOptions = System.Text.RegularExpressions.RegexOptions.None)
+        public Matcher(bool matchWholeWord = false, bool isRegexSearch = false, bool allMatchesInFile = false, CancellationTokenSource? cancellationTokenSource = null, RegexOptions regexOptions = System.Text.RegularExpressions.RegexOptions.None)
         {
             this.MatchWholeWord = matchWholeWord;
             this.IsRegexSearch = isRegexSearch;

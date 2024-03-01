@@ -25,20 +25,25 @@ namespace Searcher
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using SearcherLibrary;
     using System;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Resources;
+    using System.Reflection;
     using System.Windows.Controls;
     using System.Windows.Documents;
-    using SearcherLibrary;
 
     /// <summary>
     /// Class to perform common tasks.
     /// </summary>
     public class Common
     {
+        /// <summary>
+        /// Gets the name of the application executable.
+        /// </summary>
+        public static string ApplicationExecutableName => "Searcher.exe";
+
         /// <summary>
         /// Gets a value indicating whether an application update has been downloaded and is pending to be applied.
         /// </summary>
@@ -57,7 +62,7 @@ namespace Searcher
         {
             get
             {
-                System.Version programVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                Version? programVersion = Assembly.GetExecutingAssembly().GetName().Version ?? new Version();
                 string version = string.Format("{0}.{1}.{2}", programVersion.Major, programVersion.Minor, programVersion.Build);
                 return version;
             }
@@ -89,7 +94,7 @@ namespace Searcher
                 {
                     if (((ListBox)((MenuItem)sender).Tag).SelectedItems != null && ((ListBox)((MenuItem)sender).Tag).SelectedItems.Count == 1)
                     {
-                        fileNamePath = ((ListBox)((MenuItem)sender).Tag).SelectedItems[0].ToString();
+                        fileNamePath = ((ListBox)((MenuItem)sender).Tag).SelectedItems[0]?.ToString() ?? string.Empty;
                     }
                 }
 

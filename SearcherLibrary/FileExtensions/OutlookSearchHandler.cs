@@ -106,11 +106,11 @@ namespace SearcherLibrary.FileExtensions
             string sender = (email.Headers.Sender ?? email.Headers.From).DisplayName + " " + (email.Headers.Sender ?? email.Headers.From).Address;
             string dateSent = email.Headers.DateSent == DateTime.MinValue ? string.Empty : email.Headers.Date;
             string headerInfo = string.Join(", ", new string[] { sender, dateSent, recipients, recipientsCc, email.Headers.Subject });
-            string body = email.TextBody?.GetBodyAsText();
+            string body = email.TextBody?.GetBodyAsText() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(body))
             {
-                body = email.HtmlBody?.GetBodyAsText();
+                body = email.HtmlBody?.GetBodyAsText() ?? string.Empty;
             }
 
             matchedLines.AddRange(GetMatchesForHeader());

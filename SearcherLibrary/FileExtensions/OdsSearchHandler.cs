@@ -65,7 +65,7 @@ namespace SearcherLibrary.FileExtensions
             try
             {
                 Directory.CreateDirectory(tempDirPath);
-                SharpCompress.Archives.IArchive archive = null;
+                SharpCompress.Archives.IArchive? archive = null;
 
                 if (fileName.ToUpper().EndsWith(".ODS") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
                 {
@@ -132,7 +132,7 @@ namespace SearcherLibrary.FileExtensions
             // Loop through each sheet.
             foreach (XElement element in XDocument.Load(extractedContentFile, LoadOptions.None).Descendants().Where(d => d.Name.LocalName == "table"))
             {
-                string sheetName = element.Attributes().Where(a => a.Name.LocalName == "name").Select(a => a.Value).FirstOrDefault();
+                string sheetName = element.Attributes().Where(a => a.Name.LocalName == "name").Select(a => a.Value).FirstOrDefault() ?? string.Empty;
                 int rowCount = 0;
 
                 // Loop through each table-row.
@@ -140,7 +140,7 @@ namespace SearcherLibrary.FileExtensions
                 {
                     int colCount = 1;
 
-                    string emptyRowCount = tableContent.Attributes().Where(c => c.Name.LocalName == "number-rows-repeated").Select(c => c.Value).FirstOrDefault();
+                    string emptyRowCount = tableContent.Attributes().Where(c => c.Name.LocalName == "number-rows-repeated").Select(c => c.Value).FirstOrDefault() ?? string.Empty;
 
                     if (!string.IsNullOrWhiteSpace(emptyRowCount))
                     {
@@ -154,7 +154,7 @@ namespace SearcherLibrary.FileExtensions
                     // Loop through each table-cell.
                     foreach (XElement rowContent in tableContent.Elements().Where(e => e.Name.LocalName == "table-cell"))
                     {
-                        string emptyColCount = rowContent.Attributes().Where(c => c.Name.LocalName == "number-columns-repeated").Select(c => c.Value).FirstOrDefault();
+                        string emptyColCount = rowContent.Attributes().Where(c => c.Name.LocalName == "number-columns-repeated").Select(c => c.Value).FirstOrDefault() ?? string.Empty;
 
                         if (!string.IsNullOrWhiteSpace(emptyColCount))
                         {

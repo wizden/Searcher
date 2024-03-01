@@ -133,9 +133,10 @@ namespace Searcher
         {
             if (Common.ApplicationUpdateExists)
             {
+                // TODO: Use System.AppContext.BaseDirectory instead of AppDomain.CurrentDomain.BaseDirectory?
                 string newProgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg");
-                string pathToOldProg = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher.exe");
-                string pathToNewProg = System.IO.Path.Combine(newProgPath, "Searcher.exe");
+                string pathToOldProg = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Common.ApplicationExecutableName);
+                string pathToNewProg = System.IO.Path.Combine(newProgPath, Common.ApplicationExecutableName);
 
                 System.IO.File.Move(pathToOldProg, pathToOldProg + ".old");
 

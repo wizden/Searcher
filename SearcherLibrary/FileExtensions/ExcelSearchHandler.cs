@@ -81,44 +81,51 @@ namespace SearcherLibrary.FileExtensions
             {
                 using (SpreadsheetDocument document = SpreadsheetDocument.Open(fileName, false))
                 {
-                    WorkbookPart wkbkPart = document.WorkbookPart;
-                    List<Sheet> sheets = wkbkPart.Workbook.Descendants<Sheet>().ToList();
-                    string cellValue = string.Empty;
-                    List<OpenXmlElement> sharedStringTable = wkbkPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault()?.SharedStringTable?.ToList();        // Get it in memory for performance.
-                    CellFormats cellFormats = wkbkPart.WorkbookStylesPart.Stylesheet.CellFormats;
-                    List<NumberingFormat> numberingFormats = wkbkPart.WorkbookStylesPart.Stylesheet.NumberingFormats?.Elements<NumberingFormat>().ToList();
-                    string cellFormatCodeUpper = string.Empty;
-                    int counter = 0;
+                    WorkbookPart? wkbkPart = document.WorkbookPart;
 
-                    foreach (Sheet sheet in sheets)
+                    if (wkbkPart != null)
                     {
-                        if (sheet == null)
-                        {
-                            throw new ArgumentException(Resources.Strings.SheetNotFound);
-                        }
+                        List<Sheet> sheets = wkbkPart.Workbook.Descendants<Sheet>().ToList();
+                        string cellValue = string.Empty;
+                        // Get it in memory for performance.
+                        List<OpenXmlElement> sharedStringTable = wkbkPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault()?.SharedStringTable?.ToList()
+                            ?? new List<OpenXmlElement>();
+                        CellFormats cellFormats = wkbkPart.WorkbookStylesPart?.Stylesheet.CellFormats ?? new CellFormats();
+                        List<NumberingFormat> numberingFormats = wkbkPart.WorkbookStylesPart?.Stylesheet.NumberingFormats?.Elements<NumberingFormat>().ToList()
+                            ?? new List<NumberingFormat>();
+                        string cellFormatCodeUpper = string.Empty;
+                        int counter = 0;
 
-
-                        if (wkbkPart.GetPartById(sheet.Id) is WorksheetPart workSheetPart)
+                        foreach (Sheet sheet in sheets)
                         {
-                            foreach (Cell cell in ((WorksheetPart)wkbkPart.GetPartById(sheet.Id)).Worksheet.Descendants<Cell>())
+                            if (sheet == null)
                             {
-                                counter++;
+                                throw new ArgumentException(Resources.Strings.SheetNotFound);
+                            }
 
-                                if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
+                            var sheetIdValue = sheet.Id?.Value ?? string.Empty;
+                            if (wkbkPart.GetPartById(sheetIdValue) is WorksheetPart workSheetPart)
+                            {
+                                foreach (Cell cell in ((WorksheetPart)wkbkPart.GetPartById(sheetIdValue)).Worksheet.Descendants<Cell>())
                                 {
-                                    break;
-                                }
+                                    counter++;
 
-                                if (cell != null && cell.CellReference != null && !string.IsNullOrWhiteSpace(cell.InnerText))
-                                {
-                                    cellValue = this.GetSpreadsheetCellValue(cell, sharedStringTable, cellFormats, numberingFormats);
-                                    excelCellDetails.Add(new SpreadsheetCellDetail { CellContent = cellValue, CellReference = cell.CellReference.Value, SheetName = sheet.Name.Value });
-                                }
+                                    if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
+                                    {
+                                        break;
+                                    }
 
-                                if (counter % 10000 == 0)
-                                {
-                                    counter = 0;
-                                    System.Threading.Thread.Sleep(100);     // Large dataset. Give the UI 100 milliseconds to refresh itself.
+                                    if (cell != null && cell.CellReference != null && !string.IsNullOrWhiteSpace(cell.InnerText))
+                                    {
+                                        cellValue = this.GetSpreadsheetCellValue(cell, sharedStringTable, cellFormats, numberingFormats);
+                                        excelCellDetails.Add(new SpreadsheetCellDetail { CellContent = cellValue, CellReference = cell.CellReference.Value ?? string.Empty, SheetName = sheet.Name?.Value ?? string.Empty });
+                                    }
+
+                                    if (counter % 10000 == 0)
+                                    {
+                                        counter = 0;
+                                        System.Threading.Thread.Sleep(100);     // Large dataset. Give the UI 100 milliseconds to refresh itself.
+                                    }
                                 }
                             }
                         }
@@ -253,13 +260,16 @@ namespace SearcherLibrary.FileExtensions
                     }
                     else if (numberingFormats != null && cellFormat.NumberFormatId != null && cellFormat.NumberFormatId.Value > 163)
                     {
-                        NumberingFormat cellFormatUsed = numberingFormats.FirstOrDefault(nf => nf.NumberFormatId == cellFormat.NumberFormatId.Value);
+                        NumberingFormat? cellFormatUsed = numberingFormats.FirstOrDefault(nf => nf.NumberFormatId?.Value == cellFormat.NumberFormatId.Value);
 
-                        if (cellFormatUsed.FormatCode.Value.ToUpper().Contains("D") || cellFormatUsed.FormatCode.Value.ToUpper().Contains("M") || cellFormatUsed.FormatCode.Value.ToUpper().Contains("Y"))
+                        if (cellFormatUsed != null && cellFormatUsed.FormatCode != null && !string.IsNullOrWhiteSpace(cellFormatUsed.FormatCode.Value))
                         {
-                            if (double.TryParse(retVal.ToString(), out tempDouble))
+                            if (cellFormatUsed.FormatCode.Value.ToUpper().Contains("D") || cellFormatUsed.FormatCode.Value.ToUpper().Contains("M") || cellFormatUsed.FormatCode.Value.ToUpper().Contains("Y"))
                             {
-                                retVal = DateTime.FromOADate(double.Parse(retVal.ToString())).ToString();
+                                if (double.TryParse(retVal.ToString(), out tempDouble))
+                                {
+                                    retVal = DateTime.FromOADate(double.Parse(retVal.ToString())).ToString();
+                                }
                             }
                         }
                     }
@@ -283,17 +293,17 @@ namespace SearcherLibrary.FileExtensions
             /// <summary>
             /// Gets or sets the content of the cell.
             /// </summary>
-            internal string CellContent { get; set; }
+            internal string CellContent { get; set; } = string.Empty;
 
             /// <summary>
             /// Gets or sets the cell reference (address).
             /// </summary>
-            internal string CellReference { get; set; }
+            internal string CellReference { get; set; } = string.Empty;
 
             /// <summary>
             /// Gets or sets the name displayed for the sheet.
             /// </summary>
-            internal string SheetName { get; set; }
+            internal string SheetName { get; set; } = string.Empty;
 
             #endregion Internal Properties
         }

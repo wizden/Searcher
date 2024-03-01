@@ -49,13 +49,17 @@ namespace SearcherLibrary
             () =>
         {
             var retVal = new Dictionary<string, IFileSearchHandler>();
+            var fileSearchHandlerTypes = Assembly.GetAssembly(typeof(FileSearchHandler))?.GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(FileSearchHandler)));
 
-            foreach (var fshType in Assembly.GetAssembly(typeof(FileSearchHandler)).GetTypes().Where(t => t.IsSubclassOf(typeof(FileSearchHandler))))
+            foreach (var fshType in fileSearchHandlerTypes!)
             {
-                foreach (var fileType in fshType?.GetProperties().Where(p => p.Name == "Extensions" && p.PropertyType == typeof(List<string>))
-                   .Select(p => p.GetValue(null, null)).Cast<List<string>>().FirstOrDefault())
+                var fileTypes = fshType?.GetProperties().Where(p => p.Name == "Extensions" && p.PropertyType == typeof(List<string>))
+                    .Select(p => p.GetValue(null, null)).Cast<List<string>>().FirstOrDefault();
+
+                foreach (var fileType in fileTypes!)
                 {
-                    retVal.Add(fileType.ToUpper(), (IFileSearchHandler)Activator.CreateInstance(fshType));
+                    retVal.Add(fileType.ToUpper(), (IFileSearchHandler)Activator.CreateInstance(fshType!)!);
                 }
             }
 
@@ -136,7 +140,7 @@ namespace SearcherLibrary
         /// <returns>The <see cref="IFileSearchHandler" /> search handler to search file content.</returns>
         private static IFileSearchHandler GetSearchHandler(string fileName)
         {
-            if (LazySearchHandlers.Value.TryGetValue(Path.GetExtension(fileName).ToUpper(), out IFileSearchHandler searchHandler))
+            if (LazySearchHandlers.Value.TryGetValue(Path.GetExtension(fileName).ToUpper(), out var searchHandler))
             {
                 return searchHandler;
             }

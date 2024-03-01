@@ -3,7 +3,7 @@ Searcher
 
 Searcher is a utility to search file content in Windows. This utility is intended to help in search/grep for multiple content in multiple locations for multiple file types. It mainly supports the ASCII and UNICODE file formats.
 
-Searcher Copyright (C) 2018-2019 Dennis Joseph.
+Searcher Copyright (C) 2018-2024 Dennis Joseph.
 
 The main features of Searcher: 
 

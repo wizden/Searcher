@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.RegularExpressions;
-using Xunit;
 
 namespace SearcherLibrary.Tests
 {
@@ -23,7 +19,7 @@ namespace SearcherLibrary.Tests
         /// <returns>List of file names as an object array expected by <see cref="MemberDataAttribute"/>.</returns>
         public static List<object[]> GetFileNames()
         {
-            string rootPath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).Parent.Parent.Parent.FullName, rootDirectory);
+            string rootPath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory);
 
             return new List<object[]>()
             {

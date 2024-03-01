@@ -27,6 +27,7 @@ namespace SearcherLibrary.FileExtensions
 
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
@@ -72,7 +73,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// List of characters not allowed for the file system.
         /// </summary>
-        private static List<char> disallowedCharactersByOperatingSystem;
+        private static List<char>? disallowedCharactersByOperatingSystem;
 
         #endregion Private Fields
 
@@ -98,7 +99,7 @@ namespace SearcherLibrary.FileExtensions
                 {
                     disallowedCharactersByOperatingSystem = new List<char>();
 
-                    if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
                         // Based on: https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file. Excluding "\" and "/" as these get used for IEntry paths.
                         disallowedCharactersByOperatingSystem = new List<char>() { '<', '>', ':', '|', '?', '*' };
@@ -253,7 +254,7 @@ namespace SearcherLibrary.FileExtensions
         /// <param name="tempDirPath">The temporarily created directory containing archive contents.</param>
         internal void RemoveTempDirectory(string tempDirPath)
         {
-            IOException fileAccessException;
+            IOException? fileAccessException;
             int counter = 0;    // If unable to delete after 10 attempts, get out instead of staying stuck.
 
             do
@@ -268,7 +269,7 @@ namespace SearcherLibrary.FileExtensions
                 catch (IOException ioe)
                 {
                     fileAccessException = ioe;
-                    System.Threading.Thread.Sleep(counter);     // Sleep for tiny increments of time, while waiting for file to be released (max 45 milliseconds).
+                    Thread.Sleep(counter);     // Sleep for tiny increments of time, while waiting for file to be released (max 45 milliseconds).
                     counter++;
                 }
             } while (fileAccessException != null && fileAccessException.Message.ToUpper().Contains("The process cannot access the file".ToUpper()) && counter < 10);

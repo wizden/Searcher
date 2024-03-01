@@ -80,8 +80,8 @@ namespace SearcherLibrary.FileExtensions
                 using (var document = WordprocessingDocument.Open(fileName, false))
                 {
                     var allContentStringBuilder = new StringBuilder();
-                    var body = document.MainDocumentPart.Document.Body;
-                    body.Descendants().Where(bce => bce is Paragraph && bce.HasChildren).ToList().ForEach(bce =>
+                    var body = document.MainDocumentPart?.Document.Body;
+                    body?.Descendants().Where(bce => bce is Paragraph && bce.HasChildren).ToList().ForEach(bce =>
                                  {
                                      var contentText = new StringBuilder(); // Set content for each paragraph and detect page breaks (dependant on word processing application).
 

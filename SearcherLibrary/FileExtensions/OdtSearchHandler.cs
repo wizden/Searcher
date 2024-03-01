@@ -65,7 +65,7 @@ namespace SearcherLibrary.FileExtensions
             try
             {
                 Directory.CreateDirectory(tempDirPath);
-                SharpCompress.Archives.IArchive archive = null;
+                SharpCompress.Archives.IArchive? archive = null;
 
                 if (fileName.ToUpper().EndsWith(".ODT") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
                 {
