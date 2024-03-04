@@ -878,7 +878,7 @@ namespace Searcher
             {
                 UpdateApp updateApp = new UpdateApp(PreferencesHandler.PreferencesFile);
 
-                if (updateApp.UpdatedAppExistsLocally())
+                if (UpdateApp.UpdatedAppExistsLocally())
                 {
                     this.Dispatcher.Invoke(() =>
                     {

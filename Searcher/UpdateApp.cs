@@ -45,17 +45,17 @@ namespace Searcher
         /// <summary>
         /// The date when an attempt was made to check for updates.
         /// </summary>
-        private DateTime lastUpdateCheckDate = DateTime.MinValue;
+        private readonly DateTime lastUpdateCheckDate;
 
         /// <summary>
         /// Private store for the default file name when downloading the latest release.
         /// </summary>
-        private string latestReleaseDefaultFileName = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher_new.zip");
+        private readonly string latestReleaseDefaultFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher_new.zip");
 
         /// <summary>
         /// The preference file for the application.
         /// </summary>
-        private XDocument preferenceFile;
+        private readonly XDocument preferenceFile;
 
         /// <summary>
         /// Private store for the site that contains the latest update.
@@ -76,7 +76,10 @@ namespace Searcher
 
             if (this.preferenceFile.Descendants("LastUpdateCheckDate") != null && this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault() != null)
             {
-                DateTime.TryParse(this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault()?.Value, out lastUpdateCheckDate);
+                if (!DateTime.TryParse(this.preferenceFile.Descendants("LastUpdateCheckDate").FirstOrDefault()?.Value, out lastUpdateCheckDate))
+                {
+                    lastUpdateCheckDate = DateTime.MinValue;
+                }
             }
         }
 
@@ -88,10 +91,10 @@ namespace Searcher
         /// Check if a newer version has already been downloaded.
         /// </summary>
         /// <returns>A newer version exists locally.</returns>
-        public bool UpdatedAppExistsLocally()
+        public static bool UpdatedAppExistsLocally()
         {
             // Delete any previous version.
-            System.IO.File.Delete(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher.exe.old"));
+            File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Searcher.exe.old"));
             return Common.ApplicationUpdateExists;
         }
 
@@ -106,9 +109,9 @@ namespace Searcher
 
             if (newerVersionExists)
             {
-                if (System.IO.File.Exists(this.latestReleaseDefaultFileName))
+                if (File.Exists(this.latestReleaseDefaultFileName))
                 {
-                    string newProgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg");
+                    string newProgPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg");
 
                     try
                     {
@@ -127,7 +130,7 @@ namespace Searcher
                         }
                     }
 
-                    System.IO.File.Delete(this.latestReleaseDefaultFileName);
+                    File.Delete(this.latestReleaseDefaultFileName);
                 }
             }
             else
@@ -188,17 +191,13 @@ namespace Searcher
                                 File.Delete(this.latestReleaseDefaultFileName);
                             }
 
-                            using (HttpClient client = new HttpClient())
-                            {
-                                newFileName = this.latestReleaseDefaultFileName;
-                                var response = await client.GetAsync(new Uri(downloadUrl), HttpCompletionOption.ResponseContentRead,
-                                    new CancellationTokenSource(new TimeSpan(0, 5, 0)).Token);
-                                
-                                using (var fs = new FileStream(newFileName, FileMode.CreateNew))
-                                {
-                                    await response.Content.CopyToAsync(fs);
-                                }
-                            }
+                            using HttpClient client = new();
+                            newFileName = this.latestReleaseDefaultFileName;
+                            var response = await client.GetAsync(new Uri(downloadUrl), HttpCompletionOption.ResponseContentRead,
+                                new CancellationTokenSource(new TimeSpan(0, 5, 0)).Token);
+
+                            using var fs = new FileStream(newFileName, FileMode.CreateNew);
+                            await response.Content.CopyToAsync(fs);
                         }
                         catch
                         {
@@ -222,16 +221,15 @@ namespace Searcher
         {
             bool retVal = false;
 
-            if (System.IO.Directory.Exists(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg")))
+            if (Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewProg")))
             {
                 retVal = true;
             }
             else
             {
-                string downloadedFile = string.Empty;
-                string downloadUrl = string.Empty;
+                string downloadedFile, downloadUrl;
 
-                if (await this.NewReleaseExistsInSourceForgeAsync())
+                if (await NewReleaseExistsInSourceForgeAsync())
                 {
                     this.siteWithLatestUpdate = "SourceForge";
                     downloadUrl = "https://sourceforge.net/projects/searcher/files/latest/download";
@@ -239,11 +237,11 @@ namespace Searcher
                     retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
 
-                if (!retVal && await this.NewReleaseExistsInGitHubAsync_NETCore())
+                if (!retVal && await NewReleaseExistsInGitHubAsync_NETCore())
                 {
                     this.siteWithLatestUpdate = "GitHub";
-                    bool hasRuntime = this.IsNETWindowsDesktopRuntimeInstalled();
-                    downloadUrl = await this.GetGitHubDownloadLinkAsync_NETCore(hasRuntime);
+                    bool hasRuntime = IsNETWindowsDesktopRuntimeInstalled();
+                    downloadUrl = await GetGitHubDownloadLinkAsync_NETCore(hasRuntime);
                     downloadedFile = await this.GetDownloadedUpdateFilenameAsync(downloadUrl);
                     retVal = !string.IsNullOrEmpty(downloadedFile);
                 }
@@ -256,7 +254,7 @@ namespace Searcher
         /// Check if a new version exists on GitHub for the NETCore version.
         /// </summary>
         /// <returns>Boolean indicating whether a new version exists.</returns>
-        private async Task<bool> NewReleaseExistsInGitHubAsync_NETCore()
+        private static async Task<bool> NewReleaseExistsInGitHubAsync_NETCore()
         {
             bool retVal = false;
 
@@ -267,8 +265,8 @@ namespace Searcher
 
                 try
                 {
-                    bool hasRuntime = this.IsNETWindowsDesktopRuntimeInstalled();
-                    latestReleaseDownloadUrl = await this.GetGitHubDownloadLinkAsync_NETCore(hasRuntime);
+                    bool hasRuntime = IsNETWindowsDesktopRuntimeInstalled();
+                    latestReleaseDownloadUrl = await GetGitHubDownloadLinkAsync_NETCore(hasRuntime);
                 }
                 catch
                 {
@@ -285,10 +283,9 @@ namespace Searcher
                         .Replace(".x86", string.Empty)
                         .Replace(".exe", string.Empty)
                         .Replace(".zip", string.Empty);
-                    Version appVersion = new Version(Common.VersionNumber);
-                    Version? siteVersion;
+                    Version appVersion = new(Common.VersionNumber);
 
-                    if (Version.TryParse(strSiteVersion, out siteVersion))
+                    if (Version.TryParse(strSiteVersion, out Version? siteVersion))
                     {
                         newReleaseExists = siteVersion > appVersion;
                     }
@@ -304,49 +301,46 @@ namespace Searcher
         /// Check if a new version exists on SourceForge.
         /// </summary>
         /// <returns>Boolean indicating whether a new version exists.</returns>
-        private async Task<bool> NewReleaseExistsInSourceForgeAsync()
+        private static async Task<bool> NewReleaseExistsInSourceForgeAsync()
         {
             bool retVal = await Task.Run<bool>(async () =>
             {
                 bool newReleaseExists = false;
                 string path = @"https://sourceforge.net/projects/searcher/best_release.json";
-                using (HttpClient client = new HttpClient())
+                using HttpClient client = new();
+                client.Timeout = new TimeSpan(0, 0, 0, 30);
+                string latestReleaseDownloadUrl = string.Empty;
+
+                try
                 {
-                    client.Timeout = new TimeSpan(0, 0, 0, 30);
-                    string latestReleaseDownloadUrl = string.Empty;
+                    latestReleaseDownloadUrl = await client.GetStringAsync(new Uri(path));
+                }
+                catch
+                {
+                    // Cannot do much. Failed to access/retrieve data from the website.
+                }
 
-                    try
-                    {
-                        latestReleaseDownloadUrl = await client.GetStringAsync(new Uri(path));
-                    }
-                    catch
-                    {
-                        // Cannot do much. Failed to access/retrieve data from the website.
-                    }
+                if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
+                {
+                    JObject jsonSiteVersion = JObject.Parse(latestReleaseDownloadUrl);
+                    string fileName = jsonSiteVersion["platform_releases"]?["windows"]?["filename"]?.ToString() ?? string.Empty;
 
-                    if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
+                    if (!string.IsNullOrWhiteSpace(fileName))
                     {
-                        JObject jsonSiteVersion = JObject.Parse(latestReleaseDownloadUrl);
-                        string fileName = jsonSiteVersion["platform_releases"]?["windows"]?["filename"]?.ToString() ?? string.Empty;
+                        string strSiteVersion = Regex.Replace(Path.GetFileName(fileName)
+                            .Replace("Searcher_v", string.Empty)
+                            .Replace(".zip", string.Empty),
+                            ".[A-Z].*", "");
+                        Version appVersion = new(Common.VersionNumber);
 
-                        if (!string.IsNullOrWhiteSpace(fileName))
+                        if (Version.TryParse(strSiteVersion, out Version? siteVersion))
                         {
-                            string strSiteVersion = Regex.Replace(Path.GetFileName(fileName)
-                                .Replace("Searcher_v", string.Empty)
-                                .Replace(".zip", string.Empty),
-                                ".[A-Z].*", "");
-                            Version appVersion = new Version(Common.VersionNumber);
-                            Version? siteVersion;
-
-                            if (Version.TryParse(strSiteVersion, out siteVersion))
-                            {
-                                newReleaseExists = siteVersion > appVersion;
-                            }
+                            newReleaseExists = siteVersion > appVersion;
                         }
                     }
-
-                    return newReleaseExists;
                 }
+
+                return newReleaseExists;
             });
 
             return retVal;
@@ -356,17 +350,19 @@ namespace Searcher
         /// Checks if dotnet runtime is installed on the system.
         /// </summary>
         /// <returns>Boolean indicating whether the dotnet runtime is installed on the system.</returns>
-        private bool IsNETWindowsDesktopRuntimeInstalled()
+        private static bool IsNETWindowsDesktopRuntimeInstalled()
         {
             bool retVal = false;
-            Process prcDesktopRuntimeInstalled = new Process();
-            prcDesktopRuntimeInstalled.StartInfo = new ProcessStartInfo
+            Process prcDesktopRuntimeInstalled = new()
             {
-                FileName = "dotnet.exe",
-                Arguments = "--list-runtimes",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "dotnet.exe",
+                    Arguments = "--list-runtimes",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                }
             };
 
             try
@@ -403,7 +399,7 @@ namespace Searcher
         /// </summary>
         /// <param name="isNETWindowsDesktopRuntimeInstalled">Is the .NET Windows Desktop Runtime installed. Used to determine whether we get the SelfContained or FrameworkDependant version.</param>
         /// <returns>String contianing the download URL for the application.</returns>
-        private async Task<string> GetGitHubDownloadLinkAsync_NETCore(bool isNETWindowsDesktopRuntimeInstalled)
+        private static async Task<string> GetGitHubDownloadLinkAsync_NETCore(bool isNETWindowsDesktopRuntimeInstalled)
         {
             string processorArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString();
             //  Searcher_v2.x.x.Light.x86.exe
@@ -414,7 +410,7 @@ namespace Searcher
             string urlSubstring = $"{portableType}.{processorArchitecture}";
 
             string downloadUrl = string.Empty;
-            Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("searcher"));
+            Octokit.GitHubClient client = new(new Octokit.ProductHeaderValue("searcher"));
             Octokit.Release latestRelease = await client.Repository.Release.GetLatest("wizden", "searcher");
 
             if (latestRelease != null && latestRelease.Assets != null && latestRelease.Assets.Count > 0)
