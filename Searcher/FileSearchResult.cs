@@ -40,7 +40,7 @@ namespace Searcher
         /// <summary>
         /// Gets or sets the full path for the file.
         /// </summary>
-        public string FileNamePath { get; set; }
+        public string FileNamePath { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the search result matches.

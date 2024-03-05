@@ -56,6 +56,16 @@ namespace Searcher
         /// </summary>
         private int windowCloseTimeoutSeconds = 4;
 
+        /// <summary>
+        /// Private store for the height of the window.
+        /// </summary>
+        private int windowHeight;
+
+        /// <summary>
+        /// Private store for the width of the window.
+        /// </summary>
+        private int windowWidth;
+
         #endregion Private Fields
 
         #region Public Constructors
@@ -78,8 +88,8 @@ namespace Searcher
         {
             this.fileLines = File.ReadAllLines(file).ToList();
             this.TxtContent.Text = string.Join(Environment.NewLine, this.fileLines);
-            this.TxtLineNumbers.Text = string.Join(Environment.NewLine, Enumerable.Range(1, this.fileLines.Count()).Select(num => num));
-            this.TxtLineNumbers.Width = this.fileLines.Count().ToString().Length * 15;
+            this.TxtLineNumbers.Text = string.Join(Environment.NewLine, Enumerable.Range(1, this.fileLines.Count).Select(num => num));
+            this.TxtLineNumbers.Width = this.fileLines.Count.ToString().Length * 15;
             this.GrdColLineNumber.Width = new GridLength(this.TxtLineNumbers.Width, GridUnitType.Pixel);
             this.TxtLineNumbers.Text += Environment.NewLine + string.Empty;
             this.Title = file;
@@ -110,7 +120,7 @@ namespace Searcher
         {
             get
             {
-                return this.WindowHeight;
+                return this.windowHeight;
             }
 
             set
@@ -124,7 +134,7 @@ namespace Searcher
                     value = (int)this.MaxHeight;
                 }
 
-                this.WindowHeight = value;
+                this.windowHeight = value;
             }
         }
 
@@ -135,7 +145,7 @@ namespace Searcher
         {
             get
             {
-                return this.WindowWidth;
+                return this.windowWidth;
             }
 
             set
@@ -149,7 +159,7 @@ namespace Searcher
                     value = (int)this.MaxWidth;
                 }
 
-                this.WindowWidth = value;
+                this.windowWidth = value;
             }
         }
 
