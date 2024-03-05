@@ -79,7 +79,7 @@ namespace Searcher
             this.fileLines = File.ReadAllLines(file).ToList();
             this.TxtContent.Text = string.Join(Environment.NewLine, this.fileLines);
             this.TxtLineNumbers.Text = string.Join(Environment.NewLine, Enumerable.Range(1, this.fileLines.Count()).Select(num => num));
-            this.TxtLineNumbers.Width = this.fileLines.Count() * 10;
+            this.TxtLineNumbers.Width = this.fileLines.Count().ToString().Length * 15;
             this.GrdColLineNumber.Width = new GridLength(this.TxtLineNumbers.Width, GridUnitType.Pixel);
             this.TxtLineNumbers.Text += Environment.NewLine + string.Empty;
             this.Title = file;

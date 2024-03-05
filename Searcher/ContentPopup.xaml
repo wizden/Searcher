@@ -34,7 +34,8 @@
             <ColumnDefinition x:Uid="GrdColLineNumber" Name="GrdColLineNumber" Width="30" />
             <ColumnDefinition x:Uid="ColumnDefinition_1" Width="*" />
         </Grid.ColumnDefinitions>
-        <TextBox x:Uid="TxtLineNumbers" Grid.Column="0" IsEnabled="False" Name="TxtLineNumbers" Margin="0" AcceptsReturn="True" IsReadOnly="True" />
+        <TextBox x:Uid="TxtLineNumbers" Grid.Column="0" IsEnabled="False" Name="TxtLineNumbers" Margin="0" 
+                 AcceptsReturn="True" IsReadOnly="True" TextAlignment="Right" />
         <TextBox x:Uid="TxtContent" Grid.Column="1" Margin="0" Name="TxtContent" AcceptsReturn="True" IsReadOnly="True"
                  IsReadOnlyCaretVisible="True" ScrollViewer.ScrollChanged="TxtContent_ScrollChanged"
                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
