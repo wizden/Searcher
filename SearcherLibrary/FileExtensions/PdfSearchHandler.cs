@@ -29,9 +29,9 @@ namespace SearcherLibrary.FileExtensions
     using System.Collections.Generic;
     using System.Text;
     using System.Text.RegularExpressions;
-    using iTextSharp.text.pdf;
-    using iTextSharp.text.pdf.parser;
     using SearcherLibrary.Resources;
+    using UglyToad.PdfPig;
+    using UglyToad.PdfPig.DocumentLayoutAnalysis.TextExtractor;
 
     /// <summary>
     /// Class to search PDF files.
@@ -52,7 +52,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new List<string> { ".PDF" };
+        public static new List<string> Extensions => new() { ".PDF" };
 
         #endregion Public Properties
 
@@ -70,11 +70,12 @@ namespace SearcherLibrary.FileExtensions
             var matchCounter = 0;
             var matchedLines = new List<MatchedLine>();
 
-            using (var reader = new PdfReader(fileName))
+            using (var document = PdfDocument.Open(fileName))
             {
-                StringBuilder documentAllContent = new StringBuilder();
+                StringBuilder documentAllContent = new();
+                int pageCounter = 0;
 
-                for (var pageCounter = 1; pageCounter <= reader.NumberOfPages; pageCounter++)
+                foreach (var page in document.GetPages())
                 {
                     if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
                     {
@@ -83,8 +84,8 @@ namespace SearcherLibrary.FileExtensions
 
                     try
                     {
-                        ////pdfPage = PdfTextExtractor.GetTextFromPage(reader, pageCounter);                                            // Shows the result with line breaks.
-                        var pdfPage = Regex.Replace(PdfTextExtractor.GetTextFromPage(reader, pageCounter), @"\r\n?|\n", " ").Trim();
+                        pageCounter++;
+                        var pdfPage = Regex.Replace(ContentOrderTextExtractor.GetText(page), @"\r\n?|\n", " ").Trim();
 
                         if (matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
                         {
@@ -100,11 +101,11 @@ namespace SearcherLibrary.FileExtensions
 
                                 if (matches.Count > 0)
                                 {
-                                    foreach (Match match in matches)
+                                    foreach (Match match in matches.Cast<Match>())
                                     {
                                         var startIndex = match.Index >= MaxIndexBoundary ? match.Index - MaxIndexBoundary : 0;
                                         var endIndex = pdfPage.Length >= match.Index + match.Length + MaxIndexBoundary ? match.Index + match.Length + MaxIndexBoundary : pdfPage.Length;
-                                        var matchLine = pdfPage.Substring(startIndex, endIndex - startIndex);
+                                        var matchLine = pdfPage[startIndex..endIndex];
                                         var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
                                         matchedLines.Add(new MatchedLine
                                         {
@@ -136,8 +137,6 @@ namespace SearcherLibrary.FileExtensions
                 {
                     matchedLines = matcher.GetMatch(new string[] { string.Join(string.Empty, documentAllContent.ToString()) }, searchTerms, Strings.Page);
                 }
-
-                reader.Close();
             }
 
             return matchedLines;

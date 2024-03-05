@@ -13,7 +13,11 @@
 	<Version>$(AssemblyVersion)</Version>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	  <PublishSingleFile>true</PublishSingleFile>
-	  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    
+    <!--NETSDK1201 	For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will 
+                    no longer produce a self contained app by default. To continue building self-contained apps, 
+                    set the SelfContained property to true or use the "self-contained" argument.-->
+	  <!--<RuntimeIdentifier>win-x64</RuntimeIdentifier>-->
 	  
 	  <!-- Since NET 5 specify this if you want to also pack all external *.dll to your file -->
 	  <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
