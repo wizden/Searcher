@@ -244,11 +244,11 @@ namespace Searcher
                             }
                             else if (node == "SearchContents")
                             {
-                                prefFile.Root.Add(new XElement("SearchContents", new XElement[] { }));
+                                prefFile.Root.Add(new XElement("SearchContents", Array.Empty<XElement>()));
                             }
                             else if (node == "SearchFilters")
                             {
-                                prefFile.Root.Add(new XElement("SearchFilters", new XElement[] { }));
+                                prefFile.Root.Add(new XElement("SearchFilters", Array.Empty<XElement>()));
                             }
                             else if (node == "ShowFileMatchCount")
                             {
@@ -256,11 +256,11 @@ namespace Searcher
                             }
                             else if (node == "FilesToAlwaysExcludeFromSearch")
                             {
-                                prefFile.Root.Add(new XElement("FilesToAlwaysExcludeFromSearch", new XElement[] { }));
+                                prefFile.Root.Add(new XElement("FilesToAlwaysExcludeFromSearch", Array.Empty<XElement>()));
                             }
                             else if (node == "DirectoriesToAlwaysExcludeFromSearch")
                             {
-                                prefFile.Root.Add(new XElement("DirectoriesToAlwaysExcludeFromSearch", new XElement[] { }));
+                                prefFile.Root.Add(new XElement("DirectoriesToAlwaysExcludeFromSearch", Array.Empty<XElement>()));
                             }
                         }
                     }
