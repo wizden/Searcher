@@ -77,24 +77,22 @@ namespace Searcher
         {
             string retVal = string.Empty;
 
-            if (sender is MenuItem)
+            if (sender is MenuItem item)
             {
                 string fileNamePath = string.Empty;
 
-                if (((MenuItem)sender).Tag is Hyperlink)
+                if (item.Tag is Hyperlink selectedPathLink)
                 {
-                    Hyperlink selectedPathLink = (Hyperlink)((MenuItem)sender).Tag;
-
                     if (selectedPathLink.NavigateUri != null && selectedPathLink.NavigateUri.ToString() != string.Empty && !string.IsNullOrWhiteSpace(selectedPathLink.NavigateUri.LocalPath))
                     {
                         fileNamePath = selectedPathLink.NavigateUri.LocalPath;
                     }
                 }
-                else if (((MenuItem)sender).Tag is ListBox)
+                else if (item.Tag is ListBox listBox)
                 {
-                    if (((ListBox)((MenuItem)sender).Tag).SelectedItems != null && ((ListBox)((MenuItem)sender).Tag).SelectedItems.Count == 1)
+                    if (listBox.SelectedItems != null && listBox.SelectedItems.Count == 1)
                     {
-                        fileNamePath = ((ListBox)((MenuItem)sender).Tag).SelectedItems[0]?.ToString() ?? string.Empty;
+                        fileNamePath = listBox.SelectedItems[0]?.ToString() ?? string.Empty;
                     }
                 }
 
@@ -130,7 +128,7 @@ namespace Searcher
 
             if (!string.IsNullOrWhiteSpace(fullFilePath) && File.Exists(fullFilePath))
             {
-                Process explorerWindowProcess = new Process();
+                Process explorerWindowProcess = new();
                 explorerWindowProcess.StartInfo.FileName = "explorer.exe";
                 explorerWindowProcess.StartInfo.Arguments = "/select,\"" + @fullFilePath + "\"";
                 explorerWindowProcess.Start();

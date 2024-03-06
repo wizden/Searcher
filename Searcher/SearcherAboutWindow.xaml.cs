@@ -178,11 +178,11 @@ namespace Searcher
             string copyRightText = string.Format("{0} {1}  {2}{3}", Application.Current.Resources["Copyright"].ToString(), yearInfo, "Dennis Joseph", Environment.NewLine);
             string warrantyText = Application.Current.Resources["WarrantyText"].ToString() + Environment.NewLine;
 
-            Run copyRightAndWarranty = new Run(string.Join(Environment.NewLine, new string[] { copyRightText, warrantyText }));
-            Run run2 = new Run(Application.Current.Resources["DistributeSoftware"].ToString() + " ");
-            Run run4 = new Run(" " + Application.Current.Resources["ForDetails"].ToString());
+            Run copyRightAndWarranty = new (string.Join(Environment.NewLine, new string[] { copyRightText, warrantyText }));
+            Run run2 = new (Application.Current.Resources["DistributeSoftware"].ToString() + " ");
+            Run run4 = new (" " + Application.Current.Resources["ForDetails"].ToString());
 
-            Hyperlink hyperlink = new Hyperlink(new Run(Application.Current.Resources["GNULicenceLink"].ToString()))
+            Hyperlink hyperlink = new(new Run(Application.Current.Resources["GNULicenceLink"].ToString()))
             {
                 NavigateUri = new Uri("https://www.gnu.org/licenses/gpl-3.0.en.html")
             };

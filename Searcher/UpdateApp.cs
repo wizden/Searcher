@@ -276,7 +276,7 @@ namespace Searcher
                 if (!string.IsNullOrEmpty(latestReleaseDownloadUrl))
                 {
                     string searchValue = "/Searcher_v";
-                    string strSiteVersion = latestReleaseDownloadUrl.Substring(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length)
+                    string strSiteVersion = latestReleaseDownloadUrl[(latestReleaseDownloadUrl.IndexOf(searchValue) + searchValue.Length)..]
                         .Replace(".Portable", string.Empty)
                         .Replace(".Light", string.Empty)
                         .Replace(".x64", string.Empty)
@@ -381,7 +381,7 @@ namespace Searcher
                         var desktopRuntimes = output.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
                             .Where(rt => rt.Contains(desktopRuntimeName));
                         var versions = desktopRuntimes.Select(rt =>
-                            Version.Parse(rt.Substring(desktopRuntimeName.Length, rt.IndexOf("[") - desktopRuntimeName.Length).Trim()));
+                            Version.Parse(rt[desktopRuntimeName.Length..rt.IndexOf("[")].Trim()));
                         retVal = versions.Any(v => v.Major >= appNetRuntimeVersion);
                     }
                 }
