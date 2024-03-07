@@ -82,7 +82,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Gets or sets the list of extensions that can be processed by this handler. Empty is default and handles all non-specified extensions.
         /// </summary>
-        public static List<string> Extensions => new List<string>();
+        public static List<string> Extensions => new();
 
         #endregion Public Properties
 
@@ -126,11 +126,7 @@ namespace SearcherLibrary.FileExtensions
             var matchedLines = new List<MatchedLine>();
             var matchCounter = 0;
             var lineCounter = 0;
-            var lineToDisplayStart = 0;
-            var lineToDisplayEnd = 0;
             Match tempMatchObj;
-            var searchLine = string.Empty;
-            var tempSearchLine = string.Empty;
 
             // Get length of line keyword based on length in language.
             // 7 - Based on length of "Line {0}:\t{1}".
@@ -146,7 +142,7 @@ namespace SearcherLibrary.FileExtensions
                 foreach (var line in File.ReadAllLines(fileName))
                 {
                     lineCounter++;
-                    searchLine = line.Trim();
+                    string? searchLine = line.Trim();
 
                     if (matcher.CancellationTokenSource.IsCancellationRequested)
                     {
@@ -161,17 +157,17 @@ namespace SearcherLibrary.FileExtensions
 
                             if (matches.Count > 0)
                             {
-                                foreach (Match match in matches)
+                                foreach (Match match in matches.Cast<Match>())
                                 {
                                     if (searchLine.Length >= MaxStringLengthCheck)
                                     {
                                         // If the lines are exceesively long, handle accordingly.
                                         tempMatchObj = match;
-                                        lineToDisplayStart = match.Index >= MaxStringLengthDisplayIndexStart ? match.Index - MaxStringLengthDisplayIndexStart : match.Index;
-                                        lineToDisplayEnd = searchLine.Length - (match.Index + match.Length) >= MaxStringLengthDisplayIndexEnd
-                                                               ? MaxStringLengthDisplayIndexEnd
-                                                               : searchLine.Length - (match.Index + match.Length);
-                                        tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
+                                        int lineToDisplayStart = match.Index >= MaxStringLengthDisplayIndexStart ? match.Index - MaxStringLengthDisplayIndexStart : match.Index;
+                                        int lineToDisplayEnd = searchLine.Length - (match.Index + match.Length) >= MaxStringLengthDisplayIndexEnd
+                                                   ? MaxStringLengthDisplayIndexEnd
+                                                   : searchLine.Length - (match.Index + match.Length);
+                                        string? tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
                                         tempMatchObj = Regex.Match(tempSearchLine, searchTerm, matcher.RegularExpressionOptions);
 
                                         matchedLines.Add(new MatchedLine
@@ -211,9 +207,9 @@ namespace SearcherLibrary.FileExtensions
             return matchedLines;
         }
 
-        private List<MatchedLine> GetMultiLineRegexMatches(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
+        private static List<MatchedLine> GetMultiLineRegexMatches(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
             foreach (var searchTerm in searchTerms)
             {
                 string allText = File.ReadAllText(fileName);
@@ -224,9 +220,9 @@ namespace SearcherLibrary.FileExtensions
                     int matchCounter = 0;
                     var lengthOfLineKeywordPlus3 = Strings.Line.Length + 3;
 
-                    foreach (Match match in matches)
+                    foreach (Match match in matches.Cast<Match>())
                     {
-                        int lineNumber = allText.Substring(0, match.Index).Count(nl => nl == '\n') + 1;
+                        int lineNumber = allText[..match.Index].Count(nl => nl == '\n') + 1;
 
                         matchedLines.Add(new MatchedLine
                         {
@@ -252,7 +248,7 @@ namespace SearcherLibrary.FileExtensions
         /// Remove the temporarily created directory.
         /// </summary>
         /// <param name="tempDirPath">The temporarily created directory containing archive contents.</param>
-        internal void RemoveTempDirectory(string tempDirPath)
+        internal static void RemoveTempDirectory(string tempDirPath)
         {
             IOException? fileAccessException;
             int counter = 0;    // If unable to delete after 10 attempts, get out instead of staying stuck.

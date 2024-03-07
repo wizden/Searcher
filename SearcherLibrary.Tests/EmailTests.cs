@@ -29,7 +29,7 @@ namespace SearcherLibrary.Tests
 
         private static readonly string rootDirectory = "FilesToTest";
 
-        private static string rootPath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory);
+        private static readonly string rootPath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory);
 
         #endregion Private Fields
 

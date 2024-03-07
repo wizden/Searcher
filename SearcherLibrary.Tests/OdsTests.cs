@@ -7,8 +7,8 @@ namespace SearcherLibrary.Tests
     {
         #region Private Fields
 
-        private static string rootDirectory = "FilesToTest";
-        string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Ods.ods");
+        private readonly static string rootDirectory = "FilesToTest";
+        private readonly string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Ods.ods");
 
         #endregion Private Fields
 

@@ -7,8 +7,8 @@ namespace SearcherLibrary.Tests
     {
         #region Private Fields
 
-        private static string rootDirectory = "FilesToTest";
-        string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Odp.odp");
+        private readonly static string rootDirectory = "FilesToTest";
+        private readonly string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Odp.odp");
 
         #endregion Private Fields
 
@@ -69,7 +69,7 @@ namespace SearcherLibrary.Tests
         [Fact]
         public void SearchText_WithCancellation()
         {
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationTokenSource cancellationTokenSource = new();
             cancellationTokenSource.Cancel();
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the" }, new Matcher { CancellationTokenSource = cancellationTokenSource });
             Assert.Empty(matchedLines);

@@ -7,8 +7,8 @@ namespace SearcherLibrary.Tests
     {
         #region Private Fields
 
-        private static string rootDirectory = "FilesToTest";
-        string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Txt.txt");
+        private static readonly string rootDirectory = "FilesToTest";
+        private readonly string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Txt.txt");
 
         #endregion Private Fields
 
@@ -99,7 +99,7 @@ namespace SearcherLibrary.Tests
         [Fact]
         public void SearchText_Cancellation_Succeeds()
         {
-            CancellationTokenSource cts = new CancellationTokenSource();
+            CancellationTokenSource cts = new();
             cts.Cancel();
             var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "aa" }, 
                 new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase, 

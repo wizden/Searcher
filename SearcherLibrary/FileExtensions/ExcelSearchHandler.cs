@@ -58,7 +58,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new List<string> { ".XLSX", ".XLSM" };
+        public static new List<string> Extensions => new() { ".XLSX", ".XLSM" };
 
         #endregion Public Properties
 
@@ -74,8 +74,8 @@ namespace SearcherLibrary.FileExtensions
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
             int matchCounter = 0;
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
-            List<SpreadsheetCellDetail> excelCellDetails = new List<SpreadsheetCellDetail>();
+            List<MatchedLine> matchedLines = new();
+            List<SpreadsheetCellDetail> excelCellDetails = new();
 
             try
             {
@@ -117,7 +117,7 @@ namespace SearcherLibrary.FileExtensions
 
                                     if (cell != null && cell.CellReference != null && !string.IsNullOrWhiteSpace(cell.InnerText))
                                     {
-                                        cellValue = this.GetSpreadsheetCellValue(cell, sharedStringTable, cellFormats, numberingFormats);
+                                        cellValue = GetSpreadsheetCellValue(cell, sharedStringTable, cellFormats, numberingFormats);
                                         excelCellDetails.Add(new SpreadsheetCellDetail { CellContent = cellValue, CellReference = cell.CellReference.Value ?? string.Empty, SheetName = sheet.Name?.Value ?? string.Empty });
                                     }
 
@@ -146,7 +146,7 @@ namespace SearcherLibrary.FileExtensions
                             MatchCollection matches = Regex.Matches(ecd.CellContent, searchTerm, matcher.RegularExpressionOptions);            // Use this match for getting the locations of the match.
                             if (matches.Count > 0)
                             {
-                                foreach (Match match in matches)
+                                foreach (Match match in matches.Cast<Match>())
                                 {
                                     matchedLines.Add(new MatchedLine
                                     {
@@ -201,7 +201,7 @@ namespace SearcherLibrary.FileExtensions
         /// <param name="cellFormats">The cell formats in use.</param>
         /// <param name="numberingFormats">The numbering formats in use.</param>
         /// <returns>The content of the spread sheet cell based on the data type of the cell.</returns>
-        private string GetSpreadsheetCellValue(Cell excelCell, IEnumerable<OpenXmlElement> sharedStringTable, CellFormats cellFormats, IEnumerable<NumberingFormat> numberingFormats)
+        private static string GetSpreadsheetCellValue(Cell excelCell, IEnumerable<OpenXmlElement> sharedStringTable, CellFormats cellFormats, IEnumerable<NumberingFormat> numberingFormats)
         {
             string retVal = string.Empty;
 
@@ -217,15 +217,11 @@ namespace SearcherLibrary.FileExtensions
                 }
                 else if (excelCell.DataType.Value == CellValues.Boolean)
                 {
-                    switch (retVal)
+                    retVal = retVal switch
                     {
-                        case "0":
-                            retVal = "FALSE";
-                            break;
-                        default:
-                            retVal = "TRUE";
-                            break;
-                    }
+                        "0" => "FALSE",
+                        _ => "TRUE",
+                    };
                 }
             }
             else
@@ -264,7 +260,9 @@ namespace SearcherLibrary.FileExtensions
 
                         if (cellFormatUsed != null && cellFormatUsed.FormatCode != null && !string.IsNullOrWhiteSpace(cellFormatUsed.FormatCode.Value))
                         {
-                            if (cellFormatUsed.FormatCode.Value.ToUpper().Contains("D") || cellFormatUsed.FormatCode.Value.ToUpper().Contains("M") || cellFormatUsed.FormatCode.Value.ToUpper().Contains("Y"))
+                            if (cellFormatUsed.FormatCode.Value.ToUpper().Contains('D') 
+                                || cellFormatUsed.FormatCode.Value.ToUpper().Contains('M') 
+                                || cellFormatUsed.FormatCode.Value.ToUpper().Contains('Y'))
                             {
                                 if (double.TryParse(retVal.ToString(), out tempDouble))
                                 {

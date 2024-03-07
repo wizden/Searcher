@@ -2093,7 +2093,7 @@ namespace Searcher
             CultureInfo cultureInfo = new(this.culture);
             Thread.CurrentThread.CurrentCulture = cultureInfo;
             Thread.CurrentThread.CurrentUICulture = cultureInfo;
-            this.matcherObj.CultureInfo = cultureInfo;
+            Matcher.CultureInfo = cultureInfo;
 
             this.SetContentBasedOnLanguage();
         }

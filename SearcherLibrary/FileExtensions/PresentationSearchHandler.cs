@@ -44,7 +44,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PPTX/.PPTM extension.
         /// </summary>
-        public static new List<string> Extensions => new List<string> { ".PPTX", ".PPTM" };
+        public static new List<string> Extensions => new() { ".PPTX", ".PPTM" };
 
         #endregion Public Properties
 
@@ -64,74 +64,72 @@ namespace SearcherLibrary.FileExtensions
 
             try
             {
-                using (var pptDocument = PresentationDocument.Open(fileName, false))
+                using var pptDocument = PresentationDocument.Open(fileName, false);
+                var presentationPart = pptDocument.PresentationPart;
+
+                if (presentationPart != null)
                 {
-                    var presentationPart = pptDocument.PresentationPart;
+                    var slideAllText = GetPresentationSlidesText(presentationPart);
+                    var startIndex = 0;
+                    var endIndex = 0;
 
-                    if (presentationPart != null)
+                    if (!matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
                     {
-                        var slideAllText = this.GetPresentationSlidesText(presentationPart);
-                        var startIndex = 0;
-                        var endIndex = 0;
-
-                        if (!matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
+                        for (var slideCounter = 0; slideCounter < slideAllText.Length; slideCounter++)
                         {
-                            for (var slideCounter = 0; slideCounter < slideAllText.Length; slideCounter++)
+                            if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
                             {
-                                if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
-                                {
-                                    break;
-                                }
+                                break;
+                            }
 
-                                foreach (var searchTerm in searchTerms)
-                                {
-                                    var matches = Regex.Matches(slideAllText[slideCounter], searchTerm, matcher.RegularExpressionOptions); // Use this match for getting the locations of the match.
+                            foreach (var searchTerm in searchTerms)
+                            {
+                                var matches = Regex.Matches(slideAllText[slideCounter], searchTerm, matcher.RegularExpressionOptions); // Use this match for getting the locations of the match.
 
-                                    if (matches.Count > 0)
+                                if (matches.Count > 0)
+                                {
+                                    foreach (Match match in matches.Cast<Match>())
                                     {
-                                        foreach (Match match in matches)
+                                        startIndex = match.Index >= FileSearchHandler.IndexBoundary ? match.Index - FileSearchHandler.IndexBoundary : 0;
+                                        endIndex = slideAllText[slideCounter].Length >= match.Index + match.Length + FileSearchHandler.IndexBoundary
+                                                       ? match.Index + match.Length + FileSearchHandler.IndexBoundary
+                                                       : slideAllText[slideCounter].Length;
+                                        var matchLine = slideAllText[slideCounter][startIndex..endIndex];
+
+                                        while (matchLine.StartsWith("\r") || matchLine.StartsWith("\n"))
                                         {
-                                            startIndex = match.Index >= FileSearchHandler.IndexBoundary ? match.Index - FileSearchHandler.IndexBoundary : 0;
-                                            endIndex = slideAllText[slideCounter].Length >= match.Index + match.Length + FileSearchHandler.IndexBoundary
-                                                           ? match.Index + match.Length + FileSearchHandler.IndexBoundary
-                                                           : slideAllText[slideCounter].Length;
-                                            var matchLine = slideAllText[slideCounter].Substring(startIndex, endIndex - startIndex);
-
-                                            while (matchLine.StartsWith("\r") || matchLine.StartsWith("\n"))
-                                            {
-                                                matchLine = matchLine.Substring(1, matchLine.Length - 1); // Remove lines starting with the newline character.
-                                            }
-
-                                            while ((matchLine.EndsWith("\r") || matchLine.EndsWith("\n")) && matchLine.Length > 2)
-                                            {
-                                                matchLine = matchLine.Substring(0, matchLine.Length - 1); // Remove lines ending with the newline character.
-                                            }
-
-                                            var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
-                                            matchedLines.Add(new MatchedLine
-                                            {
-                                                MatchId = matchCounter++,
-                                                Content = string.Format("{0} {1}:\t{2}", Strings.Slide, (slideCounter + 1).ToString(), matchLine),
-                                                SearchTerm = searchTerm,
-                                                FileName = fileName,
-                                                LineNumber = 1,
-                                                StartIndex = searchMatch.Index + Strings.Slide.Length + 3 + (slideCounter + 1).ToString().Length,
-                                                Length = searchMatch.Length
-                                            });
+                                            matchLine = matchLine[1..]; // Remove lines starting with the newline character.
                                         }
+
+                                        while ((matchLine.EndsWith("\r") || matchLine.EndsWith("\n")) && matchLine.Length > 2)
+                                        {
+                                            matchLine = matchLine[..^1]; // Remove lines ending with the newline character.
+                                        }
+
+                                        var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
+                                        matchedLines.Add(new MatchedLine
+                                        {
+                                            MatchId = matchCounter++,
+                                            Content = string.Format("{0} {1}:\t{2}", Strings.Slide, (slideCounter + 1).ToString(), matchLine),
+                                            SearchTerm = searchTerm,
+                                            FileName = fileName,
+                                            LineNumber = 1,
+                                            StartIndex = searchMatch.Index + Strings.Slide.Length + 3 + (slideCounter + 1).ToString().Length,
+                                            Length = searchMatch.Length
+                                        });
                                     }
                                 }
                             }
+                        }
 
-                            if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
-                            {
-                                matchedLines.Clear();
-                            }
-                        }
-                        else
+                        if (matcher.CancellationTokenSource.Token.IsCancellationRequested)
                         {
-                            matchedLines = matcher.GetMatch(new string[] { string.Join(Environment.NewLine, slideAllText) }, searchTerms, Strings.Slide);
+                            matchedLines.Clear();
                         }
+                    }
+                    else
+                    {
+                        matchedLines = matcher.GetMatch(new string[] { string.Join(Environment.NewLine, slideAllText) }, searchTerms, Strings.Slide);
                     }
                 }
             }
@@ -160,11 +158,11 @@ namespace SearcherLibrary.FileExtensions
         /// </summary>
         /// <param name="presentationPart">The presentation part of the presentation document.</param>
         /// <returns>string array of the text in the presentation slides.</returns>
-        private string[] GetPresentationSlidesText(PresentationPart presentationPart)
+        private static string[] GetPresentationSlidesText(PresentationPart presentationPart)
         {
             var presentation    = presentationPart.Presentation;
             var slideParts      = presentationPart.SlideParts.ToList();
-            var retVal          = new string[slideParts.Count()];
+            var retVal          = new string[slideParts.Count];
             var relationshipId  = string.Empty;
             var tempSlideNumber = 0;
 
@@ -203,7 +201,7 @@ namespace SearcherLibrary.FileExtensions
                         if (slidePart.NotesSlidePart != null &&
                             slidePart.NotesSlidePart.NotesSlide != null &&
                             slidePart.NotesSlidePart.NotesSlide.Descendants() != null &&
-                            slidePart.NotesSlidePart.NotesSlide.Descendants().Count() > 0)
+                            slidePart.NotesSlidePart.NotesSlide.Descendants().Any())
                         {
                             notes = slidePart.NotesSlidePart.NotesSlide.Descendants<DocumentFormat.OpenXml.Drawing.Text>().Where(s =>
                                                     {
