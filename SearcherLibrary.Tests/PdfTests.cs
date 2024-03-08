@@ -1,14 +1,12 @@
-﻿using System.Reflection;
-using System.Text.RegularExpressions;
-
-namespace SearcherLibrary.Tests
+﻿namespace SearcherLibrary.Tests
 {
+    using System.Text.RegularExpressions;
+
     public class PdfTests
     {
         #region Private Fields
 
-        private static readonly string rootDirectory = "FilesToTest";
-        private readonly string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Pdf.pdf");
+        private readonly string filePath = TestHelpers.GetFilePathForTestFile("Pdf.pdf");
 
         #endregion Private Fields
 

@@ -1,17 +1,16 @@
-﻿using System.Reflection;
-using System.Text.RegularExpressions;
-
-namespace SearcherLibrary.Tests
+﻿namespace SearcherLibrary.Tests
 {
+    using System.Text.RegularExpressions;
+
     public class EmailTests
     {
         public class SearchText_Regex_CaseInsensitive_Multiline_DataGenerator : TheoryData<string, int>
         {
             public SearchText_Regex_CaseInsensitive_Multiline_DataGenerator()
             {
-                Add(Path.Combine(rootPath, "Eml.eml"), 11);
-                Add(Path.Combine(rootPath, "Msg.msg"), 11);
-                Add(Path.Combine(rootPath, "Oft.oft"), 7);
+                Add(TestHelpers.GetFilePathForTestFile("Eml.eml"), 11);
+                Add(TestHelpers.GetFilePathForTestFile("Msg.msg"), 11);
+                Add(TestHelpers.GetFilePathForTestFile("Oft.oft"), 7);
             }
         }
         
@@ -19,19 +18,11 @@ namespace SearcherLibrary.Tests
         {
             public SearchText_DataGenerator()
             {
-                Add(Path.Combine(rootPath, "Eml.eml"));
-                Add(Path.Combine(rootPath, "Msg.msg"));
-                Add(Path.Combine(rootPath, "Oft.oft"));
+                Add(TestHelpers.GetFilePathForTestFile("Eml.eml"));
+                Add(TestHelpers.GetFilePathForTestFile("Msg.msg"));
+                Add(TestHelpers.GetFilePathForTestFile("Oft.oft"));
             }
         }
-
-        #region Private Fields
-
-        private static readonly string rootDirectory = "FilesToTest";
-
-        private static readonly string rootPath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory);
-
-        #endregion Private Fields
 
         #region Public Methods
 

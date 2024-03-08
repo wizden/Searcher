@@ -1,14 +1,12 @@
-﻿using System.Reflection;
-using System.Text.RegularExpressions;
-
-namespace SearcherLibrary.Tests
+﻿namespace SearcherLibrary.Tests
 {
+    using System.Text.RegularExpressions;
+
     public class ExcelTests
     {
         #region Private Fields
 
-        private static readonly string rootDirectory = "FilesToTest";
-        private readonly string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Excel.xlsx");
+        private readonly string filePath = TestHelpers.GetFilePathForTestFile("Excel.xlsx");
 
         #endregion Private Fields
 

@@ -1,14 +1,12 @@
-﻿using System.Reflection;
-using System.Text.RegularExpressions;
-
-namespace SearcherLibrary.Tests
+﻿namespace SearcherLibrary.Tests
 {
+    using System.Text.RegularExpressions;
+
     public class OdtTests
     {
         #region Private Fields
 
-        private readonly static string rootDirectory = "FilesToTest";
-        private readonly string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Odt.odt");
+        private readonly string filePath = TestHelpers.GetFilePathForTestFile("Odt.odt");
 
         #endregion Private Fields
 

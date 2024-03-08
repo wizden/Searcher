@@ -1,14 +1,12 @@
-﻿using System.Reflection;
-using System.Text.RegularExpressions;
-
-namespace SearcherLibrary.Tests
+﻿namespace SearcherLibrary.Tests
 {
+    using System.Text.RegularExpressions;
+
     public class PptxTests
     {
         #region Private Fields
 
-        private static readonly string rootDirectory = "FilesToTest";
-        private readonly string filePath = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.FullName, rootDirectory, "Pptx.pptx");
+        private readonly string filePath = TestHelpers.GetFilePathForTestFile("Pptx.pptx");
 
         #endregion Private Fields
 
