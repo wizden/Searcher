@@ -45,7 +45,7 @@ namespace SearcherLibrary
         /// <summary>
         /// Private store for the list of available search handlers.
         /// </summary>
-        private static readonly Lazy<Dictionary<string, IFileSearchHandler>> LazySearchHandlers = new Lazy<Dictionary<string, IFileSearchHandler>>(
+        private static readonly Lazy<Dictionary<string, IFileSearchHandler>> LazySearchHandlers = new(
             () =>
         {
             var retVal = new Dictionary<string, IFileSearchHandler>();
@@ -92,7 +92,7 @@ namespace SearcherLibrary
         public static List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
             var handler = GetSearchHandler(fileName);
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines;
 
 			try
             {

@@ -44,7 +44,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new List<string> { ".ODT" };
+        public static new List<string> Extensions => new() { ".ODT" };
 
         #endregion Public Properties
 
@@ -59,7 +59,7 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
 
             try
@@ -115,7 +115,7 @@ namespace SearcherLibrary.FileExtensions
             }
             finally
             {
-                this.RemoveTempDirectory(tempDirPath);
+                RemoveTempDirectory(tempDirPath);
             }
 
             return matchedLines;

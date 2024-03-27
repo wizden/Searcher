@@ -90,7 +90,7 @@ namespace Searcher
         public SearchedFileList(IEnumerable<string> fileNamePaths)
             : this()
         {
-            if (fileNamePaths != null && fileNamePaths.Count() > 0)
+            if (fileNamePaths != null && fileNamePaths.Any())
             {
                 fileNamePaths.OrderBy(f => f).ToList().ForEach(f =>
                 {
@@ -107,7 +107,7 @@ namespace Searcher
         public SearchedFileList(IEnumerable<string> fileNamePaths, IEnumerable<string> excludedContent)
             : this(fileNamePaths)
         {
-            if (excludedContent.Count() > 0)
+            if (excludedContent.Any())
             {
                 this.ExpandTemporarilyExcluded.IsExpanded = true;
 
@@ -131,7 +131,7 @@ namespace Searcher
         public SearchedFileList(IEnumerable<string> fileNamePaths, IEnumerable<string> temporarilyExcludedContent, IEnumerable<string> alwaysExcludedContent)
             : this(fileNamePaths, temporarilyExcludedContent)
         {
-            if (alwaysExcludedContent.Count() > 0)
+            if (alwaysExcludedContent.Any())
             {
                 this.ExpandAlwaysExcluded.IsExpanded = true;
 
@@ -172,7 +172,7 @@ namespace Searcher
         {
             if (this.LstFileList.Items != null)
             {
-                List<string> filesToCopy = new List<string>();
+                List<string> filesToCopy = new();
 
                 if (this.LstFileList.SelectedItems != null && this.LstFileList.SelectedItems.Count > 0)
                 {
@@ -203,10 +203,12 @@ namespace Searcher
         {
             if (LstFileList.Items != null && LstFileList.Items.Count > 0 && LstFileList.SelectedItem != null && !string.IsNullOrWhiteSpace(LstFileList.SelectedItem.ToString()) && LstFileList.SelectedItems.Count == 1)
             {
-                System.Windows.Controls.ContextMenu mnu = new System.Windows.Controls.ContextMenu();
-                MenuItem openContainingDirectoryInExplorer = new MenuItem();
-                openContainingDirectoryInExplorer.Header = Application.Current.Resources["OpenDirectoryInExplorer"].ToString();
-                openContainingDirectoryInExplorer.Tag = sender;
+                ContextMenu mnu = new();
+                MenuItem openContainingDirectoryInExplorer = new()
+                {
+                    Header = Application.Current.Resources["OpenDirectoryInExplorer"].ToString(),
+                    Tag = sender
+                };
                 openContainingDirectoryInExplorer.Click += this.OpenContainingDirectoryInExplorer_Click;
 
                 mnu.Items.Add(openContainingDirectoryInExplorer);
@@ -221,9 +223,9 @@ namespace Searcher
         /// <param name="e">The KeyEventArgs object.</param>
         private void LstFilesAlwaysExcluded_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Delete && sender is System.Windows.Controls.ListBox)
+            if (e.Key == Key.Delete && sender is ListBox listBox)
             {
-                this.ReincludeItemsFromList((System.Windows.Controls.ListBox)sender);
+                this.ReincludeItemsFromList(listBox);
             }
         }
 
@@ -234,9 +236,9 @@ namespace Searcher
         /// <param name="e">The KeyEventArgs object.</param>
         private void LstFilesExcluded_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Delete && sender is System.Windows.Controls.ListBox)
+            if (e.Key == Key.Delete && sender is ListBox listBox)
             {
-                this.ReincludeItemsFromList((System.Windows.Controls.ListBox)sender);
+                this.ReincludeItemsFromList(listBox);
             }
         }
 

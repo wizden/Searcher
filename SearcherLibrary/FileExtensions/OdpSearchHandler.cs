@@ -46,7 +46,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new List<string> { ".ODP" };
+        public static new List<string> Extensions => new() { ".ODP" };
 
         #endregion Public Properties
 
@@ -61,7 +61,7 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
             int matchCounter = 0;
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
 
@@ -89,7 +89,7 @@ namespace SearcherLibrary.FileExtensions
                                 {
                                     reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
                                     string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
-                                    StringBuilder presentationAllText = new StringBuilder();
+                                    StringBuilder presentationAllText = new();
 
                                     foreach (XElement element in XDocument.Load(fullFilePath, LoadOptions.None).Descendants().Where(d => d.Name.LocalName == "page"))
                                     {
@@ -108,20 +108,20 @@ namespace SearcherLibrary.FileExtensions
 
                                                     if (matches.Count > 0)
                                                     {
-                                                        foreach (Match match in matches)
+                                                        foreach (Match match in matches.Cast<Match>())
                                                         {
                                                             int startIndex = match.Index >= IndexBoundary ? match.Index - IndexBoundary : 0;
                                                             int endIndex = (slideAllText.Length >= match.Index + match.Length + IndexBoundary) ? match.Index + match.Length + IndexBoundary : slideAllText.Length;
-                                                            string matchLine = slideAllText.Substring(startIndex, endIndex - startIndex);
+                                                            string matchLine = slideAllText[startIndex..endIndex];
 
                                                             while (matchLine.StartsWith("\r") || matchLine.StartsWith("\n"))
                                                             {
-                                                                matchLine = matchLine.Substring(1, matchLine.Length - 1);                       // Remove lines starting with the newline character.
+                                                                matchLine = matchLine[1..];         // Remove lines starting with the newline character.
                                                             }
 
                                                             while ((matchLine.EndsWith("\r") || matchLine.EndsWith("\n")) && matchLine.Length > 2)
                                                             {
-                                                                matchLine = matchLine.Substring(0, matchLine.Length - 1);                       // Remove lines ending with the newline character.
+                                                                matchLine = matchLine[..^1];       // Remove lines ending with the newline character.
                                                             }
 
                                                             Match searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions);          // Use this match for the result highlight, based on additional characters being selected before and after the match.
@@ -169,7 +169,7 @@ namespace SearcherLibrary.FileExtensions
             }
             finally
             {
-                this.RemoveTempDirectory(tempDirPath);
+                RemoveTempDirectory(tempDirPath);
             }
 
             return matchedLines;

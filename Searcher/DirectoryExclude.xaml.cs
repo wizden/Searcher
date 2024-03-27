@@ -32,6 +32,7 @@ namespace Searcher
         {
             this.InitializeComponent();
             this.SetContentBasedOnLanguage();
+            this.DirectoryToExclude = string.Empty;
         }
         
         /// <summary>
@@ -41,12 +42,12 @@ namespace Searcher
         public DirectoryExclude(string childPath)
             : this()
         {
-            List<string> dirPaths = new List<string>();
+            List<string> dirPaths = new();
             string tempPath = childPath;
 
-            while (Directory.GetParent(tempPath).FullName != Directory.GetDirectoryRoot(childPath))
+            while (Directory.GetParent(tempPath)?.FullName != Directory.GetDirectoryRoot(childPath))
             {
-                tempPath = Directory.GetParent(tempPath).FullName;
+                tempPath = Directory.GetParent(tempPath)?.FullName ?? string.Empty;
                 dirPaths.Add(tempPath);
             }
 
@@ -54,23 +55,21 @@ namespace Searcher
 
             foreach (string dirPath in dirPaths.OrderBy(p => p))
             {
-                TreeViewItem item = new TreeViewItem();
-                item.Header = dirPath;
-                item.IsExpanded = true;
-                item.IsSelected = true;
+                TreeViewItem item = new()
+                {
+                    Header = dirPath,
+                    IsExpanded = true,
+                    IsSelected = true
+                };
 
                 if (this.TvDirectoryStructure.Items == null || this.TvDirectoryStructure.Items.Count == 0)
                 {
-                    this.TvDirectoryStructure.Items.Add(item);
+                    this.TvDirectoryStructure.Items?.Add(item);
                 }
                 else
                 {
-                    TreeViewItem nodeToUse = this.GetItemWithText((TreeViewItem)this.TvDirectoryStructure.Items[0], nodeToFind);
-
-                    if (nodeToUse != null)
-                    {
-                        nodeToUse.Items.Add(item);
-                    }
+                    TreeViewItem? nodeToUse = GetItemWithText((TreeViewItem)this.TvDirectoryStructure.Items[0], nodeToFind);
+                    nodeToUse?.Items.Add(item);
                 }
 
                 nodeToFind = dirPath;
@@ -113,8 +112,14 @@ namespace Searcher
         /// <param name="e">The parameter is not used.</param>
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
-            this.DirectoryToExclude = ((TreeViewItem)this.TvDirectoryStructure.SelectedItem).Header.ToString();
-            this.IsExclusionPermanent = this.RbtnPermanent.IsChecked.Value;
+            string? selectedDirectory = ((TreeViewItem)this.TvDirectoryStructure.SelectedItem).Header.ToString();
+
+            if (!string.IsNullOrWhiteSpace(selectedDirectory))
+            {
+                this.DirectoryToExclude = selectedDirectory;
+                this.IsExclusionPermanent = this.RbtnPermanent.IsChecked.GetValueOrDefault();
+            }
+
             this.DialogResult = true;
             this.Close();
         }
@@ -125,9 +130,9 @@ namespace Searcher
         /// <param name="treeViewItem">The TreeViewItem parent object.</param>
         /// <param name="textToFind">The text to find in the TreeViewItem object or its child nodes.</param>
         /// <returns>The TreeViewItem object containing the header text specified.</returns>
-        private TreeViewItem GetItemWithText(TreeViewItem treeViewItem, string textToFind)
+        private static TreeViewItem? GetItemWithText(TreeViewItem treeViewItem, string textToFind)
         {
-            TreeViewItem retVal = null;
+            TreeViewItem? retVal = null;
 
             if (treeViewItem.Header.ToString() == textToFind)
             {
@@ -137,7 +142,7 @@ namespace Searcher
             {
                 foreach (TreeViewItem item in treeViewItem.Items)
                 {
-                    retVal = this.GetItemWithText(item, textToFind);
+                    retVal = GetItemWithText(item, textToFind);
 
                     if (retVal != null)
                     {

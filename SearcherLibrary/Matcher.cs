@@ -41,11 +41,6 @@ namespace SearcherLibrary
         #region Private Fields
 
         /// <summary>
-        /// Private store for the maximum length in the search text.
-        /// </summary>
-        private const int MaxSearchTextLength = 100;
-
-        /// <summary>
         /// Private store for limiting display of long strings.
         /// </summary>
         private const int MaxStringLengthCheck = 2000;
@@ -98,7 +93,7 @@ namespace SearcherLibrary
         /// <summary>
         /// Gets or sets the culture to determine the resource for language.
         /// </summary>
-        public CultureInfo CultureInfo 
+        public static CultureInfo CultureInfo 
         {
             get
             {
@@ -140,7 +135,7 @@ namespace SearcherLibrary
         /// <exception cref="ArgumentException">Generated when regular expression failures occur.</exception>
         public List<MatchedLine> GetMatch(IEnumerable<string> content, IEnumerable<string> searchTerms, string locationType = "Line")
         {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines;
 
             if (this.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
             {
@@ -164,7 +159,7 @@ namespace SearcherLibrary
         /// <param name="fileContent">The file content.</param>
         /// <param name="indexPosition">The index position.</param>
         /// <returns>The line number for the index in the file.</returns>
-        private int GetLineNumberFromIndex(string fileContent, int indexPosition)
+        private static int GetLineNumberFromIndex(string fileContent, int indexPosition)
         {
             int retVal = 1;
 
@@ -187,10 +182,7 @@ namespace SearcherLibrary
         /// <returns>List of matches found in content based on search terms.</returns>
         private List<MatchedLine> GetMatchesForMultilineRegex(IEnumerable<string> content, IEnumerable<string> searchTerms, string locationType = "Line")
         {
-            int lineToDisplayStart = 0;
-            string tempSearchLine = string.Empty;
-
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
             string allContent = string.Join(Environment.NewLine, content);
             foreach (string searchTerm in searchTerms)
             {
@@ -204,12 +196,12 @@ namespace SearcherLibrary
 
                 if (matches.Count > 0)
                 {
-                    foreach (Match match in matches)
+                    foreach (Match match in matches.Cast<Match>())
                     {
                         if (allContent.Length >= MaxStringLengthCheck)
                         {
                             // If the lines are exceesively long, handle accordingly.
-                            lineToDisplayStart = this.GetLineNumberFromIndex(allContent, match.Index);
+                            int lineToDisplayStart = GetLineNumberFromIndex(allContent, match.Index);
 
                             // 7 - Based on length of "Line {0}:\t{1}".
                             //                         12345   6 7
@@ -224,7 +216,7 @@ namespace SearcherLibrary
                         }
                         else
                         {
-                            int lineNumberStart = this.GetLineNumberFromIndex(allContent, match.Index);
+                            int lineNumberStart = GetLineNumberFromIndex(allContent, match.Index);
 
                             matchedLines.Add(new MatchedLine
                             {
@@ -250,14 +242,12 @@ namespace SearcherLibrary
         /// <returns>List of matches in the file or string contents based on the search terms.</returns>
         private List<MatchedLine> SearchASCIIContent(IEnumerable<string> contents, IEnumerable<string> searchTerms)
         {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
             int matchCounter = 0;
             int lineCounter = 0;
-            int lineToDisplayStart = 0;
-            int lineToDisplayEnd = 0;
+            int lineToDisplayStart;
+            int lineToDisplayEnd;
             Match tempMatchObj;
-            string searchLine = string.Empty;
-            string tempSearchLine = string.Empty;
 
             // Get length of line keyword based on length in language.
             // 7 - Based on length of "Line {0}:\t{1}".
@@ -267,7 +257,7 @@ namespace SearcherLibrary
             foreach (string line in contents)
             {
                 lineCounter++;
-                searchLine = line.Trim();
+                string searchLine = line.Trim();
 
                 if (this.CancellationTokenSource.IsCancellationRequested)
                 {
@@ -282,7 +272,7 @@ namespace SearcherLibrary
 
                         if (matches.Count > 0)
                         {
-                            foreach (Match match in matches)
+                            foreach (Match match in matches.Cast<Match>())
                             {
                                 if (searchLine.Length >= MaxStringLengthCheck)
                                 {
@@ -290,7 +280,7 @@ namespace SearcherLibrary
                                     tempMatchObj = match;
                                     lineToDisplayStart = match.Index >= MaxStringLengthDisplayIndexStart ? match.Index - MaxStringLengthDisplayIndexStart : match.Index;
                                     lineToDisplayEnd = searchLine.Length - (match.Index + match.Length) >= MaxStringLengthDisplayIndexEnd ? MaxStringLengthDisplayIndexEnd : searchLine.Length - (match.Index + match.Length);
-                                    tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
+                                    string tempSearchLine = searchLine.Substring(lineToDisplayStart, lineToDisplayEnd);
                                     tempMatchObj = Regex.Match(tempSearchLine, searchTerm, this.RegularExpressionOptions);
 
                                     matchedLines.Add(new MatchedLine

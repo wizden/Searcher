@@ -53,7 +53,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .EML/.MSG/.OFT extension.
         /// </summary>
-        public static new List<string> Extensions => new List<string> { ".EML", ".MSG", ".OFT" };
+        public static new List<string> Extensions => new() { ".EML", ".MSG", ".OFT" };
 
         #endregion Public Properties
 
@@ -68,7 +68,7 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
 
             string fileExtension = Path.GetExtension(fileName).ToUpper();
 
@@ -76,10 +76,10 @@ namespace SearcherLibrary.FileExtensions
             {
                 case ".OFT":
                 case ".MSG":
-                    matchedLines = this.GetMatchesInMsgOftFiles(fileName, searchTerms, matcher);
+                    matchedLines = GetMatchesInMsgOftFiles(fileName, searchTerms, matcher);
                     break;
                 case ".EML":
-                    matchedLines = this.GetMatchesInEmlFiles(fileName, searchTerms, matcher);
+                    matchedLines = GetMatchesInEmlFiles(fileName, searchTerms, matcher);
                     break;
             }
 
@@ -97,9 +97,9 @@ namespace SearcherLibrary.FileExtensions
         /// <param name="searchTerms">The terms to search.</param>
         /// <param name="matcher">The matcher object to determine search criteria.</param>
         /// <returns>The matched lines containing the search terms.</returns>
-        private List<MatchedLine> GetMatchesInEmlFiles(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
+        private static List<MatchedLine> GetMatchesInEmlFiles(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
             Message email = Message.Load(new FileInfo(fileName));
             string recipients = string.Join(", ", email.Headers.To.Select(t => GetEmailForDisplay(t)));
             string recipientsCc = string.Join(", ", email.Headers.Cc.Select(cc => GetEmailForDisplay(cc)));
@@ -140,7 +140,7 @@ namespace SearcherLibrary.FileExtensions
                     MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegularExpressionOptions);            // Use this match for getting the locations of the match.
                     if (matches.Count > 0)
                     {
-                        foreach (Match match in matches)
+                        foreach (Match match in matches.Cast<Match>())
                         {
                             matchedLines.Add(new MatchedLine
                             {
@@ -175,9 +175,9 @@ namespace SearcherLibrary.FileExtensions
         /// <param name="searchTerms">The terms to search.</param>
         /// <param name="matcher">The matcher object to determine search criteria.</param>
         /// <returns>The matched lines containing the search terms.</returns>
-        private List<MatchedLine> GetMatchesInMsgOftFiles(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
+        private static List<MatchedLine> GetMatchesInMsgOftFiles(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
 
             using (var msg = new Storage.Message(fileName))
             {
@@ -198,7 +198,7 @@ namespace SearcherLibrary.FileExtensions
                         MatchCollection matches = Regex.Matches(headerInfo, searchTerm, matcher.RegularExpressionOptions);            // Use this match for getting the locations of the match.
                         if (matches.Count > 0)
                         {
-                            foreach (Match match in matches)
+                            foreach (Match match in matches.Cast<Match>())
                             {
                                 matchedLines.Add(new MatchedLine
                                 {

@@ -44,7 +44,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new List<string> { ".ODS" };
+        public static new List<string> Extensions => new() { ".ODS" };
 
         #endregion Public Properties
 
@@ -59,7 +59,7 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
 
             try
@@ -86,7 +86,7 @@ namespace SearcherLibrary.FileExtensions
                                 {
                                     reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
                                     string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
-                                    matchedLines = this.GetMatchesFromOdsContentXml(fileName, fullFilePath, searchTerms, matcher);
+                                    matchedLines = GetMatchesFromOdsContentXml(fileName, fullFilePath, searchTerms, matcher);
                                 }
                                 catch (PathTooLongException ptlex)
                                 {
@@ -106,7 +106,7 @@ namespace SearcherLibrary.FileExtensions
             }
             finally
             {
-                this.RemoveTempDirectory(tempDirPath);
+                RemoveTempDirectory(tempDirPath);
             }
 
             return matchedLines;
@@ -124,10 +124,10 @@ namespace SearcherLibrary.FileExtensions
         /// <param name="searchTerms">The terms to search.</param>
         /// <param name="matcher">The matcher object to determine search criteria.</param>
         /// <returns>The matched lines containing the search terms.</returns>
-        private List<MatchedLine> GetMatchesFromOdsContentXml(string fileName, string extractedContentFile, IEnumerable<string> searchTerms, Matcher matcher)
+        private static List<MatchedLine> GetMatchesFromOdsContentXml(string fileName, string extractedContentFile, IEnumerable<string> searchTerms, Matcher matcher)
         {
             int matchCounter = 0;
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<MatchedLine> matchedLines = new();
 
             // Loop through each sheet.
             foreach (XElement element in XDocument.Load(extractedContentFile, LoadOptions.None).Descendants().Where(d => d.Name.LocalName == "table"))
@@ -171,7 +171,7 @@ namespace SearcherLibrary.FileExtensions
 
                             if (matches.Count > 0)
                             {
-                                foreach (Match match in matches)
+                                foreach (Match match in matches.Cast<Match>())
                                 {
                                     matchedLines.Add(new MatchedLine
                                     {
@@ -203,14 +203,14 @@ namespace SearcherLibrary.FileExtensions
         /// </summary>
         /// <param name="index">The index value.</param>
         /// <returns>The column header value.</returns>
-        private string GetSpreadsheetColumnNameFromIndex(int index)
+        private static string GetSpreadsheetColumnNameFromIndex(int index)
         {
             // Based on: https://stackoverflow.com/questions/297213/translate-a-column-index-into-an-excel-column-name
             index -= 1;     // Adjust so it matches 0-indexed array rather than 1-indexed column
 
             int quotient = index / 26;
             return (quotient > 0)
-                ? this.GetSpreadsheetColumnNameFromIndex(quotient) + ((char)((index % 26) + 'A')).ToString()
+                ? GetSpreadsheetColumnNameFromIndex(quotient) + ((char)((index % 26) + 'A')).ToString()
                 : ((char)((index % 26) + 'A')).ToString();
         }
 

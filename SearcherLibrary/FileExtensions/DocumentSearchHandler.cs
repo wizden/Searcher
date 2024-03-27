@@ -54,7 +54,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handle files with the .DOCX/.DOCM extension.
         /// </summary>
-        public static new List<string> Extensions => new List<string> { ".DOCX", ".DOCM" };
+        public static new List<string> Extensions => new() { ".DOCX", ".DOCM" };
 
         #endregion Public Properties
 
@@ -127,7 +127,7 @@ namespace SearcherLibrary.FileExtensions
 
                                                      if (matches.Count > 0)
                                                      {
-                                                         foreach (Match match in matches)
+                                                         foreach (Match match in matches.Cast<Match>())
                                                          {
                                                              if (content.Length > MaxContentLengthCheck)
                                                              {
@@ -142,7 +142,7 @@ namespace SearcherLibrary.FileExtensions
                                                                  endIndex = content.Length;
                                                              }
 
-                                                             var matchLine = content.Substring(startIndex, endIndex - startIndex);
+                                                             var matchLine = content[startIndex..endIndex];
                                                              var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
 
                                                              // Only add, if it does not already exist (Not sure how the body elements manage to bring back the same content again.
@@ -191,11 +191,11 @@ namespace SearcherLibrary.FileExtensions
 
                                 if (matches.Count > 0)
                                 {
-                                    foreach (Match match in matches)
+                                    foreach (Match match in matches.Cast<Match>())
                                     {
                                         startIndex = match.Index;
                                         endIndex = match.Index + match.Length;
-                                        var matchLine = allContent.Substring(startIndex, endIndex - startIndex);
+                                        var matchLine = allContent[startIndex..endIndex];
                                         var searchMatch = Regex.Match(matchLine, searchTerm, matcher.RegularExpressionOptions); // Use this match for the result highlight, based on additional characters being selected before and after the match.
                                         allContentMatchedLines.Add(new MatchedLine
                                         {
@@ -220,7 +220,7 @@ namespace SearcherLibrary.FileExtensions
 
                         // Only add those lines that do not already exist in matches found. Do not like the search mechanism below, but it helps to search by excluding the "Page {0}:\t{1}" content.
                         matchedLines.AddRange(allContentMatchedLines.Where(acm => !matchedLines.Any(ml => acm.Length == ml.Length 
-                            && acm.Content.Contains(ml.Content.Substring(Strings.Page.Length + 3 + ml.LineNumber.ToString().Length, ml.Content.Length - (Strings.Page.Length + 3 + ml.LineNumber.ToString().Length))))));
+                            && acm.Content.Contains(ml.Content[(Strings.Page.Length + 3 + ml.LineNumber.ToString().Length)..]))));
                     }
                 }
 
@@ -255,7 +255,7 @@ namespace SearcherLibrary.FileExtensions
         /// <param name="content">The match content.</param>
         /// <param name="startIndex">The index boundary.</param>
         /// <returns>Position of the first word.</returns>
-        private int GetLocationOfFirstWord(string content, int startIndex)
+        private static int GetLocationOfFirstWord(string content, int startIndex)
         {
             var retVal = startIndex;
 
@@ -278,7 +278,7 @@ namespace SearcherLibrary.FileExtensions
         /// <param name="content">The match content.</param>
         /// <param name="endIndex">The index boundary.</param>
         /// <returns>Position of the last word.</returns>
-        private int GetLocationOfLastWord(string content, int endIndex)
+        private static int GetLocationOfLastWord(string content, int endIndex)
         {
             var retVal = endIndex;
 

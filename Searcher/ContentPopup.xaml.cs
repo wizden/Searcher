@@ -5,30 +5,31 @@
 
 namespace Searcher
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+
 
     /*
-* Searcher - Utility to search file content
-* Copyright (C) 2018  Dennis Joseph
-* 
-* This file is part of Searcher.
+     * Searcher - Utility to search file content
+     * Copyright (C) 2018  Dennis Joseph
+     * 
+     * This file is part of Searcher.
 
-* Searcher is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* Searcher is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
-*/
+     * Searcher is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, either version 3 of the License, or
+     * (at your option) any later version.
+     * 
+     * Searcher is distributed in the hope that it will be useful,
+     * but WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     * GNU General Public License for more details.
+     * 
+     * You should have received a copy of the GNU General Public License
+     * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
+     */
 
+    using System;
+    using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Input;
@@ -48,17 +49,22 @@ namespace Searcher
         /// <summary>
         /// Private store for the array containing the file contents.
         /// </summary>
-        private string[] fileLines = null;
-
-        /// <summary>
-        /// Private store for the line number to be highlighted.
-        /// </summary>
-        private int lineNumber = 0;
+        private readonly List<string> fileLines = new();
 
         /// <summary>
         /// Timeout value in seconds after which content windows closes.
         /// </summary>
         private int windowCloseTimeoutSeconds = 4;
+
+        /// <summary>
+        /// Private store for the height of the window.
+        /// </summary>
+        private int windowHeight;
+
+        /// <summary>
+        /// Private store for the width of the window.
+        /// </summary>
+        private int windowWidth;
 
         #endregion Private Fields
 
@@ -80,11 +86,10 @@ namespace Searcher
         public ContentPopup(string file, int lineNo)
             : this()
         {
-            this.fileLines = System.IO.File.ReadAllLines(file);
-            this.lineNumber = lineNo;
+            this.fileLines = File.ReadAllLines(file).ToList();
             this.TxtContent.Text = string.Join(Environment.NewLine, this.fileLines);
-            this.TxtLineNumbers.Text = string.Join(Environment.NewLine, Enumerable.Range(1, this.fileLines.Length).Select(num => num));
-            this.TxtLineNumbers.Width = this.fileLines.ToString().Length * 4;
+            this.TxtLineNumbers.Text = string.Join(Environment.NewLine, Enumerable.Range(1, this.fileLines.Count).Select(num => num));
+            this.TxtLineNumbers.Width = this.fileLines.Count.ToString().Length * 15;
             this.GrdColLineNumber.Width = new GridLength(this.TxtLineNumbers.Width, GridUnitType.Pixel);
             this.TxtLineNumbers.Text += Environment.NewLine + string.Empty;
             this.Title = file;
@@ -115,7 +120,7 @@ namespace Searcher
         {
             get
             {
-                return this.WindowHeight;
+                return this.windowHeight;
             }
 
             set
@@ -129,7 +134,7 @@ namespace Searcher
                     value = (int)this.MaxHeight;
                 }
 
-                this.WindowHeight = value;
+                this.windowHeight = value;
             }
         }
 
@@ -140,7 +145,7 @@ namespace Searcher
         {
             get
             {
-                return this.WindowWidth;
+                return this.windowWidth;
             }
 
             set
@@ -154,7 +159,7 @@ namespace Searcher
                     value = (int)this.MaxWidth;
                 }
 
-                this.WindowWidth = value;
+                this.windowWidth = value;
             }
         }
 

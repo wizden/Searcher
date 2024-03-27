@@ -97,17 +97,17 @@ namespace Searcher
         /// <summary>
         /// Private store for the background colour of the application
         /// </summary>
-        private SolidColorBrush applicationBackColour = new SolidColorBrush();
+        private SolidColorBrush applicationBackColour = new();
 
         /// <summary>
         /// Cancellation token source object to cancel file search.
         /// </summary>
-        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource cancellationTokenSource = new();
 
         /// <summary>
         /// List of child result pop-out windows.
         /// </summary>
-        private List<ResultsPopout> childWindows = new List<ResultsPopout>();
+        private readonly List<ResultsPopout> childWindows = new();
 
         /// <summary>
         /// Private store for the object that pops up the content.
@@ -122,7 +122,7 @@ namespace Searcher
         /// <summary>
         /// Private store for the list of directories that will not be searched (temporarily or always).
         /// </summary>
-        private List<string> directoriesToExclude = new List<string>();
+        private readonly List<string> directoriesToExclude = new();
 
         /// <summary>
         /// Boolean to store whether the list of files being searched have been finalised.
@@ -137,7 +137,7 @@ namespace Searcher
         /// <summary>
         /// Variable to store stopwatch that calculates execution time.
         /// </summary>
-        private Stopwatch executionTime = new Stopwatch();
+        private readonly Stopwatch executionTime = new();
 
         /// <summary>
         /// Private store for the list of files that have already been searched.
@@ -152,12 +152,12 @@ namespace Searcher
         /// <summary>
         /// Private store for the determining the progress of the files currently being searched.
         /// </summary>
-        private ConcurrentDictionary<string, FileSearchResult> filesSearchProgress = new ConcurrentDictionary<string, FileSearchResult>();      // TODO: Use ConcurrentBag, but only .NET 5.0 has the Clear() method.
+        private readonly ConcurrentDictionary<string, FileSearchResult> filesSearchProgress = new();      // TODO: Use ConcurrentBag, but only .NET 5.0 has the Clear() method.
 
         /// <summary>
         /// Private store for the list of files that will not be searched (temporarily or always).
         /// </summary>
-        private List<string> filesToExclude = new List<string>();
+        private readonly List<string> filesToExclude = new();
 
         /// <summary>
         /// Private store for the list of files that are being searched.
@@ -192,7 +192,7 @@ namespace Searcher
         /// <summary>
         /// Private store for the matcher object used to search files.
         /// </summary>
-        private Matcher matcherObj = new Matcher();
+        private readonly Matcher matcherObj = new();
 
         /// <summary>
         /// Variable to store the number of search matches.
@@ -255,11 +255,6 @@ namespace Searcher
         private double scale = 1.0;
 
         /// <summary>
-        /// Boolean indicating whether the search mode is normal.
-        /// </summary>
-        private bool searchModeNormal = false;
-
-        /// <summary>
         /// Boolean indicating whether the search mode uses regex.
         /// </summary>
         private bool searchModeRegex = false;
@@ -277,7 +272,7 @@ namespace Searcher
         /// <summary>
         /// Private store for timer to determine time taken to run search.
         /// </summary>
-        private Timer searchTimer = new Timer(1000);
+        private readonly Timer searchTimer = new(1000);
 
         /// <summary>
         /// Boolean indicating whether the search must contain all of the search terms.
@@ -327,7 +322,7 @@ namespace Searcher
         /// <summary>
         /// Private store to hide the zoom level text block.
         /// </summary>
-        private DispatcherTimer zoomLabelTimer = new DispatcherTimer();
+        private readonly DispatcherTimer zoomLabelTimer = new();
 
         #endregion Private Fields
 
@@ -383,10 +378,7 @@ namespace Searcher
         /// <param name="strPropertyName">The name of the property</param>
         protected void NotifyPropertyChanged(string strPropertyName)
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(strPropertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(strPropertyName));
         }
 
         #endregion Protected Methods
@@ -398,7 +390,7 @@ namespace Searcher
         /// </summary>
         /// <param name="comboBox">The combo box object.</param>
         /// <param name="preferenceElement">The search preference value.</param>
-        private void AddItemsToPreferences(ComboBox comboBox, string preferenceElement)
+        private static void AddItemsToPreferences(ComboBox comboBox, string preferenceElement)
         {
             IEnumerable<string> itemsToAdd = comboBox.Items.Cast<string>();
             PreferencesHandler.AddItemsToPreferences(itemsToAdd, preferenceElement);
@@ -409,7 +401,7 @@ namespace Searcher
         /// </summary>
         /// <param name="comboBox">The combo box object.</param>
         /// <param name="preferenceElement">The search preference value.</param>
-        private void AddPreferencesToItems(ComboBox comboBox, string preferenceElement)
+        private static void AddPreferencesToItems(ComboBox comboBox, string preferenceElement)
         {
             PreferencesHandler.GetPreference(preferenceElement).Descendants("Value").ToList().ForEach(p =>
             {
@@ -424,7 +416,7 @@ namespace Searcher
         /// <returns>List of Inline to be added to the results.</returns>
         private async Task<List<Inline>> AddResult(List<MatchedLine> matchedLines)
         {
-            List<Inline> retVal = new List<Inline>();
+            List<Inline> retVal = new();
             string currentFileName = string.Empty;
             string matchCountStr = $" ({Application.Current.Resources["Matches"]}: {matchedLines.Count})";
             int matchCounter = 0;
@@ -443,8 +435,11 @@ namespace Searcher
 
                         this.Dispatcher.Invoke(() =>
                         {
-                            Hyperlink link = new Hyperlink(new Run(Environment.NewLine + ml.FileName));
-                            link.NavigateUri = new Uri(ml.FileName);
+                            Hyperlink link = new(new Run(Environment.NewLine + ml.FileName))
+                            {
+                                NavigateUri = new Uri(ml.FileName)
+                            };
+
                             link.RequestNavigate += Link_RequestNavigate;
                             link.PreviewMouseRightButtonDown += Link_PreviewMouseRightButtonDown;
                             retVal.Add(new Bold(link)
@@ -464,7 +459,7 @@ namespace Searcher
                     this.matchesFound++;
                     this.Dispatcher.Invoke(() =>
                     {
-                        retVal.Add(new Run(ml.Content.Substring(0, ml.StartIndex)));
+                        retVal.Add(new Run(ml.Content[..ml.StartIndex]));
                         retVal.Add(new Run(Regex.Unescape(Regex.Escape(ml.Content.Substring(ml.StartIndex, ml.Length))))
                         {
                             Background = this.highlightResults ? this.highlightResultBackColour : this.applicationBackColour
@@ -578,7 +573,7 @@ namespace Searcher
         /// <param name="e">The parameter is not used.</param>
         private void BtnAbout_Click(object sender, RoutedEventArgs e)
         {
-            SearcherAboutWindow saw = new SearcherAboutWindow();
+            SearcherAboutWindow saw = new();
 
             if (PreferencesHandler.PreferencesFile != null)
             {
@@ -623,7 +618,7 @@ namespace Searcher
         /// <param name="e">The RoutedEventArgs object.</param>
         private void BtnChangeEditor_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog
+            OpenFileDialog ofd = new()
             {
                 Filter = Application.Current.Resources["ExecutableFiles"].ToString() + " (*.exe)|*.exe",
                 Multiselect = false,
@@ -664,7 +659,7 @@ namespace Searcher
         /// <param name="e">The RoutedEventArgs object.</param>
         private void BtnDirectory_Click(object sender, RoutedEventArgs e)
         {
-            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            FolderBrowserDialog fbd = new();
             if (!string.IsNullOrEmpty(this.CmbDirectory.Text))
             {
                 fbd.SelectedPath = this.CmbDirectory.Text.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Last().Trim();
@@ -716,9 +711,9 @@ namespace Searcher
                 }
                 catch (Exception ex)
                 {
-                    if (ex is AggregateException)
+                    if (ex is AggregateException exception)
                     {
-                        foreach (Exception innerExc in ((AggregateException)ex).InnerExceptions)
+                        foreach (Exception innerExc in exception.InnerExceptions)
                         {
                             if (innerExc != null && innerExc.InnerException != null)
                             {
@@ -779,7 +774,7 @@ namespace Searcher
             }
             else
             {
-                List<string> errorPaths = new List<string>();
+                List<string> errorPaths = new();
                 this.CmbDirectory.Text.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList().ForEach(d =>
                 {
                     if (!Directory.Exists(d))
@@ -815,7 +810,7 @@ namespace Searcher
         private void CmbLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.culture = ((ComboBoxItem)CmbLanguage.SelectedItem).Tag.ToString() ?? string.Empty;
-            Uri imageFile = new Uri("/Images/" + this.culture + ".png", UriKind.Relative);
+            Uri imageFile = new("/Images/" + this.culture + ".png", UriKind.Relative);
             this.ImgFlag.Source = new BitmapImage(imageFile);
             this.SetLanguage();
         }
@@ -876,9 +871,9 @@ namespace Searcher
             // This method is async void because if the search for update fails, we do not worry further as it does not impact the application usage.
             if (PreferencesHandler.PreferencesFile != null && PreferencesHandler.GetPreferenceValue("CheckForUpdates").ToUpper() == true.ToString().ToUpper())
             {
-                UpdateApp updateApp = new UpdateApp(PreferencesHandler.PreferencesFile);
+                UpdateApp updateApp = new(PreferencesHandler.PreferencesFile);
 
-                if (updateApp.UpdatedAppExistsLocally())
+                if (UpdateApp.UpdatedAppExistsLocally())
                 {
                     this.Dispatcher.Invoke(() =>
                     {
@@ -973,7 +968,7 @@ namespace Searcher
 
             if (!string.IsNullOrEmpty(fullFilePath))
             {
-                DirectoryExclude dirExcludeWindow = new DirectoryExclude(fullFilePath)
+                DirectoryExclude dirExcludeWindow = new(fullFilePath)
                 {
                     PreferenceFileExists = PreferencesHandler.PreferencesFile != null,
                     Owner = this
@@ -1035,7 +1030,7 @@ namespace Searcher
             {
                 Inline fileNameInline = ((Run)(Inline)this.TxtResults.CaretPosition.Parent).PreviousInline;
 
-                while (!(fileNameInline is Bold) && fileNameInline != null)
+                while (fileNameInline is not Bold && fileNameInline != null)
                 {
                     fileNameInline = (Inline)fileNameInline.PreviousInline;
                 }
@@ -1050,7 +1045,7 @@ namespace Searcher
 
                 if (indexOfMatchCount > 0)
                 {
-                    retVal = retVal.Substring(0, indexOfMatchCount);
+                    retVal = retVal[..indexOfMatchCount];
                 }
             }
 
@@ -1065,8 +1060,8 @@ namespace Searcher
         /// <returns>List of files to be searched.</returns>
         private List<string> GetFilesToSearch(string path, string filter)
         {
-            List<string> filesToSearch = new List<string>();
-            List<string> pathErrors = new List<string>();
+            List<string> filesToSearch = new();
+            List<string> pathErrors = new();
 
             if (this.filterExclusionSet)
             {
@@ -1135,7 +1130,7 @@ namespace Searcher
         {
             int retVal = 0;
 
-            if (this.TxtResults.CaretPosition.Parent != null && this.TxtResults.CaretPosition.Parent is Run && ((Run)this.TxtResults.CaretPosition.Parent).PreviousInline != null)
+            if (this.TxtResults.CaretPosition.Parent != null && this.TxtResults.CaretPosition.Parent is Run run && run.PreviousInline != null)
             {
                 int startPosition = this.TxtResults.CaretPosition.IsAtLineStartPosition ? -1 : 0;
                 int nextPosition = startPosition + 1;
@@ -1161,9 +1156,9 @@ namespace Searcher
                 {
                     try
                     {
-                        int.TryParse(text.Substring(5, text.IndexOf(":") - 5), out retVal);
+                        int.TryParse(text[5..text.IndexOf(":")], out retVal);
                     }
-                    catch (ArgumentOutOfRangeException aore)
+                    catch (ArgumentOutOfRangeException argOutOfRangeEx)
                     {
                         if (this.multilineRegex)
                         {
@@ -1171,7 +1166,7 @@ namespace Searcher
                         }
                         else
                         {
-                            this.ShowError(aore);
+                            ShowError(argOutOfRangeEx);
                         }
                     }
                 }
@@ -1196,7 +1191,7 @@ namespace Searcher
         /// Sets the title bar to display details of user running the application.
         /// </summary>
         /// <returns>String containing user name information.</returns>
-        private string GetRunningUserInfo()
+        private static string GetRunningUserInfo()
         {
             AssemblyTitleAttribute? assemblyTitleAttribute = (AssemblyTitleAttribute)(Attribute.GetCustomAttribute(Assembly.GetExecutingAssembly(), typeof(AssemblyTitleAttribute), false) 
                 ?? new AssemblyTitleAttribute(string.Empty));
@@ -1204,7 +1199,7 @@ namespace Searcher
                 ? assemblyTitleAttribute.Title 
                 : (Application.Current.Resources["UnknownAssemblyName"].ToString() ?? string.Empty);
             string userName = string.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
-            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+            WindowsPrincipal principal = new(WindowsIdentity.GetCurrent());
 
             if (principal.IsInRole(WindowsBuiltInRole.Administrator))
             {
@@ -1224,13 +1219,9 @@ namespace Searcher
             if ((this.distinctFilesFound && this.filesToSearch != null && this.filesToSearch.Count > 0) || (this.filesToExclude.Count > 0 || this.directoriesToExclude.Count > 0))
             {
                 SearchedFileList searchedFileList;
-                List<string> filesToAlwaysExclude = new List<string>();
-                List<string> directoriesToAlwaysExclude = new List<string>();
-
-                if(this.filesToSearch == null)
-                {
-                    this.filesToSearch = new();
-                }
+                List<string> filesToAlwaysExclude = new();
+                List<string> directoriesToAlwaysExclude = new();
+                this.filesToSearch ??= new();
 
                 if (PreferencesHandler.PreferencesFile != null)
                 {
@@ -1241,7 +1232,7 @@ namespace Searcher
                     {
                         if (filesToAlwaysExclude.Count > 0 || directoriesToAlwaysExclude.Count > 0)
                         {
-                            List<string> tempFilesToExclude = new List<string>();
+                            List<string> tempFilesToExclude = new();
                             tempFilesToExclude.AddRange(this.directoriesToExclude);
                             tempFilesToExclude.AddRange(this.filesToExclude);
                             tempFilesToExclude.RemoveAll(tfe => filesToAlwaysExclude.Any(fae => fae == tfe));
@@ -1274,7 +1265,7 @@ namespace Searcher
                         this.directoriesToExclude.RemoveAll(tde => searchedFileList.FilesToInclude.Any(fi => Directory.Exists(fi) && fi == tde));
                         filesToAlwaysExclude.RemoveAll(fae => searchedFileList.FilesToInclude.Any(fi => File.Exists(fi) && fi == fae));
                         directoriesToAlwaysExclude.RemoveAll(fae => searchedFileList.FilesToInclude.Any(fi => Directory.Exists(fi) && fi == fae));
-                        this.SavePathsToAlwaysExclude(filesToAlwaysExclude, directoriesToAlwaysExclude);
+                        SavePathsToAlwaysExclude(filesToAlwaysExclude, directoriesToAlwaysExclude);
                     }
                 }
             }
@@ -1326,10 +1317,10 @@ namespace Searcher
                     PreferencesHandler.CheckPreferencesFile(PreferencesHandler.PreferenceFilePath);
                     this.SetInitialSearchOptions();
 
-                    this.AddPreferencesToItems(this.CmbDirectory, "SearchDirectories");
-                    this.AddPreferencesToItems(this.CmbFindWhat, "SearchContents");
-                    this.AddPreferencesToItems(this.CmbFilters, "SearchFilters");
-                    this.LoadPathsToAlwaysExlude();
+                    AddPreferencesToItems(this.CmbDirectory, "SearchDirectories");
+                    AddPreferencesToItems(this.CmbFindWhat, "SearchContents");
+                    AddPreferencesToItems(this.CmbFilters, "SearchFilters");
+                    LoadPathsToAlwaysExlude();
 
                     this.CmbDirectory.Text = this.CmbDirectory.Items.Count > 0 ? this.CmbDirectory.Items[0].ToString() : string.Empty;
                     this.CmbFindWhat.Text = this.CmbFindWhat.Items.Count > 0 ? this.CmbFindWhat.Items[0].ToString() : string.Empty;
@@ -1339,13 +1330,13 @@ namespace Searcher
                 if (!string.IsNullOrEmpty(PreferencesHandler.PreferenceFilePath) && File.Exists(PreferencesHandler.PreferenceFilePath))
                 {
                     this.SetDefaultCulture();
-                    this.SetJumpList();
+                    SetJumpList();
                     this.DownloadUpdates();
                 }
             }
             catch (IOException ex)
             {
-                this.ShowError(ex);
+                ShowError(ex);
             }
         }
 
@@ -1356,71 +1347,96 @@ namespace Searcher
         /// <param name="e">The MouseButtonEventArgs object.</param>
         private void Link_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Hyperlink)
+            if (sender is Hyperlink hyperlink)
             {
-                ContextMenu mnu = new ContextMenu();
-                MenuItem copyFullPathToClipboard = new MenuItem();
-                copyFullPathToClipboard.Header = Application.Current.Resources["CopyFullPath"].ToString();
-                copyFullPathToClipboard.Tag = sender;
+                ContextMenu mnu = new();
+                MenuItem copyFullPathToClipboard = new()
+                {
+                    Header = Application.Current.Resources["CopyFullPath"].ToString(),
+                    Tag = sender
+                };
+
                 copyFullPathToClipboard.Click += this.CopyFullPathToClipboard_Click;
                 mnu.Items.Add(copyFullPathToClipboard);
 
-                MenuItem copyFileNameToClipboard = new MenuItem();
-                copyFileNameToClipboard.Header = Application.Current.Resources["CopyFileName"].ToString();
-                copyFileNameToClipboard.Tag = sender;
+                MenuItem copyFileNameToClipboard = new()
+                {
+                    Header = Application.Current.Resources["CopyFileName"].ToString(),
+                    Tag = sender
+                };
+
                 copyFileNameToClipboard.Click += this.CopyFileNameToClipboard_Click;
                 mnu.Items.Add(copyFileNameToClipboard);
 
-                MenuItem copyFileNameNoExtToClipboard = new MenuItem();
-                copyFileNameNoExtToClipboard.Header = Application.Current.Resources["CopyFileNameNoExtension"].ToString();
-                copyFileNameNoExtToClipboard.Tag = sender;
+                MenuItem copyFileNameNoExtToClipboard = new()
+                {
+                    Header = Application.Current.Resources["CopyFileNameNoExtension"].ToString(),
+                    Tag = sender
+                };
+
                 copyFileNameNoExtToClipboard.Click += this.CopyFileNameNoExtToClipboard_Click;
                 mnu.Items.Add(copyFileNameNoExtToClipboard);
                 mnu.Items.Add(new Separator());
 
-                MenuItem openContainingDirectory = new MenuItem();
-                openContainingDirectory.Header = Application.Current.Resources["OpenDirectoryInExplorer"].ToString();
-                openContainingDirectory.Tag = sender;
+                MenuItem openContainingDirectory = new()
+                {
+                    Header = Application.Current.Resources["OpenDirectoryInExplorer"].ToString(),
+                    Tag = sender
+                };
+
                 openContainingDirectory.Click += this.OpenContainingDirectory_Click;
                 mnu.Items.Add(openContainingDirectory);
 
-                MenuItem saveAllResultsToFile = new MenuItem();
-                saveAllResultsToFile.Header = Application.Current.Resources["SaveResultsToFile"].ToString();
+                MenuItem saveAllResultsToFile = new()
+                {
+                    Header = Application.Current.Resources["SaveResultsToFile"].ToString()
+                };
+
                 saveAllResultsToFile.Click += this.SaveAllResultsToFile_Click;
                 mnu.Items.Add(saveAllResultsToFile);
 
-                MenuItem popoutResults = new MenuItem();
-                popoutResults.Header = Application.Current.Resources["PopOutResults"].ToString();
-                popoutResults.Tag = sender;
+                MenuItem popoutResults = new()
+                {
+                    Header = Application.Current.Resources["PopOutResults"].ToString(),
+                    Tag = sender
+                };
+
                 popoutResults.Click += this.PopoutResults_Click;
                 mnu.Items.Add(popoutResults);
 
                 mnu.Items.Add(new Separator());
 
-                MenuItem excludeFileTemporarily = new MenuItem();
-                excludeFileTemporarily.Header = Application.Current.Resources["ExcludeFileTemporarily"].ToString();
-                excludeFileTemporarily.Tag = sender;
+                MenuItem excludeFileTemporarily = new()
+                {
+                    Header = Application.Current.Resources["ExcludeFileTemporarily"].ToString(),
+                    Tag = sender
+                };
+
                 excludeFileTemporarily.Click += this.ExcludeFromSearchTemporarily_Click;
                 mnu.Items.Add(excludeFileTemporarily);
 
                 if (PreferencesHandler.PreferencesFile != null)
                 {
-                    MenuItem excludeFileAlways = new MenuItem();
-                    excludeFileAlways.Header = Application.Current.Resources["ExcludeFileAlways"].ToString();
-                    excludeFileAlways.Tag = sender;
+                    MenuItem excludeFileAlways = new()
+                    {
+                        Header = Application.Current.Resources["ExcludeFileAlways"].ToString(),
+                        Tag = sender
+                    };
+
                     excludeFileAlways.Click += this.ExcludeFromSearchAlways_Click;
                     mnu.Items.Add(excludeFileAlways);
                 }
 
-                MenuItem excludeDirectory = new MenuItem
+                MenuItem excludeDirectory = new()
                 {
                     Header = Application.Current.Resources["ExcludeDirectory"].ToString(),
                     Tag = sender
                 };
+
                 excludeDirectory.Click += this.ExcludeDirectory_Click;
                 mnu.Items.Add(excludeDirectory);
 
-                ((Hyperlink)sender).ContextMenu = mnu;
+                hyperlink.ContextMenu = mnu;
             }
         }
 
@@ -1494,11 +1510,11 @@ namespace Searcher
 
             if (this.searchModeRegex)
             {
-                this.regexOptions = this.regexOptions | (this.multilineRegex ? RegexOptions.Multiline : RegexOptions.Singleline);
+                this.regexOptions |= (this.multilineRegex ? RegexOptions.Multiline : RegexOptions.Singleline);
             }
 
             List<string> termsToSearch = this.SetTermsToSearchText(searchText);
-            List<Task<List<string>>> pathsListTask = new List<Task<List<string>>>(searchPaths.Count());
+            List<Task<List<string>>> pathsListTask = new(searchPaths.Count);
 
             try
             {
@@ -1534,7 +1550,7 @@ namespace Searcher
             }
             catch (Exception ex)
             {
-                if (!(ex is OperationCanceledException))
+                if (ex is not OperationCanceledException)
                 {
                     throw;
                 }
@@ -1551,11 +1567,11 @@ namespace Searcher
             bool resultsCaptured = false;
             double horizontalOffset = this.TxtResults.HorizontalOffset;
             double verticalOffset = this.TxtResults.VerticalOffset;
-            ResultsPopout newWnd = new ResultsPopout();
+            ResultsPopout newWnd = new();
             newWnd.TxtResults.Background = this.applicationBackColour;
             newWnd.Width = this.Width;
             newWnd.Height = this.TxtResults.ActualHeight;
-            newWnd.Title = string.Format("{0} - {1}", Application.Current.Resources["Results"].ToString(), this.CmbFindWhat.Text.Substring(0, Math.Min(this.CmbFindWhat.Text.Length, 50)));
+            newWnd.Title = string.Format("{0} - {1}", Application.Current.Resources["Results"].ToString(), this.CmbFindWhat.Text[..Math.Min(this.CmbFindWhat.Text.Length, 50)]);
             this.childWindows.Add(newWnd);
             newWnd.Closed += (windowSender, windowEventArgs) =>
             {
@@ -1573,7 +1589,7 @@ namespace Searcher
                 this.CmbFindWhat.Focus();                                               // Set focus back on the search term.
 
                 // If the copy did not succeed, only "\r\n" is set in the new window. So, retry the copy.
-                TextRange textRange = new TextRange(newWnd.TxtResults.Document.ContentStart, newWnd.TxtResults.Document.ContentEnd);
+                TextRange textRange = new(newWnd.TxtResults.Document.ContentStart, newWnd.TxtResults.Document.ContentEnd);
                 resultsCaptured = textRange.Text != "\r\n";
             }
 
@@ -1680,7 +1696,7 @@ namespace Searcher
         /// <param name="e">The RoutedEventArgs object.</param>
         private void SaveAllResultsToFile_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
+            SaveFileDialog sfd = new();
             if (!string.IsNullOrEmpty(this.CmbDirectory.Text))
             {
                 sfd.InitialDirectory = this.CmbDirectory.Text.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Last().Trim();
@@ -1698,7 +1714,7 @@ namespace Searcher
         /// </summary>
         /// <param name="filesToAlwaysExclude">The list of file paths.</param>
         /// <param name="directoriesToAlwaysExclude">The list of directory paths.</param>
-        private void SavePathsToAlwaysExclude(List<string> filesToAlwaysExclude, List<string> directoriesToAlwaysExclude)
+        private static void SavePathsToAlwaysExclude(List<string> filesToAlwaysExclude, List<string> directoriesToAlwaysExclude)
         {
             PreferencesHandler.GetPreference("FilesToAlwaysExcludeFromSearch").FirstOrDefault()?.RemoveAll();
             PreferencesHandler.GetPreference("DirectoriesToAlwaysExcludeFromSearch").FirstOrDefault()?.RemoveAll();
@@ -1728,8 +1744,8 @@ namespace Searcher
         /// <returns>Task object that searches and displays the result.</returns>
         private async Task<List<Inline>> SearchAndDisplayResult(string fileName, IEnumerable<string> termsToSearch)
         {
-            List<Inline> retVal = new List<Inline>();
-            List<MatchedLine> matchedLines = new List<MatchedLine>();
+            List<Inline> retVal = new();
+            List<MatchedLine> matchedLines = new();
 
             try
             {
@@ -1795,7 +1811,7 @@ namespace Searcher
             this.matcherObj.AllMatchesInFile = this.searchTypeAll;
             this.matcherObj.RegularExpressionOptions = this.regexOptions;
             this.matcherObj.CancellationTokenSource = this.cancellationTokenSource;
-            List<Task> searchTasks = new List<Task>();
+            List<Task> searchTasks = new();
 
             try
             {
@@ -1803,7 +1819,7 @@ namespace Searcher
                 {
                     if (!this.cancellationTokenSource.Token.IsCancellationRequested)
                     {
-                        FileSearchResult fileSearchResult = new FileSearchResult { FileNamePath = fileNamePath, SearchStartDateTimeTicks = DateTime.UtcNow.Ticks };
+                        FileSearchResult fileSearchResult = new() { FileNamePath = fileNamePath, SearchStartDateTimeTicks = DateTime.UtcNow.Ticks };
                         this.filesSearchProgress.TryAdd(fileSearchResult.FileNamePath, fileSearchResult);
 
                         Task searchTask = Task.Run(
@@ -1817,8 +1833,8 @@ namespace Searcher
                                         await this.UpdateResults(fileSearchResult);
                                     }
 
-                                    this.TaskBarItemInfoProgress.ProgressValue = this.filesSearchedCounter * 1.0 / this.filesToSearch.Count();
-                                    this.SetFileCounterProgressInformation(this.filesSearchedCounter, string.Format("{0} {1} {2} {3} ({4} %)", Application.Current.Resources["ProcessingFiles"].ToString(), this.filesSearchedCounter, Application.Current.Resources["Of"].ToString(), this.filesToSearch.Count(), (int)(this.filesSearchedCounter * 100) / this.filesToSearch.Count()));
+                                    this.TaskBarItemInfoProgress.ProgressValue = this.filesSearchedCounter * 1.0 / this.filesToSearch.Count;
+                                    this.SetFileCounterProgressInformation(this.filesSearchedCounter, string.Format("{0} {1} {2} {3} ({4} %)", Application.Current.Resources["ProcessingFiles"].ToString(), this.filesSearchedCounter, Application.Current.Resources["Of"].ToString(), this.filesToSearch.Count, (int)(this.filesSearchedCounter * 100) / this.filesToSearch.Count));
                                 });
 
                                 this.filesSearchProgress.TryRemove(fileSearchResult.FileNamePath, out _);
@@ -2010,7 +2026,6 @@ namespace Searcher
         {
             this.ChkMatchWholeWord.IsChecked = PreferencesHandler.GetPreferenceValue("MatchWholeWord").ToUpper() == true.ToString().ToUpper();
             this.ChkMatchCase.IsChecked = PreferencesHandler.GetPreferenceValue("MatchCase").ToUpper() == true.ToString().ToUpper();
-            this.searchModeNormal = this.RbtnNormalSearch.IsChecked.GetValueOrDefault(true);
             this.searchModeRegex = this.RbtnRegexSearch.IsChecked.GetValueOrDefault(true);
             this.ChkSearchSubfolders.IsChecked = PreferencesHandler.GetPreferenceValue("SearchSubfolders").ToUpper() == true.ToString().ToUpper();
             this.ChkHighlightResults.IsChecked = PreferencesHandler.GetPreferenceValue("HighlightResults").ToUpper() == true.ToString().ToUpper();
@@ -2022,8 +2037,8 @@ namespace Searcher
                 this.CmbSearchType.Items.Cast<ComboBoxItem>().Where(i => i.Content.ToString()?.ToUpper() == Application.Current.Resources["All"].ToString()?.ToUpper()).First() :
                 this.CmbSearchType.Items.Cast<ComboBoxItem>().First();
 
-            this.SetSearchDate(this.DtpStartDate, "MinFileCreateSearchDate");
-            this.SetSearchDate(this.DtpEndDate, "MaxFileCreateSearchDate");
+            SetSearchDate(this.DtpStartDate, "MinFileCreateSearchDate");
+            SetSearchDate(this.DtpEndDate, "MaxFileCreateSearchDate");
             this.SetWindowDimensions();
             this.SetApplicationCustomBackground();
             this.SetResultHighlightColour();
@@ -2042,14 +2057,16 @@ namespace Searcher
         /// <summary>
         /// Set a jump list for the window.
         /// </summary>
-        private void SetJumpList()
+        private static void SetJumpList()
         {
-            JumpTask jmpPreferences = new JumpTask();
-            jmpPreferences.ApplicationPath = PreferencesHandler.PreferenceFilePath;
-            jmpPreferences.IconResourcePath = @"C:\Windows\notepad.exe";
-            jmpPreferences.Title = "Preferences";
-            jmpPreferences.Description = Application.Current.Resources["OpenPreferencesFile"].ToString();
-            jmpPreferences.CustomCategory = "Settings";
+            JumpTask jmpPreferences = new()
+            {
+                ApplicationPath = PreferencesHandler.PreferenceFilePath,
+                IconResourcePath = @"C:\Windows\notepad.exe",
+                Title = "Preferences",
+                Description = Application.Current.Resources["OpenPreferencesFile"].ToString(),
+                CustomCategory = "Settings"
+            };
 
             JumpList jmpList = JumpList.GetJumpList(Application.Current);
             jmpList.JumpItems.Add(jmpPreferences);
@@ -2073,10 +2090,10 @@ namespace Searcher
                 }
             }
 
-            CultureInfo cultureInfo = new CultureInfo(this.culture);
+            CultureInfo cultureInfo = new(this.culture);
             Thread.CurrentThread.CurrentCulture = cultureInfo;
             Thread.CurrentThread.CurrentUICulture = cultureInfo;
-            this.matcherObj.CultureInfo = cultureInfo;
+            Matcher.CultureInfo = cultureInfo;
 
             this.SetContentBasedOnLanguage();
         }
@@ -2187,14 +2204,13 @@ namespace Searcher
         /// </summary>
         /// <param name="datePicker">The date picker control.</param>
         /// <param name="preferenceElement">The preference element to use.</param>
-        private void SetSearchDate(DatePicker datePicker, string preferenceElement)
+        private static void SetSearchDate(DatePicker datePicker, string preferenceElement)
         {
             if (PreferencesHandler.PreferencesFile != null && PreferencesHandler.GetPreference(preferenceElement) != null)
             {
                 string strDateToSet = PreferencesHandler.GetPreferenceValue(preferenceElement);
-                DateTime dateToSet;
 
-                if (DateTime.TryParse(strDateToSet, out dateToSet))
+                if (DateTime.TryParse(strDateToSet, out DateTime dateToSet))
                 {
                     datePicker.SelectedDate = dateToSet;
                 }
@@ -2241,7 +2257,7 @@ namespace Searcher
         /// </summary>
         /// <param name="comboBox">The combo box object whose input is to be restricted.</param>
         /// <param name="maxAllowedLength">The maximum input length allowed for the combo box object.</param>
-        private void SetSearchInputMaxLengths(ComboBox comboBox, int maxAllowedLength)
+        private static void SetSearchInputMaxLengths(ComboBox comboBox, int maxAllowedLength)
         {
             TextBox editableTextBox = (TextBox)comboBox.Template.FindName("PART_EditableTextBox", comboBox);
             if (editableTextBox != null)
@@ -2257,7 +2273,7 @@ namespace Searcher
         {
             if (PreferencesHandler.GetPreference("SeparatorCharacter") != null && PreferencesHandler.GetPreference("SeparatorCharacter").FirstOrDefault() != null && !string.IsNullOrWhiteSpace(PreferencesHandler.GetPreferenceValue("SeparatorCharacter")))
             {
-                this.separatorCharacter = PreferencesHandler.GetPreferenceValue("SeparatorCharacter").Substring(0, 1);
+                this.separatorCharacter = PreferencesHandler.GetPreferenceValue("SeparatorCharacter")[..1];
 
                 string separatorTooltipMessage = string.Format("{0} '{1}'.", Application.Current.Resources["SeparateUsingCharacter"].ToString(), this.separatorCharacter);
                 this.CmbDirectory.ToolTip = separatorTooltipMessage;
@@ -2274,13 +2290,12 @@ namespace Searcher
             this.TxtErrors.Text = string.Empty;
             this.matchWholeWord = this.ChkMatchWholeWord.IsChecked.GetValueOrDefault(true);
             this.matchCase = this.ChkMatchCase.IsChecked.GetValueOrDefault(true);
-            this.searchModeNormal = this.RbtnNormalSearch.IsChecked.GetValueOrDefault(true);
             this.searchModeRegex = this.RbtnRegexSearch.IsChecked.GetValueOrDefault(true);
             this.searchSubFolders = this.ChkSearchSubfolders.IsChecked.GetValueOrDefault(true);
             this.highlightResults = this.ChkHighlightResults.IsChecked.GetValueOrDefault(true);
             this.searchTypeAll = this.CmbFindWhat.Text.Contains(this.separatorCharacter) && ((ComboBoxItem)this.CmbSearchType.SelectedValue).Content.ToString()?.ToUpper() == Application.Current.Resources["All"].ToString()?.ToUpper();
             this.multilineRegex = this.ChkRegexMultiline.IsChecked.GetValueOrDefault(true);
-            this.minSearchDate = this.DtpStartDate.SelectedDate.HasValue ? this.DtpStartDate.SelectedDate.Value : DateTime.MinValue;
+            this.minSearchDate = this.DtpStartDate.SelectedDate ?? DateTime.MinValue;
             this.maxSearchDate = this.DtpEndDate.SelectedDate.HasValue ? this.DtpEndDate.SelectedDate.Value.Add(new TimeSpan(23, 59, 59)) : DateTime.MaxValue;   // Add time else uses 00:00:00
             this.showMatchCount = this.ChkShowMatchCount.IsChecked.GetValueOrDefault(true);
             this.filterExclusionSet = this.ChkExcludeFilters.IsChecked.GetValueOrDefault(true);
@@ -2292,9 +2307,9 @@ namespace Searcher
             this.AddSearchCriteria(this.CmbFindWhat, this.CmbFindWhat.Text);
             this.AddSearchCriteria(this.CmbFilters, this.CmbFilters.Text);
 
-            this.UpdateDropdownListOrder(this.CmbDirectory);
-            this.UpdateDropdownListOrder(this.CmbFindWhat);
-            this.UpdateDropdownListOrder(this.CmbFilters);
+            UpdateDropdownListOrder(this.CmbDirectory);
+            UpdateDropdownListOrder(this.CmbFindWhat);
+            UpdateDropdownListOrder(this.CmbFilters);
         }
 
         /// <summary>
@@ -2327,7 +2342,7 @@ namespace Searcher
         /// </summary>
         private void SetTitleInfo()
         {
-            this.Title = this.GetRunningUserInfo();
+            this.Title = GetRunningUserInfo();
         }
 
         /// <summary>
@@ -2383,7 +2398,7 @@ namespace Searcher
         /// Show any error on attempting to read file or find matches.
         /// </summary>
         /// <param name="ex">The incurred exception object.</param>
-        private void ShowError(Exception ex)
+        private static void ShowError(Exception ex)
         {
             MessageBox.Show(ex.Message + Environment.NewLine + ex.StackTrace, Application.Current.Resources["ErrorOccurred"].ToString());
         }
@@ -2415,11 +2430,7 @@ namespace Searcher
             if (lineNo > 0)
             {
                 string file = this.GetFileForPopup();
-
-                if (this.contentPopup != null)
-                {
-                    this.contentPopup.Close();
-                }
+                this.contentPopup?.Close();
 
                 if (!string.IsNullOrWhiteSpace(file) && Common.IsAsciiSearch(file))
                 {
@@ -2482,11 +2493,11 @@ namespace Searcher
         /// Update the content of the drop down combo box.
         /// </summary>
         /// <param name="comboBox">The combo box control object.</param>
-        private void UpdateDropdownListOrder(ComboBox comboBox)
+        private static void UpdateDropdownListOrder(ComboBox comboBox)
         {
             if (comboBox.SelectedItem != null)
             {
-                List<string> directories = new List<string>();
+                List<string> directories = new();
                 string selectedItem = comboBox.Text;
                 directories.Add(selectedItem);
 
@@ -2539,9 +2550,9 @@ namespace Searcher
                 PreferencesHandler.SetPreferenceValue("Culture", this.culture.ToString());
                 PreferencesHandler.SetPreferenceValue("SearchContentMode", this.searchTypeAll ? "All" : "Any");
                 PreferencesHandler.SetPreferenceValue("ShowFileMatchCount", this.ChkShowMatchCount.IsChecked.GetValueOrDefault().ToString());
-                this.AddItemsToPreferences(this.CmbDirectory, "SearchDirectories");
-                this.AddItemsToPreferences(this.CmbFindWhat, "SearchContents");
-                this.AddItemsToPreferences(this.CmbFilters, "SearchFilters");
+                AddItemsToPreferences(this.CmbDirectory, "SearchDirectories");
+                AddItemsToPreferences(this.CmbFindWhat, "SearchContents");
+                AddItemsToPreferences(this.CmbFilters, "SearchFilters");
 
                 try
                 {
@@ -2554,7 +2565,7 @@ namespace Searcher
                 }
                 catch (Exception ex)
                 {
-                    this.ShowError(ex);
+                    ShowError(ex);
                 }
             }
 
@@ -2587,9 +2598,9 @@ namespace Searcher
         /// <param name="e">The routed event args object.</param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            this.SetSearchInputMaxLengths(this.CmbDirectory, MaxSearchDirectoryTextLength);
-            this.SetSearchInputMaxLengths(this.CmbFindWhat, MaxSearchTextLength);
-            this.SetSearchInputMaxLengths(this.CmbFilters, MaxSearchFilterTextLength);
+            SetSearchInputMaxLengths(this.CmbDirectory, MaxSearchDirectoryTextLength);
+            SetSearchInputMaxLengths(this.CmbFindWhat, MaxSearchTextLength);
+            SetSearchInputMaxLengths(this.CmbFilters, MaxSearchFilterTextLength);
             this.CmbFindWhat.Focus();
         }
 

@@ -44,12 +44,12 @@ namespace Searcher
         /// <summary>
         /// Private store for the main search window.
         /// </summary>
-        private static SearchWindow mainSearchWindow;
+        private static SearchWindow? mainSearchWindow;
 
         /// <summary>
         /// Private store for the preferences file.
         /// </summary>
-        private static XDocument preferencesFile;
+        private static XDocument? preferencesFile;
 
         /// <summary>
         /// Gets the location of the preference file.
@@ -112,7 +112,8 @@ namespace Searcher
 
             foreach (string item in itemsToAdd)
             {
-                PreferencesFile.Descendants(preferenceElement).FirstOrDefault().Add(new XElement("Value", item));
+                var itemToAddFromXml = PreferencesFile.Descendants(preferenceElement).FirstOrDefault();
+                itemToAddFromXml?.Add(new XElement("Value", item));
             }
         }
 
@@ -122,7 +123,7 @@ namespace Searcher
         /// <param name="fileName">The preferences file name.</param>
         public static void CheckPreferencesFile(string fileName)
         {
-            XDocument prefFile = null;
+            XDocument? prefFile;
 
             try
             {
@@ -143,121 +144,124 @@ namespace Searcher
                 {
                     foreach (string node in missingNodes)
                     {
-                        if (node == "MatchWholeWord")
+                        if (prefFile.Root != null)
                         {
-                            prefFile.Root.Add(new XElement("MatchWholeWord", false));
-                        }
-                        else if (node == "MatchCase")
-                        {
-                            prefFile.Root.Add(new XElement("MatchCase", false));
-                        }
-                        else if (node == "MaxDropDownItems")
-                        {
-                            prefFile.Root.Add(new XElement("MaxDropDownItems", 10));
-                        }
-                        else if (node == "SearchSubfolders")
-                        {
-                            prefFile.Root.Add(new XElement("SearchSubfolders", true));
-                        }
-                        else if (node == "HighlightResults")
-                        {
-                            prefFile.Root.Add(new XElement("HighlightResults", true));
-                        }
-                        else if (node == "MinFileCreateSearchDate")
-                        {
-                            prefFile.Root.Add(new XElement("MinFileCreateSearchDate", DateTime.MinValue));
-                        }
-                        else if (node == "MaxFileCreateSearchDate")
-                        {
-                            prefFile.Root.Add(new XElement("MaxFileCreateSearchDate", DateTime.MaxValue));
-                        }
-                        else if (node == "Culture")
-                        {
-                            prefFile.Root.Add(new XElement("Culture", System.Globalization.CultureInfo.CurrentUICulture.Name));
-                        }
-                        else if (node == "ShowExecutionTime")
-                        {
-                            prefFile.Root.Add(new XElement("ShowExecutionTime", false));
-                        }
-                        else if (node == "SeparatorCharacter")
-                        {
-                            prefFile.Root.Add(new XElement("SeparatorCharacter", ";"));
-                        }
-                        else if (node == "SearchContentMode")
-                        {
-                            prefFile.Root.Add(new XElement("SearchContentMode", "Any"));
-                        }
-                        else if (node == "BackGroundColour")
-                        {
-                            prefFile.Root.Add(new XElement("BackGroundColour", "#FFFFFF"));
-                        }
-                        else if (node == "HighlightResultsColour")
-                        {
-                            prefFile.Root.Add(new XElement("HighlightResultsColour", "#FFDAB9"));
-                        }
-                        else if (node == "CustomEditor")
-                        {
-                            prefFile.Root.Add(new XElement("CustomEditor", string.Empty));
-                        }
-                        else if (node == "CheckForUpdates")
-                        {
-                            prefFile.Root.Add(new XElement("CheckForUpdates", true));
-                        }
-                        else if (node == "LastUpdateCheckDate")
-                        {
-                            prefFile.Root.Add(new XElement("LastUpdateCheckDate", DateTime.Today.AddMonths(-1).ToShortDateString()));
-                        }
-                        else if (node == "WindowHeight")
-                        {
-                            prefFile.Root.Add(new XElement("WindowHeight", mainSearchWindow?.MinHeight ?? 200));
-                        }
-                        else if (node == "WindowLeft")
-                        {
-                            prefFile.Root.Add(new XElement("WindowLeft", mainSearchWindow?.Left ?? 200));
-                        }
-                        else if (node == "WindowTop")
-                        {
-                            prefFile.Root.Add(new XElement("WindowTop", mainSearchWindow?.Top ?? 200));
-                        }
-                        else if (node == "WindowWidth")
-                        {
-                            prefFile.Root.Add(new XElement("WindowWidth", mainSearchWindow?.MinWidth ?? 200));
-                        }
-                        else if (node == "PopupWindowHeight")
-                        {
-                            prefFile.Root.Add(new XElement("PopupWindowHeight", 300));
-                        }
-                        else if (node == "PopupWindowWidth")
-                        {
-                            prefFile.Root.Add(new XElement("PopupWindowWidth", 500));
-                        }
-                        else if (node == "PopupWindowTimeoutSeconds")
-                        {
-                            prefFile.Root.Add(new XElement("PopupWindowTimeoutSeconds", 4));
-                        }
-                        else if (node == "SearchDirectories")
-                        {
-                            prefFile.Root.Add(new XElement("SearchDirectories", new XElement[] { null }));
-                        }
-                        else if (node == "SearchContents")
-                        {
-                            prefFile.Root.Add(new XElement("SearchContents", new XElement[] { null }));
-                        }
-                        else if (node == "SearchFilters")
-                        {
-                            prefFile.Root.Add(new XElement("SearchFilters", new XElement[] { null }));
-                        }
-                        else if (node == "ShowFileMatchCount")
-                        {
-                            prefFile.Root.Add(new XElement("ShowFileMatchCount", true));
-                        }
-                        else if (node == "FilesToAlwaysExcludeFromSearch")
-                        {
-                            prefFile.Root.Add(new XElement("FilesToAlwaysExcludeFromSearch", new XElement[] { null }));
-                        }
-                        else if (node == "DirectoriesToAlwaysExcludeFromSearch")
-                        {
-                            prefFile.Root.Add(new XElement("DirectoriesToAlwaysExcludeFromSearch", new XElement[] { null }));
+                            if (node == "MatchWholeWord")
+                            {
+                                prefFile.Root.Add(new XElement("MatchWholeWord", false));
+                            }
+                            else if (node == "MatchCase")
+                            {
+                                prefFile.Root.Add(new XElement("MatchCase", false));
+                            }
+                            else if (node == "MaxDropDownItems")
+                            {
+                                prefFile.Root.Add(new XElement("MaxDropDownItems", 10));
+                            }
+                            else if (node == "SearchSubfolders")
+                            {
+                                prefFile.Root.Add(new XElement("SearchSubfolders", true));
+                            }
+                            else if (node == "HighlightResults")
+                            {
+                                prefFile.Root.Add(new XElement("HighlightResults", true));
+                            }
+                            else if (node == "MinFileCreateSearchDate")
+                            {
+                                prefFile.Root.Add(new XElement("MinFileCreateSearchDate", DateTime.MinValue));
+                            }
+                            else if (node == "MaxFileCreateSearchDate")
+                            {
+                                prefFile.Root.Add(new XElement("MaxFileCreateSearchDate", DateTime.MaxValue));
+                            }
+                            else if (node == "Culture")
+                            {
+                                prefFile.Root.Add(new XElement("Culture", System.Globalization.CultureInfo.CurrentUICulture.Name));
+                            }
+                            else if (node == "ShowExecutionTime")
+                            {
+                                prefFile.Root.Add(new XElement("ShowExecutionTime", false));
+                            }
+                            else if (node == "SeparatorCharacter")
+                            {
+                                prefFile.Root.Add(new XElement("SeparatorCharacter", ";"));
+                            }
+                            else if (node == "SearchContentMode")
+                            {
+                                prefFile.Root.Add(new XElement("SearchContentMode", "Any"));
+                            }
+                            else if (node == "BackGroundColour")
+                            {
+                                prefFile.Root.Add(new XElement("BackGroundColour", "#FFFFFF"));
+                            }
+                            else if (node == "HighlightResultsColour")
+                            {
+                                prefFile.Root.Add(new XElement("HighlightResultsColour", "#FFDAB9"));
+                            }
+                            else if (node == "CustomEditor")
+                            {
+                                prefFile.Root.Add(new XElement("CustomEditor", string.Empty));
+                            }
+                            else if (node == "CheckForUpdates")
+                            {
+                                prefFile.Root.Add(new XElement("CheckForUpdates", true));
+                            }
+                            else if (node == "LastUpdateCheckDate")
+                            {
+                                prefFile.Root.Add(new XElement("LastUpdateCheckDate", DateTime.Today.AddMonths(-1).ToShortDateString()));
+                            }
+                            else if (node == "WindowHeight")
+                            {
+                                prefFile.Root.Add(new XElement("WindowHeight", mainSearchWindow?.MinHeight ?? 200));
+                            }
+                            else if (node == "WindowLeft")
+                            {
+                                prefFile.Root.Add(new XElement("WindowLeft", mainSearchWindow?.Left ?? 200));
+                            }
+                            else if (node == "WindowTop")
+                            {
+                                prefFile.Root.Add(new XElement("WindowTop", mainSearchWindow?.Top ?? 200));
+                            }
+                            else if (node == "WindowWidth")
+                            {
+                                prefFile.Root.Add(new XElement("WindowWidth", mainSearchWindow?.MinWidth ?? 200));
+                            }
+                            else if (node == "PopupWindowHeight")
+                            {
+                                prefFile.Root.Add(new XElement("PopupWindowHeight", 300));
+                            }
+                            else if (node == "PopupWindowWidth")
+                            {
+                                prefFile.Root.Add(new XElement("PopupWindowWidth", 500));
+                            }
+                            else if (node == "PopupWindowTimeoutSeconds")
+                            {
+                                prefFile.Root.Add(new XElement("PopupWindowTimeoutSeconds", 4));
+                            }
+                            else if (node == "SearchDirectories")
+                            {
+                                prefFile.Root.Add(new XElement("SearchDirectories", Array.Empty<XElement>()));
+                            }
+                            else if (node == "SearchContents")
+                            {
+                                prefFile.Root.Add(new XElement("SearchContents", Array.Empty<XElement>()));
+                            }
+                            else if (node == "SearchFilters")
+                            {
+                                prefFile.Root.Add(new XElement("SearchFilters", Array.Empty<XElement>()));
+                            }
+                            else if (node == "ShowFileMatchCount")
+                            {
+                                prefFile.Root.Add(new XElement("ShowFileMatchCount", true));
+                            }
+                            else if (node == "FilesToAlwaysExcludeFromSearch")
+                            {
+                                prefFile.Root.Add(new XElement("FilesToAlwaysExcludeFromSearch", Array.Empty<XElement>()));
+                            }
+                            else if (node == "DirectoriesToAlwaysExcludeFromSearch")
+                            {
+                                prefFile.Root.Add(new XElement("DirectoriesToAlwaysExcludeFromSearch", Array.Empty<XElement>()));
+                            }
                         }
                     }
 
@@ -285,7 +289,7 @@ namespace Searcher
         /// <returns>Value of the preference element.</returns>
         public static string GetPreferenceValue(string preference)
         {
-            return PreferencesFile.Descendants(preference).FirstOrDefault().Value;
+            return PreferencesFile.Descendants(preference).FirstOrDefault()?.Value ?? string.Empty;
         }
 
         /// <summary>
@@ -314,7 +318,12 @@ namespace Searcher
         {
             if (PreferencesHandler.PreferencesFile != null)
             {
-                PreferencesFile.Descendants(preference).FirstOrDefault().Value = value;
+                XElement? preferenceElement = PreferencesFile.Descendants(preference).FirstOrDefault();
+                
+                if (preferenceElement != null)
+                {
+                    preferenceElement.Value = value;
+                }
             }
         }
 
@@ -327,35 +336,35 @@ namespace Searcher
             // Not bothering with XSD, as this is a one-off config operation, and not used for data exchange with other systems.
             XElement[] initialPreferences = new XElement[]
             {
-                new XElement("MatchWholeWord", false),
-                new XElement("MatchCase", false),
-                new XElement("MaxDropDownItems", 10),
-                new XElement("SearchSubfolders", true),
-                new XElement("HighlightResults", true),
-                new XElement("MinFileCreateSearchDate", string.Empty),
-                new XElement("MaxFileCreateSearchDate", string.Empty),
-                new XElement("SearchContentMode", "Any"),
-                new XElement("ShowExecutionTime", false),
-                new XElement("SeparatorCharacter", ";"),
-                new XElement("BackGroundColour", "#FFFFFF"),
-                new XElement("HighlightResultsColour", "#FFDAB9"),        // Brushes.PeachPuff
-                new XElement("CustomEditor", string.Empty),
-                new XElement("CheckForUpdates", true),
-                new XElement("LastUpdateCheckDate", DateTime.Today.AddMonths(-1).ToShortDateString()),
-                new XElement("WindowHeight", mainSearchWindow?.MinHeight ?? 200),
-                new XElement("WindowLeft", mainSearchWindow?.Left ?? 200),
-                new XElement("WindowTop", mainSearchWindow?.Top ?? 200),
-                new XElement("WindowWidth", mainSearchWindow?.MinWidth ?? 200),
-                new XElement("PopupWindowHeight", 300),
-                new XElement("PopupWindowWidth", 500),
-                new XElement("PopupWindowTimeoutSeconds", 4),
-                new XElement("Culture", System.Globalization.CultureInfo.CurrentUICulture.Name),
-                new XElement("SearchDirectories", new XElement[] { null }),
-                new XElement("SearchContents", new XElement[] { null }),
-                new XElement("SearchFilters", new XElement[] { null }),
-                new XElement("ShowFileMatchCount", true),
-                new XElement("FilesToAlwaysExcludeFromSearch", new XElement[] { null }),
-                new XElement("DirectoriesToAlwaysExcludeFromSearch", new XElement[] { null })
+                new ("MatchWholeWord", false),
+                new ("MatchCase", false),
+                new ("MaxDropDownItems", 10),
+                new ("SearchSubfolders", true),
+                new ("HighlightResults", true),
+                new ("MinFileCreateSearchDate", string.Empty),
+                new ("MaxFileCreateSearchDate", string.Empty),
+                new ("SearchContentMode", "Any"),
+                new ("ShowExecutionTime", false),
+                new ("SeparatorCharacter", ";"),
+                new ("BackGroundColour", "#FFFFFF"),
+                new ("HighlightResultsColour", "#FFDAB9"),        // Brushes.PeachPuff
+                new ("CustomEditor", string.Empty),
+                new ("CheckForUpdates", true),
+                new ("LastUpdateCheckDate", DateTime.Today.AddMonths(-1).ToShortDateString()),
+                new ("WindowHeight", mainSearchWindow?.MinHeight ?? 200),
+                new ("WindowLeft", mainSearchWindow?.Left ?? 200),
+                new ("WindowTop", mainSearchWindow?.Top ?? 200),
+                new ("WindowWidth", mainSearchWindow?.MinWidth ?? 200),
+                new ("PopupWindowHeight", 300),
+                new ("PopupWindowWidth", 500),
+                new ("PopupWindowTimeoutSeconds", 4),
+                new ("Culture", System.Globalization.CultureInfo.CurrentUICulture.Name),
+                new ("SearchDirectories", Array.Empty<XElement>()),
+                new ("SearchContents", Array.Empty<XElement>()),
+                new ("SearchFilters", Array.Empty<XElement>()),
+                new ("ShowFileMatchCount", true),
+                new ("FilesToAlwaysExcludeFromSearch", Array.Empty<XElement>()),
+                new("DirectoriesToAlwaysExcludeFromSearch", Array.Empty<XElement>())
             };
 
             XDocument retVal = XDocument.Parse(new XElement("SearcherPreferences", initialPreferences).ToString(), LoadOptions.None);
