@@ -27,8 +27,6 @@ namespace Searcher
 
     using System;
     using System.Diagnostics;
-    using System.Net;
-    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Documents;
     using System.Windows.Input;
@@ -178,9 +176,9 @@ namespace Searcher
             string copyRightText = string.Format("{0} {1}  {2}{3}", Application.Current.Resources["Copyright"].ToString(), yearInfo, "Dennis Joseph", Environment.NewLine);
             string warrantyText = Application.Current.Resources["WarrantyText"].ToString() + Environment.NewLine;
 
-            Run copyRightAndWarranty = new (string.Join(Environment.NewLine, new string[] { copyRightText, warrantyText }));
-            Run run2 = new (Application.Current.Resources["DistributeSoftware"].ToString() + " ");
-            Run run4 = new (" " + Application.Current.Resources["ForDetails"].ToString());
+            Run copyRightAndWarranty = new(string.Join(Environment.NewLine, [copyRightText, warrantyText]));
+            Run run2 = new(Application.Current.Resources["DistributeSoftware"].ToString() + " ");
+            Run run4 = new(" " + Application.Current.Resources["ForDetails"].ToString());
 
             Hyperlink hyperlink = new(new Run(Application.Current.Resources["GNULicenceLink"].ToString()))
             {

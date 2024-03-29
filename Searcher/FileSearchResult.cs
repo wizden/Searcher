@@ -25,11 +25,7 @@ namespace Searcher
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using System.Windows.Documents;
 
     /// <summary>
@@ -45,7 +41,7 @@ namespace Searcher
         /// <summary>
         /// Gets or sets the search result matches.
         /// </summary>
-        public List<Inline> SearchMatches { get; set; } = new List<Inline>();
+        public List<Inline> SearchMatches { get; set; } = [];
 
         /// <summary>
         /// Gets or sets the search start date/time ticks.

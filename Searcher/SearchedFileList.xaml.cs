@@ -31,7 +31,6 @@ namespace Searcher
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Documents;
     using System.Windows.Input;
 
     /// <summary>
@@ -71,7 +70,7 @@ namespace Searcher
         public SearchedFileList()
         {
             this.InitializeComponent();
-            this.FilesToInclude = new List<string>();
+            this.FilesToInclude = [];
             this.SetContentBasedOnLanguage();
 
             if (windowWidth > 0 && windowHeight > 0 && windowLeft > 0 && windowTop > 0)
@@ -172,7 +171,7 @@ namespace Searcher
         {
             if (this.LstFileList.Items != null)
             {
-                List<string> filesToCopy = new();
+                List<string> filesToCopy = [];
 
                 if (this.LstFileList.SelectedItems != null && this.LstFileList.SelectedItems.Count > 0)
                 {

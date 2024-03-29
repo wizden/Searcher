@@ -114,10 +114,10 @@ namespace Searcher
         {
             bool retVal = false;
             string fileExtension = Path.GetExtension(fileName).ToUpper();
-            retVal = !Enum.GetNames(typeof(OtherExtensions)).Any(s => fileExtension.Contains(s.ToUpper()));
+            retVal = !Enum.GetNames(typeof(OtherExtensions)).Any(s => fileExtension.Contains(s, StringComparison.CurrentCultureIgnoreCase));
             return retVal;
         }
-        
+
         /// <summary>
         /// Context menu to open windows explorer to the selected file.
         /// </summary>

@@ -38,7 +38,7 @@ namespace Searcher
     /// <summary>
     /// Class to handle updates for the application.
     /// </summary>
-    public class UpdateApp
+    public partial class UpdateApp
     {
         #region Private Fields
 
@@ -155,7 +155,8 @@ namespace Searcher
         private async Task<bool> NewerVersionExistsAsync()
         {
             bool retVal = false;
-            if (preferenceFile.Descendants("CheckForUpdates").FirstOrDefault()?.Value.ToUpper() == true.ToString().ToUpper())
+            if (preferenceFile.Descendants("CheckForUpdates").First() is not null
+                && (preferenceFile.Descendants("CheckForUpdates").First().Value).Equals(true.ToString(), StringComparison.CurrentCultureIgnoreCase))
             {
                 // Check for updates monthly. Why bother the user more frequently. Can look to make this configurable in the future.
                 if (this.lastUpdateCheckDate.AddMonths(1) < DateTime.Today)
@@ -327,10 +328,10 @@ namespace Searcher
 
                     if (!string.IsNullOrWhiteSpace(fileName))
                     {
-                        string strSiteVersion = Regex.Replace(Path.GetFileName(fileName)
+                        string strSiteVersion = SiteVersionRegex().Replace(Path.GetFileName(fileName)
                             .Replace("Searcher_v", string.Empty)
-                            .Replace(".zip", string.Empty),
-                            ".[A-Z].*", "");
+                            .Replace(".zip", string.Empty), "");
+
                         Version appVersion = new(Common.VersionNumber);
 
                         if (Version.TryParse(strSiteVersion, out Version? siteVersion))
@@ -381,7 +382,7 @@ namespace Searcher
                         var desktopRuntimes = output.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
                             .Where(rt => rt.Contains(desktopRuntimeName));
                         var versions = desktopRuntimes.Select(rt =>
-                            Version.Parse(rt[desktopRuntimeName.Length..rt.IndexOf("[")].Trim()));
+                            Version.Parse(rt[desktopRuntimeName.Length..rt.IndexOf('[')].Trim()));
                         retVal = versions.Any(v => v.Major >= appNetRuntimeVersion);
                     }
                 }
@@ -416,12 +417,15 @@ namespace Searcher
             if (latestRelease != null && latestRelease.Assets != null && latestRelease.Assets.Count > 0)
             {
                 downloadUrl = latestRelease.Assets
-                    .FirstOrDefault(a => a.BrowserDownloadUrl.ToLower()
-                        .Contains(urlSubstring.ToLower()))?.BrowserDownloadUrl ?? string.Empty;
+                    .FirstOrDefault(a => a.BrowserDownloadUrl
+                        .Contains(urlSubstring, StringComparison.CurrentCultureIgnoreCase))?.BrowserDownloadUrl ?? string.Empty;
             }
 
             return downloadUrl;
         }
+
+        [GeneratedRegex(".[A-Z].*")]
+        private static partial Regex SiteVersionRegex();
 
         #endregion Private Methods
     }
