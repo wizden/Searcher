@@ -25,6 +25,9 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using SearcherLibrary.Resources;
+    using SharpCompress.Common;
+    using SharpCompress.Readers;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -32,9 +35,6 @@ namespace SearcherLibrary.FileExtensions
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
-    using SearcherLibrary.Resources;
-    using SharpCompress.Common;
-    using SharpCompress.Readers;
 
     /// <summary>
     /// Class to search ODP files.
@@ -46,7 +46,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new() { ".ODP" };
+        public static new List<string> Extensions => [".ODP"];
 
         #endregion Public Properties
 
@@ -61,14 +61,14 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
             int matchCounter = 0;
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
 
             try
             {
                 Directory.CreateDirectory(tempDirPath);
-                SharpCompress.Archives.IArchive? archive = null;
+                SharpCompress.Archives.Zip.ZipArchive? archive = null;
 
                 if (fileName.ToUpper().EndsWith(".ODP") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
                 {
@@ -114,12 +114,12 @@ namespace SearcherLibrary.FileExtensions
                                                             int endIndex = (slideAllText.Length >= match.Index + match.Length + IndexBoundary) ? match.Index + match.Length + IndexBoundary : slideAllText.Length;
                                                             string matchLine = slideAllText[startIndex..endIndex];
 
-                                                            while (matchLine.StartsWith("\r") || matchLine.StartsWith("\n"))
+                                                            while (matchLine.StartsWith('\r') || matchLine.StartsWith('\n'))
                                                             {
                                                                 matchLine = matchLine[1..];         // Remove lines starting with the newline character.
                                                             }
 
-                                                            while ((matchLine.EndsWith("\r") || matchLine.EndsWith("\n")) && matchLine.Length > 2)
+                                                            while ((matchLine.EndsWith('\r') || matchLine.EndsWith('\n')) && matchLine.Length > 2)
                                                             {
                                                                 matchLine = matchLine[..^1];       // Remove lines ending with the newline character.
                                                             }
@@ -148,7 +148,7 @@ namespace SearcherLibrary.FileExtensions
 
                                     if (matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
                                     {
-                                        matchedLines = matcher.GetMatch(new string[] { string.Join(Environment.NewLine, presentationAllText.ToString()) }, searchTerms, Strings.Slide);
+                                        matchedLines = matcher.GetMatch([string.Join(Environment.NewLine, presentationAllText.ToString())], searchTerms, Strings.Slide);
                                     }
                                 }
                                 catch (PathTooLongException ptlex)

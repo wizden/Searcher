@@ -25,14 +25,14 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using SharpCompress.Common;
+    using SharpCompress.Readers;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
-    using SharpCompress.Common;
-    using SharpCompress.Readers;
 
     /// <summary>
     /// Class to search OpenDocument Text file.
@@ -44,7 +44,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new() { ".ODT" };
+        public static new List<string> Extensions => [".ODT"];
 
         #endregion Public Properties
 
@@ -59,13 +59,13 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
 
             try
             {
                 Directory.CreateDirectory(tempDirPath);
-                SharpCompress.Archives.IArchive? archive = null;
+                SharpCompress.Archives.Zip.ZipArchive? archive = null;
 
                 if (fileName.ToUpper().EndsWith(".ODT") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
                 {
@@ -94,7 +94,7 @@ namespace SearcherLibrary.FileExtensions
                                     }
                                     else
                                     {
-                                        matchedLines = matcher.GetMatch(new string[] { string.Join(string.Empty, content) }, searchTerms);
+                                        matchedLines = matcher.GetMatch([string.Join(string.Empty, content)], searchTerms);
                                     }
                                 }
                                 catch (PathTooLongException ptlex)

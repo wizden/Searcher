@@ -25,15 +25,15 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Wordprocessing;
+    using SearcherLibrary.Resources;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
-    using DocumentFormat.OpenXml.Packaging;
-    using DocumentFormat.OpenXml.Wordprocessing;
-    using SearcherLibrary.Resources;
 
     /// <summary>
     /// Class to search OpenDocument files.
@@ -54,7 +54,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handle files with the .DOCX/.DOCM extension.
         /// </summary>
-        public static new List<string> Extensions => new() { ".DOCX", ".DOCM" };
+        public static new List<string> Extensions => [".DOCX", ".DOCM"];
 
         #endregion Public Properties
 
@@ -219,7 +219,7 @@ namespace SearcherLibrary.FileExtensions
                         }
 
                         // Only add those lines that do not already exist in matches found. Do not like the search mechanism below, but it helps to search by excluding the "Page {0}:\t{1}" content.
-                        matchedLines.AddRange(allContentMatchedLines.Where(acm => !matchedLines.Any(ml => acm.Length == ml.Length 
+                        matchedLines.AddRange(allContentMatchedLines.Where(acm => !matchedLines.Any(ml => acm.Length == ml.Length
                             && acm.Content.Contains(ml.Content[(Strings.Page.Length + 3 + ml.LineNumber.ToString().Length)..]))));
                     }
                 }

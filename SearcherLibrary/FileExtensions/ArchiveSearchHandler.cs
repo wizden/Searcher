@@ -25,13 +25,13 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using SharpCompress.Common;
+    using SharpCompress.Readers;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
-    using SharpCompress.Common;
-    using SharpCompress.Readers;
 
     /// <summary>
     /// Class to search archive files.
@@ -43,7 +43,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new() { ".7Z", ".GZ", ".RAR", ".TAR", ".ZIP" };
+        public static new List<string> Extensions => [".7Z", ".GZ", ".RAR", ".TAR", ".ZIP"];
 
         #endregion Public Properties
 
@@ -58,14 +58,14 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
             string tempDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
             Directory.CreateDirectory(tempDirPath);
             SharpCompress.Archives.IArchive? archive = null;
-            
+
             try
             {
-                
+
                 if (fileName.ToUpper().EndsWith(".GZ") && SharpCompress.Archives.GZip.GZipArchive.IsGZipFile(fileName))
                 {
                     archive = SharpCompress.Archives.GZip.GZipArchive.Open(fileName);
@@ -115,7 +115,7 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>List of matched lines for GZIP file contents.</returns>
         private static List<MatchedLine> DecompressGZipStream(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
             string newFileName = string.Empty;
 
             FileInfo fileToDecompress = new(fileName);
@@ -148,7 +148,7 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         private static List<MatchedLine> GetMatchedLinesInZipArchive(string fileName, IEnumerable<string> searchTerms, string tempDirPath, SharpCompress.Archives.IArchive archive, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
 
             try
             {

@@ -25,14 +25,14 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using SharpCompress.Common;
+    using SharpCompress.Readers;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
-    using SharpCompress.Common;
-    using SharpCompress.Readers;
 
     /// <summary>
     /// Class to search ODS files.
@@ -44,7 +44,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new() { ".ODS" };
+        public static new List<string> Extensions => [".ODS"];
 
         #endregion Public Properties
 
@@ -59,13 +59,13 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
             string tempDirPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
 
             try
             {
                 Directory.CreateDirectory(tempDirPath);
-                SharpCompress.Archives.IArchive? archive = null;
+                SharpCompress.Archives.Zip.ZipArchive? archive = null;
 
                 if (fileName.ToUpper().EndsWith(".ODS") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
                 {
@@ -127,7 +127,7 @@ namespace SearcherLibrary.FileExtensions
         private static List<MatchedLine> GetMatchesFromOdsContentXml(string fileName, string extractedContentFile, IEnumerable<string> searchTerms, Matcher matcher)
         {
             int matchCounter = 0;
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
 
             // Loop through each sheet.
             foreach (XElement element in XDocument.Load(extractedContentFile, LoadOptions.None).Descendants().Where(d => d.Name.LocalName == "table"))

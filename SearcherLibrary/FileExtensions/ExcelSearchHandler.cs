@@ -25,14 +25,14 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using DocumentFormat.OpenXml;
+    using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Spreadsheet;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using DocumentFormat.OpenXml;
-    using DocumentFormat.OpenXml.Packaging;
-    using DocumentFormat.OpenXml.Spreadsheet;
 
     /// <summary>
     /// Class to search XLSX/XLSM files.
@@ -58,7 +58,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new() { ".XLSX", ".XLSM" };
+        public static new List<string> Extensions => [".XLSX", ".XLSM"];
 
         #endregion Public Properties
 
@@ -74,8 +74,8 @@ namespace SearcherLibrary.FileExtensions
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
             int matchCounter = 0;
-            List<MatchedLine> matchedLines = new();
-            List<SpreadsheetCellDetail> excelCellDetails = new();
+            List<MatchedLine> matchedLines = [];
+            List<SpreadsheetCellDetail> excelCellDetails = [];
 
             try
             {
@@ -89,10 +89,10 @@ namespace SearcherLibrary.FileExtensions
                         string cellValue = string.Empty;
                         // Get it in memory for performance.
                         List<OpenXmlElement> sharedStringTable = wkbkPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault()?.SharedStringTable?.ToList()
-                            ?? new List<OpenXmlElement>();
+                            ?? [];
                         CellFormats cellFormats = wkbkPart.WorkbookStylesPart?.Stylesheet.CellFormats ?? new CellFormats();
                         List<NumberingFormat> numberingFormats = wkbkPart.WorkbookStylesPart?.Stylesheet.NumberingFormats?.Elements<NumberingFormat>().ToList()
-                            ?? new List<NumberingFormat>();
+                            ?? [];
                         string cellFormatCodeUpper = string.Empty;
                         int counter = 0;
 
@@ -260,8 +260,8 @@ namespace SearcherLibrary.FileExtensions
 
                         if (cellFormatUsed != null && cellFormatUsed.FormatCode != null && !string.IsNullOrWhiteSpace(cellFormatUsed.FormatCode.Value))
                         {
-                            if (cellFormatUsed.FormatCode.Value.ToUpper().Contains('D') 
-                                || cellFormatUsed.FormatCode.Value.ToUpper().Contains('M') 
+                            if (cellFormatUsed.FormatCode.Value.ToUpper().Contains('D')
+                                || cellFormatUsed.FormatCode.Value.ToUpper().Contains('M')
                                 || cellFormatUsed.FormatCode.Value.ToUpper().Contains('Y'))
                             {
                                 if (double.TryParse(retVal.ToString(), out tempDouble))
