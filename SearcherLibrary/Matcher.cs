@@ -28,7 +28,6 @@ namespace SearcherLibrary
     using System;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading;
@@ -93,7 +92,7 @@ namespace SearcherLibrary
         /// <summary>
         /// Gets or sets the culture to determine the resource for language.
         /// </summary>
-        public static CultureInfo CultureInfo 
+        public static CultureInfo CultureInfo
         {
             get
             {
@@ -182,7 +181,7 @@ namespace SearcherLibrary
         /// <returns>List of matches found in content based on search terms.</returns>
         private List<MatchedLine> GetMatchesForMultilineRegex(IEnumerable<string> content, IEnumerable<string> searchTerms, string locationType = "Line")
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
             string allContent = string.Join(Environment.NewLine, content);
             foreach (string searchTerm in searchTerms)
             {
@@ -242,7 +241,7 @@ namespace SearcherLibrary
         /// <returns>List of matches in the file or string contents based on the search terms.</returns>
         private List<MatchedLine> SearchASCIIContent(IEnumerable<string> contents, IEnumerable<string> searchTerms)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
             int matchCounter = 0;
             int lineCounter = 0;
             int lineToDisplayStart;
