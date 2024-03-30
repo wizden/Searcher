@@ -35,7 +35,15 @@ namespace SearcherLibrary
     /// <summary>
     /// Class to search files for matches.
     /// </summary>
-    public class Matcher
+    /// <remarks>
+    /// Initialises a new instance of the <see cref="Matcher"/> class.
+    /// </remarks>
+    /// <param name="matchWholeWord">Is the search to be performed on the word as a whole.</param>
+    /// <param name="isRegexSearch">Is the search to be performed as a regular expression search.</param>
+    /// <param name="allMatchesInFile">Should the search report only those files that match all search terms.</param>
+    /// <param name="cancellationTokenSource">The cancellation object.</param>
+    /// <param name="regexOptions">The regular expressions options object (e.g. Compiled, Multiline, IgnoreCase).</param>
+    public class Matcher(bool matchWholeWord = false, bool isRegexSearch = false, bool allMatchesInFile = false, CancellationTokenSource? cancellationTokenSource = null, RegexOptions regexOptions = System.Text.RegularExpressions.RegexOptions.None)
     {
         #region Private Fields
 
@@ -55,25 +63,7 @@ namespace SearcherLibrary
         private const int MaxStringLengthDisplayIndexStart = 100;
 
         #endregion Private Fields
-
         #region Public Constructors
-
-        /// <summary>
-        /// Initialises a new instance of the <see cref="Matcher"/> class.
-        /// </summary>
-        /// <param name="matchWholeWord">Is the search to be performed on the word as a whole.</param>
-        /// <param name="isRegexSearch">Is the search to be performed as a regular expression search.</param>
-        /// <param name="allMatchesInFile">Should the search report only those files that match all search terms.</param>
-        /// <param name="cancellationTokenSource">The cancellation object.</param>
-        /// <param name="regexOptions">The regular expressions options object (e.g. Compiled, Multiline, IgnoreCase).</param>
-        public Matcher(bool matchWholeWord = false, bool isRegexSearch = false, bool allMatchesInFile = false, CancellationTokenSource? cancellationTokenSource = null, RegexOptions regexOptions = System.Text.RegularExpressions.RegexOptions.None)
-        {
-            this.MatchWholeWord = matchWholeWord;
-            this.IsRegexSearch = isRegexSearch;
-            this.AllMatchesInFile = allMatchesInFile;
-            this.RegularExpressionOptions = regexOptions;
-            this.CancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
-        }
 
         #endregion Public Constructors
 
@@ -82,12 +72,12 @@ namespace SearcherLibrary
         /// <summary>
         /// Gets or sets a value indicating whether the search must contain all of the search terms.
         /// </summary>
-        public bool AllMatchesInFile { get; set; }
+        public bool AllMatchesInFile { get; set; } = allMatchesInFile;
 
         /// <summary>
         /// Gets or sets the cancellation token source object to cancel file search.
         /// </summary>
-        public CancellationTokenSource CancellationTokenSource { get; set; }
+        public CancellationTokenSource CancellationTokenSource { get; set; } = cancellationTokenSource ?? new CancellationTokenSource();
 
         /// <summary>
         /// Gets or sets the culture to determine the resource for language.
@@ -109,17 +99,17 @@ namespace SearcherLibrary
         /// <summary>
         /// Gets or sets a value indicating whether the search mode uses regex.
         /// </summary>
-        public bool IsRegexSearch { get; set; }
+        public bool IsRegexSearch { get; set; } = isRegexSearch;
 
         /// <summary>
         /// Gets or sets a value indicating whether the search is for the whole word.
         /// </summary>
-        public bool MatchWholeWord { get; set; }
+        public bool MatchWholeWord { get; set; } = matchWholeWord;
 
         /// <summary>
         /// Gets or sets the regex options to use when searching.
         /// </summary>
-        public RegexOptions RegularExpressionOptions { get; set; }
+        public RegexOptions RegularExpressionOptions { get; set; } = regexOptions;
 
         #endregion Public Properties
 
