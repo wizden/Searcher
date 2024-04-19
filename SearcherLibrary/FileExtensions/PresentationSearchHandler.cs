@@ -25,14 +25,14 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Presentation;
+    using SearcherLibrary.Resources;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using DocumentFormat.OpenXml.Packaging;
-    using DocumentFormat.OpenXml.Presentation;
-    using SearcherLibrary.Resources;
 
     /// <summary>
     /// Class to search presentation files files.
@@ -44,7 +44,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PPTX/.PPTM extension.
         /// </summary>
-        public static new List<string> Extensions => new() { ".PPTX", ".PPTM" };
+        public static new List<string> Extensions => [".PPTX", ".PPTM"];
 
         #endregion Public Properties
 
@@ -96,12 +96,12 @@ namespace SearcherLibrary.FileExtensions
                                                        : slideAllText[slideCounter].Length;
                                         var matchLine = slideAllText[slideCounter][startIndex..endIndex];
 
-                                        while (matchLine.StartsWith("\r") || matchLine.StartsWith("\n"))
+                                        while (matchLine.StartsWith('\r') || matchLine.StartsWith('\n'))
                                         {
                                             matchLine = matchLine[1..]; // Remove lines starting with the newline character.
                                         }
 
-                                        while ((matchLine.EndsWith("\r") || matchLine.EndsWith("\n")) && matchLine.Length > 2)
+                                        while ((matchLine.EndsWith('\r') || matchLine.EndsWith('\n')) && matchLine.Length > 2)
                                         {
                                             matchLine = matchLine[..^1]; // Remove lines ending with the newline character.
                                         }
@@ -129,7 +129,7 @@ namespace SearcherLibrary.FileExtensions
                     }
                     else
                     {
-                        matchedLines = matcher.GetMatch(new string[] { string.Join(Environment.NewLine, slideAllText) }, searchTerms, Strings.Slide);
+                        matchedLines = matcher.GetMatch([string.Join(Environment.NewLine, slideAllText)], searchTerms, Strings.Slide);
                     }
                 }
             }
@@ -160,10 +160,10 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>string array of the text in the presentation slides.</returns>
         private static string[] GetPresentationSlidesText(PresentationPart presentationPart)
         {
-            var presentation    = presentationPart.Presentation;
-            var slideParts      = presentationPart.SlideParts.ToList();
-            var retVal          = new string[slideParts.Count];
-            var relationshipId  = string.Empty;
+            var presentation = presentationPart.Presentation;
+            var slideParts = presentationPart.SlideParts.ToList();
+            var retVal = new string[slideParts.Count];
+            var relationshipId = string.Empty;
             var tempSlideNumber = 0;
 
             if (presentation != null && presentation.SlideIdList != null)
@@ -181,19 +181,24 @@ namespace SearcherLibrary.FileExtensions
                         var notes = new List<string>();
 
                         slidePart.Slide.Descendants<Shape>().ToList().ForEach(shape =>
-                                          {
-                                              foreach (var item in shape.Descendants<PlaceholderShape>().Where(i => i.Type != null))
-                                              {
-                                                  if ((item.Type!.ToString()!.ToUpper() == "CenteredTitle".ToUpper() ||
-                                                       item.Type.ToString()!.ToUpper() == "SubTitle".ToUpper() ||
-                                                       item.Type.ToString()!.ToUpper() == "Title".ToUpper()) &&
-                                                      shape.TextBody != null &&
-                                                      !string.IsNullOrWhiteSpace(shape.TextBody.InnerText))
-                                                  {
-                                                      titles.AddRange(shape.TextBody.Descendants<DocumentFormat.OpenXml.Drawing.Text>().Select(s => s.Text));
-                                                  }
-                                              }
-                                          });
+                        {
+                            foreach (var item in shape.Descendants<PlaceholderShape>().Where(i => i.Type != null))
+                            {
+                                var itemType = item.Type is not null && !string.IsNullOrWhiteSpace(item.Type.ToString())
+                                    ? item.Type.ToString() : null;
+                                if (itemType is not null)
+                                {
+                                    if ((itemType.Equals("CenteredTitle", StringComparison.OrdinalIgnoreCase) ||
+                                        itemType.Equals("SubTitle", StringComparison.CurrentCultureIgnoreCase) ||
+                                        itemType.Equals("Title", StringComparison.CurrentCultureIgnoreCase)) &&
+                                        shape.TextBody != null &&
+                                        !string.IsNullOrWhiteSpace(shape.TextBody.InnerText))
+                                    {
+                                        titles.AddRange(shape.TextBody.Descendants<DocumentFormat.OpenXml.Drawing.Text>().Select(s => s.Text));
+                                    }
+                                }
+                            }
+                        });
 
                         content = slidePart.Slide.Descendants<DocumentFormat.OpenXml.Drawing.Text>().Select(s => s.Text).ToList();
                         content.RemoveAll(s => titles.Any(t => t == s));
@@ -209,7 +214,7 @@ namespace SearcherLibrary.FileExtensions
                                                     }).Select(s => s.Text).ToList();
                         }
 
-                        retVal[index] = string.Join(string.Empty, string.Join(Environment.NewLine, titles.ToArray()), string.Join(string.Empty, content.ToArray()), string.Join(Environment.NewLine, notes.ToArray()));
+                        retVal[index] = string.Join(string.Empty, string.Join(Environment.NewLine, [.. titles]), string.Join(string.Empty, [.. content]), string.Join(Environment.NewLine, [.. notes]));
                     }
                 }
             }

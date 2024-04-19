@@ -5,20 +5,11 @@
 
 namespace Searcher
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Data;
-    using System.Windows.Documents;
-    using System.Windows.Input;
-    using System.Windows.Media;
-    using System.Windows.Media.Imaging;
-    using System.Windows.Shapes;
 
     /// <summary>
     /// Interaction logic for DirectoryExclude window.
@@ -34,7 +25,7 @@ namespace Searcher
             this.SetContentBasedOnLanguage();
             this.DirectoryToExclude = string.Empty;
         }
-        
+
         /// <summary>
         /// Initialises a new instance of the <see cref="DirectoryExclude"/> class.
         /// </summary>
@@ -42,7 +33,7 @@ namespace Searcher
         public DirectoryExclude(string childPath)
             : this()
         {
-            List<string> dirPaths = new();
+            List<string> dirPaths = [];
             string tempPath = childPath;
 
             while (Directory.GetParent(tempPath)?.FullName != Directory.GetDirectoryRoot(childPath))

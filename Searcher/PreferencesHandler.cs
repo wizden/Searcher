@@ -29,8 +29,6 @@ namespace Searcher
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using System.Windows;
     using System.Xml.Linq;
 
@@ -319,7 +317,7 @@ namespace Searcher
             if (PreferencesHandler.PreferencesFile != null)
             {
                 XElement? preferenceElement = PreferencesFile.Descendants(preference).FirstOrDefault();
-                
+
                 if (preferenceElement != null)
                 {
                     preferenceElement.Value = value;
@@ -334,8 +332,8 @@ namespace Searcher
         private static XDocument CreatePreferencesFile()
         {
             // Not bothering with XSD, as this is a one-off config operation, and not used for data exchange with other systems.
-            XElement[] initialPreferences = new XElement[]
-            {
+            XElement[] initialPreferences =
+            [
                 new ("MatchWholeWord", false),
                 new ("MatchCase", false),
                 new ("MaxDropDownItems", 10),
@@ -365,7 +363,7 @@ namespace Searcher
                 new ("ShowFileMatchCount", true),
                 new ("FilesToAlwaysExcludeFromSearch", Array.Empty<XElement>()),
                 new("DirectoriesToAlwaysExcludeFromSearch", Array.Empty<XElement>())
-            };
+            ];
 
             XDocument retVal = XDocument.Parse(new XElement("SearcherPreferences", initialPreferences).ToString(), LoadOptions.None);
             return retVal;

@@ -25,18 +25,18 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using SearcherLibrary.Resources;
     using System;
     using System.Collections.Generic;
     using System.Text;
     using System.Text.RegularExpressions;
-    using SearcherLibrary.Resources;
     using UglyToad.PdfPig;
     using UglyToad.PdfPig.DocumentLayoutAnalysis.TextExtractor;
 
     /// <summary>
     /// Class to search PDF files.
     /// </summary>
-    public class PdfSearchHandler : FileSearchHandler
+    public partial class PdfSearchHandler : FileSearchHandler
     {
         #region Internal Fields
 
@@ -52,7 +52,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .PDF extension.
         /// </summary>
-        public static new List<string> Extensions => new() { ".PDF" };
+        public static new List<string> Extensions => [".PDF"];
 
         #endregion Public Properties
 
@@ -85,7 +85,7 @@ namespace SearcherLibrary.FileExtensions
                     try
                     {
                         pageCounter++;
-                        var pdfPage = Regex.Replace(ContentOrderTextExtractor.GetText(page), @"\r\n?|\n", " ").Trim();
+                        var pdfPage = PdfPageRegex().Replace(ContentOrderTextExtractor.GetText(page), " ").Trim();
 
                         if (matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
                         {
@@ -135,12 +135,15 @@ namespace SearcherLibrary.FileExtensions
 
                 if (matcher.RegularExpressionOptions.HasFlag(RegexOptions.Multiline))
                 {
-                    matchedLines = matcher.GetMatch(new string[] { string.Join(string.Empty, documentAllContent.ToString()) }, searchTerms, Strings.Page);
+                    matchedLines = matcher.GetMatch([string.Join(string.Empty, documentAllContent.ToString())], searchTerms, Strings.Page);
                 }
             }
 
             return matchedLines;
         }
+
+        [GeneratedRegex(@"\r\n?|\n")]
+        private static partial Regex PdfPageRegex();
 
         #endregion Public Methods
     }

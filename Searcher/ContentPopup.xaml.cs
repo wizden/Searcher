@@ -49,7 +49,7 @@ namespace Searcher
         /// <summary>
         /// Private store for the array containing the file contents.
         /// </summary>
-        private readonly List<string> fileLines = new();
+        private readonly List<string> fileLines = [];
 
         /// <summary>
         /// Timeout value in seconds after which content windows closes.
@@ -86,7 +86,7 @@ namespace Searcher
         public ContentPopup(string file, int lineNo)
             : this()
         {
-            this.fileLines = File.ReadAllLines(file).ToList();
+            this.fileLines = [.. File.ReadAllLines(file)];
             this.TxtContent.Text = string.Join(Environment.NewLine, this.fileLines);
             this.TxtLineNumbers.Text = string.Join(Environment.NewLine, Enumerable.Range(1, this.fileLines.Count).Select(num => num));
             this.TxtLineNumbers.Width = this.fileLines.Count.ToString().Length * 15;

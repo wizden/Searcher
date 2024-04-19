@@ -25,6 +25,8 @@ namespace Searcher
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using Microsoft.Win32;
+    using SearcherLibrary;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -49,8 +51,6 @@ namespace Searcher
     using System.Windows.Shell;
     using System.Windows.Threading;
     using System.Xml.Linq;
-    using Microsoft.Win32;
-    using SearcherLibrary;
     using Application = System.Windows.Application;
     using Clipboard = System.Windows.Clipboard;
     using ComboBox = System.Windows.Controls.ComboBox;
@@ -107,7 +107,7 @@ namespace Searcher
         /// <summary>
         /// List of child result pop-out windows.
         /// </summary>
-        private readonly List<ResultsPopout> childWindows = new();
+        private readonly List<ResultsPopout> childWindows = [];
 
         /// <summary>
         /// Private store for the object that pops up the content.
@@ -122,7 +122,7 @@ namespace Searcher
         /// <summary>
         /// Private store for the list of directories that will not be searched (temporarily or always).
         /// </summary>
-        private readonly List<string> directoriesToExclude = new();
+        private readonly List<string> directoriesToExclude = [];
 
         /// <summary>
         /// Boolean to store whether the list of files being searched have been finalised.
@@ -142,7 +142,7 @@ namespace Searcher
         /// <summary>
         /// Private store for the list of files that have already been searched.
         /// </summary>
-        private List<string> filesSearched = new();
+        private List<string> filesSearched = [];
 
         /// <summary>
         /// Track count of number of files already searched.
@@ -157,12 +157,12 @@ namespace Searcher
         /// <summary>
         /// Private store for the list of files that will not be searched (temporarily or always).
         /// </summary>
-        private readonly List<string> filesToExclude = new();
+        private readonly List<string> filesToExclude = [];
 
         /// <summary>
         /// Private store for the list of files that are being searched.
         /// </summary>
-        private List<string> filesToSearch = new();
+        private List<string> filesToSearch = [];
 
         /// <summary>
         /// Variable to store the number of files that have a search match.
@@ -313,7 +313,7 @@ namespace Searcher
         /// Private store for the window top location.
         /// </summary>
         private double windowTop = 0;
-        
+
         /// <summary>
         /// Private store for the window width.
         /// </summary>
@@ -416,7 +416,7 @@ namespace Searcher
         /// <returns>List of Inline to be added to the results.</returns>
         private async Task<List<Inline>> AddResult(List<MatchedLine> matchedLines)
         {
-            List<Inline> retVal = new();
+            List<Inline> retVal = [];
             string currentFileName = string.Empty;
             string matchCountStr = $" ({Application.Current.Resources["Matches"]}: {matchedLines.Count})";
             int matchCounter = 0;
@@ -464,7 +464,7 @@ namespace Searcher
                         {
                             Background = this.highlightResults ? this.highlightResultBackColour : this.applicationBackColour
                         });
-                        retVal.Add(new Run(ml.Content.Substring(ml.StartIndex + ml.Length, ml.Content.Length - (ml.StartIndex + ml.Length))));
+                        retVal.Add(new Run(ml.Content[(ml.StartIndex + ml.Length)..]));
 
                         retVal.Add(new Run(Environment.NewLine));
                     });
@@ -556,7 +556,7 @@ namespace Searcher
             }
             else
             {
-                if (!this.filesToExclude.Any(f => f.ToUpper() == fullFileName.ToUpper()) && File.Exists(fullFileName))
+                if (!this.filesToExclude.Any(f => f.Equals(fullFileName, StringComparison.CurrentCultureIgnoreCase)) && File.Exists(fullFileName))
                 {
                     this.filesToExclude.Add(fullFileName);
                     retVal = true;
@@ -674,7 +674,7 @@ namespace Searcher
                 }
                 else
                 {
-                    List<string> directories = this.CmbDirectory.Text.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    List<string> directories = [.. this.CmbDirectory.Text.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries)];
                     directories.Add(fbd.SelectedPath);
                     this.CmbDirectory.Text = string.Join("; ", directories.Select(dir => dir.Trim()).Distinct());
                 }
@@ -774,7 +774,7 @@ namespace Searcher
             }
             else
             {
-                List<string> errorPaths = new();
+                List<string> errorPaths = [];
                 this.CmbDirectory.Text.Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList().ForEach(d =>
                 {
                     if (!Directory.Exists(d))
@@ -869,7 +869,7 @@ namespace Searcher
         private async void DownloadUpdates()
         {
             // This method is async void because if the search for update fails, we do not worry further as it does not impact the application usage.
-            if (PreferencesHandler.PreferencesFile != null && PreferencesHandler.GetPreferenceValue("CheckForUpdates").ToUpper() == true.ToString().ToUpper())
+            if (PreferencesHandler.PreferencesFile != null && PreferencesHandler.GetPreferenceValue("CheckForUpdates").Equals(true.ToString(), StringComparison.CurrentCultureIgnoreCase))
             {
                 UpdateApp updateApp = new(PreferencesHandler.PreferencesFile);
 
@@ -1060,8 +1060,8 @@ namespace Searcher
         /// <returns>List of files to be searched.</returns>
         private List<string> GetFilesToSearch(string path, string filter)
         {
-            List<string> filesToSearch = new();
-            List<string> pathErrors = new();
+            List<string> filesToSearch = [];
+            List<string> pathErrors = [];
 
             if (this.filterExclusionSet)
             {
@@ -1156,7 +1156,7 @@ namespace Searcher
                 {
                     try
                     {
-                        int.TryParse(text[5..text.IndexOf(":")], out retVal);
+                        _ = int.TryParse(text[5..text.IndexOf(':')], out retVal);
                     }
                     catch (ArgumentOutOfRangeException argOutOfRangeEx)
                     {
@@ -1193,10 +1193,10 @@ namespace Searcher
         /// <returns>String containing user name information.</returns>
         private static string GetRunningUserInfo()
         {
-            AssemblyTitleAttribute? assemblyTitleAttribute = (AssemblyTitleAttribute)(Attribute.GetCustomAttribute(Assembly.GetExecutingAssembly(), typeof(AssemblyTitleAttribute), false) 
+            AssemblyTitleAttribute? assemblyTitleAttribute = (AssemblyTitleAttribute)(Attribute.GetCustomAttribute(Assembly.GetExecutingAssembly(), typeof(AssemblyTitleAttribute), false)
                 ?? new AssemblyTitleAttribute(string.Empty));
-            string programName = assemblyTitleAttribute != null 
-                ? assemblyTitleAttribute.Title 
+            string programName = assemblyTitleAttribute != null
+                ? assemblyTitleAttribute.Title
                 : (Application.Current.Resources["UnknownAssemblyName"].ToString() ?? string.Empty);
             string userName = string.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
             WindowsPrincipal principal = new(WindowsIdentity.GetCurrent());
@@ -1219,9 +1219,9 @@ namespace Searcher
             if ((this.distinctFilesFound && this.filesToSearch != null && this.filesToSearch.Count > 0) || (this.filesToExclude.Count > 0 || this.directoriesToExclude.Count > 0))
             {
                 SearchedFileList searchedFileList;
-                List<string> filesToAlwaysExclude = new();
-                List<string> directoriesToAlwaysExclude = new();
-                this.filesToSearch ??= new();
+                List<string> filesToAlwaysExclude = [];
+                List<string> directoriesToAlwaysExclude = [];
+                this.filesToSearch ??= [];
 
                 if (PreferencesHandler.PreferencesFile != null)
                 {
@@ -1232,9 +1232,7 @@ namespace Searcher
                     {
                         if (filesToAlwaysExclude.Count > 0 || directoriesToAlwaysExclude.Count > 0)
                         {
-                            List<string> tempFilesToExclude = new();
-                            tempFilesToExclude.AddRange(this.directoriesToExclude);
-                            tempFilesToExclude.AddRange(this.filesToExclude);
+                            List<string> tempFilesToExclude = [.. this.directoriesToExclude, .. this.filesToExclude];
                             tempFilesToExclude.RemoveAll(tfe => filesToAlwaysExclude.Any(fae => fae == tfe));
                             tempFilesToExclude.RemoveAll(tfe => directoriesToAlwaysExclude.Any(dae => dae == tfe));
                             searchedFileList = new SearchedFileList(this.filesToSearch, tempFilesToExclude, filesToAlwaysExclude.Concat(directoriesToAlwaysExclude));
@@ -1502,8 +1500,8 @@ namespace Searcher
         {
             List<string> filtersToUse = filters.Trim().Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList();
             List<string> searchPaths = searchPath.Trim().Split(new string[] { this.separatorCharacter }, StringSplitOptions.RemoveEmptyEntries).Select(str => str.Trim()).ToList();
-            this.filesToSearch = new List<string>();
-            this.filesSearched = new List<string>();
+            this.filesToSearch = [];
+            this.filesSearched = [];
             this.distinctFilesFound = false;
             this.SetFileCounterProgressInformation(0, Application.Current.Resources["GettingFilesToSearch"].ToString() ?? string.Empty);
             this.regexOptions = this.matchCase ? RegexOptions.None : RegexOptions.IgnoreCase;
@@ -1543,7 +1541,7 @@ namespace Searcher
 
                 await this.RemoveExclusionPaths();
                 this.SetFileCounterProgressInformation(0, string.Format("{0}: {1}", Application.Current.Resources["FilesFound"].ToString(), this.filesToSearch.Count));
-                this.filesToSearch = this.filesToSearch.Distinct().OrderBy(f => f).ToList();      // Remove duplicates that could be added via path filters that cover the same item mulitple times.
+                this.filesToSearch = [.. this.filesToSearch.Distinct().OrderBy(f => f)];      // Remove duplicates that could be added via path filters that cover the same item mulitple times.
                 this.distinctFilesFound = true;
                 this.SetProgressMaxValue(this.filesToSearch.Count);
                 await this.SearchParallelAsync(this.filesToSearch, termsToSearch);
@@ -1647,7 +1645,7 @@ namespace Searcher
         /// <returns>Task indicating the status of the operation.</returns>
         private async Task RemoveExclusionPaths()
         {
-            this.filesToSearch.RemoveAll(f => this.filesToExclude.Any(excludeFile => excludeFile.ToUpper() == f.ToUpper()));
+            this.filesToSearch.RemoveAll(f => this.filesToExclude.Any(excludeFile => excludeFile.Equals(f, StringComparison.CurrentCultureIgnoreCase)));
 
             await Task.Run(() =>
             {
@@ -1744,8 +1742,8 @@ namespace Searcher
         /// <returns>Task object that searches and displays the result.</returns>
         private async Task<List<Inline>> SearchAndDisplayResult(string fileName, IEnumerable<string> termsToSearch)
         {
-            List<Inline> retVal = new();
-            List<MatchedLine> matchedLines = new();
+            List<Inline> retVal = [];
+            List<MatchedLine> matchedLines = [];
 
             try
             {
@@ -1785,7 +1783,7 @@ namespace Searcher
                 }
                 else
                 {
-                    matchedLines = matchedLines.OrderBy(ml => ml.MatchId).ToList();
+                    matchedLines = [.. matchedLines.OrderBy(ml => ml.MatchId)];
                     string resultFileName = matchedLines.Select(ml => ml.FileName).FirstOrDefault() ?? string.Empty;
                     matchedLines.ForEach(ml => ml.FileName = string.Empty);
                     matchedLines[0].FileName = (resultFileName != null && resultFileName.Length > fileName.Length) ? resultFileName : fileName;
@@ -1811,7 +1809,7 @@ namespace Searcher
             this.matcherObj.AllMatchesInFile = this.searchTypeAll;
             this.matcherObj.RegularExpressionOptions = this.regexOptions;
             this.matcherObj.CancellationTokenSource = this.cancellationTokenSource;
-            List<Task> searchTasks = new();
+            List<Task> searchTasks = [];
 
             try
             {
@@ -1890,7 +1888,7 @@ namespace Searcher
         private void SetApplicationCustomBackground()
         {
             string backGroundColourValue = PreferencesHandler.GetPreferenceValue("BackGroundColour");
-            backGroundColourValue = backGroundColourValue.StartsWith("#") ? backGroundColourValue : "#" + backGroundColourValue;
+            backGroundColourValue = backGroundColourValue.StartsWith('#') ? backGroundColourValue : "#" + backGroundColourValue;
 
             try
             {
@@ -2024,15 +2022,15 @@ namespace Searcher
         /// </summary>
         private void SetInitialSearchOptions()
         {
-            this.ChkMatchWholeWord.IsChecked = PreferencesHandler.GetPreferenceValue("MatchWholeWord").ToUpper() == true.ToString().ToUpper();
-            this.ChkMatchCase.IsChecked = PreferencesHandler.GetPreferenceValue("MatchCase").ToUpper() == true.ToString().ToUpper();
+            this.ChkMatchWholeWord.IsChecked = PreferencesHandler.GetPreferenceValue("MatchWholeWord").Equals(true.ToString(), StringComparison.CurrentCultureIgnoreCase);
+            this.ChkMatchCase.IsChecked = PreferencesHandler.GetPreferenceValue("MatchCase").Equals(true.ToString(), StringComparison.CurrentCultureIgnoreCase);
             this.searchModeRegex = this.RbtnRegexSearch.IsChecked.GetValueOrDefault(true);
-            this.ChkSearchSubfolders.IsChecked = PreferencesHandler.GetPreferenceValue("SearchSubfolders").ToUpper() == true.ToString().ToUpper();
-            this.ChkHighlightResults.IsChecked = PreferencesHandler.GetPreferenceValue("HighlightResults").ToUpper() == true.ToString().ToUpper();
-            this.searchTypeAll = PreferencesHandler.GetPreferenceValue("SearchContentMode").ToUpper() == "All".ToUpper();
-            this.showExecutionTime = PreferencesHandler.GetPreferenceValue("ShowExecutionTime").ToUpper() == true.ToString().ToUpper();
+            this.ChkSearchSubfolders.IsChecked = PreferencesHandler.GetPreferenceValue("SearchSubfolders").Equals(true.ToString(), StringComparison.CurrentCultureIgnoreCase);
+            this.ChkHighlightResults.IsChecked = PreferencesHandler.GetPreferenceValue("HighlightResults").Equals(true.ToString(), StringComparison.CurrentCultureIgnoreCase);
+            this.searchTypeAll = PreferencesHandler.GetPreferenceValue("SearchContentMode").Equals("All", StringComparison.CurrentCultureIgnoreCase);
+            this.showExecutionTime = PreferencesHandler.GetPreferenceValue("ShowExecutionTime").Equals(true.ToString(), StringComparison.CurrentCultureIgnoreCase);
             this.culture = PreferencesHandler.GetPreferenceValue("Culture") ?? "en-US";
-            this.ChkShowMatchCount.IsChecked = PreferencesHandler.GetPreferenceValue("ShowFileMatchCount").ToUpper() == true.ToString().ToUpper();
+            this.ChkShowMatchCount.IsChecked = PreferencesHandler.GetPreferenceValue("ShowFileMatchCount").Equals(true.ToString(), StringComparison.CurrentCultureIgnoreCase);
             this.CmbSearchType.SelectedItem = this.searchTypeAll ?
                 this.CmbSearchType.Items.Cast<ComboBoxItem>().Where(i => i.Content.ToString()?.ToUpper() == Application.Current.Resources["All"].ToString()?.ToUpper()).First() :
                 this.CmbSearchType.Items.Cast<ComboBoxItem>().First();
@@ -2137,7 +2135,7 @@ namespace Searcher
         /// </summary>
         private void SetResourceDictionary()
         {
-            List<ResourceDictionary> resourceDictionaries = Application.Current.Resources.MergedDictionaries.ToList();
+            List<ResourceDictionary> resourceDictionaries = [.. Application.Current.Resources.MergedDictionaries];
             string requestedCultureDictionary = string.Format("Resources/StringResources.{0}.xaml", this.culture);
             ResourceDictionary? resourceDictionary = resourceDictionaries.FirstOrDefault(d => d.Source.OriginalString == requestedCultureDictionary);
 
@@ -2160,7 +2158,7 @@ namespace Searcher
         private void SetResultHighlightColour()
         {
             string highlightResultColourValue = PreferencesHandler.GetPreferenceValue("HighlightResultsColour");
-            highlightResultColourValue = highlightResultColourValue.StartsWith("#") ? highlightResultColourValue : "#" + highlightResultColourValue;        // Prepend with "#" if required.
+            highlightResultColourValue = highlightResultColourValue.StartsWith('#') ? highlightResultColourValue : "#" + highlightResultColourValue;        // Prepend with "#" if required.
 
             try
             {
@@ -2389,9 +2387,9 @@ namespace Searcher
                 this.Width = this.windowWidth;
             }
 
-            int.TryParse(strPopupWindowWidth, out this.popupWindowWidth);
-            int.TryParse(strPopupWindowHeight, out this.popupWindowHeight);
-            int.TryParse(strPopupWindowTimeoutSeconds, out this.popupWindowTimeoutSeconds);
+            _ = int.TryParse(strPopupWindowWidth, out this.popupWindowWidth);
+            _ = int.TryParse(strPopupWindowHeight, out this.popupWindowHeight);
+            _ = int.TryParse(strPopupWindowTimeoutSeconds, out this.popupWindowTimeoutSeconds);
         }
 
         /// <summary>
@@ -2497,7 +2495,7 @@ namespace Searcher
         {
             if (comboBox.SelectedItem != null)
             {
-                List<string> directories = new();
+                List<string> directories = [];
                 string selectedItem = comboBox.Text;
                 directories.Add(selectedItem);
 
@@ -2534,7 +2532,7 @@ namespace Searcher
         {
             if (shouldSavePreferences && PreferencesHandler.PreferencesFile != null)
             {
-                PreferencesHandler.SetPreferenceValue("MatchWholeWord",  this.ChkMatchWholeWord.IsChecked.GetValueOrDefault().ToString());
+                PreferencesHandler.SetPreferenceValue("MatchWholeWord", this.ChkMatchWholeWord.IsChecked.GetValueOrDefault().ToString());
                 PreferencesHandler.SetPreferenceValue("MatchCase", this.ChkMatchCase.IsChecked.GetValueOrDefault().ToString());
                 PreferencesHandler.SetPreferenceValue("SearchSubfolders", this.ChkSearchSubfolders.IsChecked.GetValueOrDefault().ToString());
                 PreferencesHandler.SetPreferenceValue("HighlightResults", this.ChkHighlightResults.IsChecked.GetValueOrDefault().ToString());

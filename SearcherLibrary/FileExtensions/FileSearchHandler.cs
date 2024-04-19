@@ -25,14 +25,13 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using SearcherLibrary.Resources;
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text.RegularExpressions;
-    using SearcherLibrary.Resources;
 
     /// <summary>
     /// Class to search files that do not have any specific handler.
@@ -82,7 +81,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Gets or sets the list of extensions that can be processed by this handler. Empty is default and handles all non-specified extensions.
         /// </summary>
-        public static List<string> Extensions => new();
+        public static List<string> Extensions => [];
 
         #endregion Public Properties
 
@@ -97,12 +96,12 @@ namespace SearcherLibrary.FileExtensions
             {
                 if (disallowedCharactersByOperatingSystem == null)
                 {
-                    disallowedCharactersByOperatingSystem = new List<char>();
+                    disallowedCharactersByOperatingSystem = [];
 
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
                         // Based on: https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file. Excluding "\" and "/" as these get used for IEntry paths.
-                        disallowedCharactersByOperatingSystem = new List<char>() { '<', '>', ':', '|', '?', '*' };
+                        disallowedCharactersByOperatingSystem = ['<', '>', ':', '|', '?', '*'];
                     }
                 }
 
@@ -209,13 +208,13 @@ namespace SearcherLibrary.FileExtensions
 
         private static List<MatchedLine> GetMultiLineRegexMatches(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
             foreach (var searchTerm in searchTerms)
             {
                 string allText = File.ReadAllText(fileName);
                 var matches = Regex.Matches(allText, searchTerm, matcher.RegularExpressionOptions);
-                
-                if(matches.Count > 0)
+
+                if (matches.Count > 0)
                 {
                     int matchCounter = 0;
                     var lengthOfLineKeywordPlus3 = Strings.Line.Length + 3;
@@ -268,7 +267,8 @@ namespace SearcherLibrary.FileExtensions
                     Thread.Sleep(counter);     // Sleep for tiny increments of time, while waiting for file to be released (max 45 milliseconds).
                     counter++;
                 }
-            } while (fileAccessException != null && fileAccessException.Message.ToUpper().Contains("The process cannot access the file".ToUpper()) && counter < 10);
+            } while (fileAccessException != null
+                && fileAccessException.Message.Contains("The process cannot access the file", StringComparison.CurrentCultureIgnoreCase) && counter < 10);
         }
 
         #endregion Internal Methods

@@ -13,7 +13,7 @@
                 Add(TestHelpers.GetFilePathForTestFile("Oft.oft"), 7);
             }
         }
-        
+
         public class SearchText_DataGenerator : TheoryData<string>
         {
             public SearchText_DataGenerator()
@@ -29,10 +29,10 @@
         [Theory]
         [ClassData(typeof(SearchText_DataGenerator))]
         public void SearchText_CaseInsensitive_MatchesTwo(string filePath)
-        {            
-			// Arrange / Act
-			var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the" }, new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase });
-            
+        {
+            // Arrange / Act
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, ["the"], new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase });
+
             // Assert
             Assert.Equal(2, matchedLines.Count);
         }
@@ -42,10 +42,10 @@
         public void SearchText_CaseSensitive_MatchesOne(string filePath)
         {
             // Arrange / Act
-			var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "The" }, new Matcher { RegularExpressionOptions = RegexOptions.None });
-            
-			// Assert
-			Assert.Single(matchedLines);
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, ["The"], new Matcher { RegularExpressionOptions = RegexOptions.None });
+
+            // Assert
+            Assert.Single(matchedLines);
         }
 
         [Theory]
@@ -53,10 +53,10 @@
         public void SearchText_Regex_CaseInsensitive_MatchesOne(string filePath)
         {
             // Arrange / Act
-			var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "th.*qu" }, new Matcher { RegularExpressionOptions = RegexOptions.Singleline | RegexOptions.IgnoreCase });
-            
-			// Assert
-			Assert.Single(matchedLines);
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, ["th.*qu"], new Matcher { RegularExpressionOptions = RegexOptions.Singleline | RegexOptions.IgnoreCase });
+
+            // Assert
+            Assert.Single(matchedLines);
         }
 
         [Theory]
@@ -64,19 +64,19 @@
         public void SearchText_Regex_CaseInsensitive_Multiline_Matches11(string filePath, int matchCount)
         {
             // Arrange / Act
-			var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "e(.|\n)*?o" }, new Matcher { RegularExpressionOptions = RegexOptions.Multiline | RegexOptions.IgnoreCase });
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, ["e(.|\n)*?o"], new Matcher { RegularExpressionOptions = RegexOptions.Multiline | RegexOptions.IgnoreCase });
 
             try
             {
-                
-			// Assert
-			Assert.Equal(matchCount, matchedLines.Count);
+
+                // Assert
+                Assert.Equal(matchCount, matchedLines.Count);
             }
             catch (Xunit.Sdk.EqualException ee)
             {
                 throw new Xunit.Sdk.XunitException($"Failed for {filePath}. {ee}");
             }
-            
+
         }
 
         [Theory]
@@ -84,10 +84,10 @@
         public void SearchText_Regex_CaseSensitive_MatchesOne(string filePath)
         {
             // Arrange / Act
-			var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "Th.*qu" }, new Matcher { RegularExpressionOptions = RegexOptions.Singleline });
-            
-			// Assert
-			Assert.Single(matchedLines);
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, ["Th.*qu"], new Matcher { RegularExpressionOptions = RegexOptions.Singleline });
+
+            // Assert
+            Assert.Single(matchedLines);
         }
 
         [Theory]
@@ -95,10 +95,10 @@
         public void SearchText_TwoWords_CaseInsensitive_MatchesThree(string filePath)
         {
             // Arrange / Act
-			var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the", "quick"}, new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase });
-            
-			// Assert
-			Assert.Equal(3, matchedLines.Count);
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, ["the", "quick"], new Matcher { RegularExpressionOptions = RegexOptions.IgnoreCase });
+
+            // Assert
+            Assert.Equal(3, matchedLines.Count);
         }
 
         [Theory]
@@ -106,10 +106,10 @@
         public void SearchText_TwoWords_CaseInsensitive_MatchesTwo(string filePath)
         {
             // Arrange / Act
-			var matchedLines = FileSearchHandlerFactory.Search(filePath, new string[] { "the", "quick" }, new Matcher { RegularExpressionOptions = RegexOptions.None });
-            
-			// Assert
-			Assert.Equal(2, matchedLines.Count);
+            var matchedLines = FileSearchHandlerFactory.Search(filePath, ["the", "quick"], new Matcher { RegularExpressionOptions = RegexOptions.None });
+
+            // Assert
+            Assert.Equal(2, matchedLines.Count);
         }
 
         #endregion Public Methods

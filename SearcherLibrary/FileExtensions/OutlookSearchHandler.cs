@@ -25,14 +25,14 @@ namespace SearcherLibrary.FileExtensions
      * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
      */
 
+    using MsgReader.Mime;
+    using MsgReader.Mime.Header;
+    using MsgReader.Outlook;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using MsgReader.Mime;
-    using MsgReader.Mime.Header;
-    using MsgReader.Outlook;
 
     /// <summary>
     /// Class to search Outlook files.
@@ -53,7 +53,7 @@ namespace SearcherLibrary.FileExtensions
         /// <summary>
         /// Handles files with the .EML/.MSG/.OFT extension.
         /// </summary>
-        public static new List<string> Extensions => new() { ".EML", ".MSG", ".OFT" };
+        public static new List<string> Extensions => [".EML", ".MSG", ".OFT"];
 
         #endregion Public Properties
 
@@ -68,7 +68,7 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         public override List<MatchedLine> Search(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
 
             string fileExtension = Path.GetExtension(fileName).ToUpper();
 
@@ -99,13 +99,13 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         private static List<MatchedLine> GetMatchesInEmlFiles(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
             Message email = Message.Load(new FileInfo(fileName));
             string recipients = string.Join(", ", email.Headers.To.Select(t => GetEmailForDisplay(t)));
             string recipientsCc = string.Join(", ", email.Headers.Cc.Select(cc => GetEmailForDisplay(cc)));
             string sender = (email.Headers.Sender ?? email.Headers.From).DisplayName + " " + (email.Headers.Sender ?? email.Headers.From).Address;
             string dateSent = email.Headers.DateSent == DateTime.MinValue ? string.Empty : email.Headers.Date;
-            string headerInfo = string.Join(", ", new string[] { sender, dateSent, recipients, recipientsCc, email.Headers.Subject });
+            string headerInfo = string.Join(", ", [sender, dateSent, recipients, recipientsCc, email.Headers.Subject]);
             string body = email.TextBody?.GetBodyAsText() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(body))
@@ -177,13 +177,13 @@ namespace SearcherLibrary.FileExtensions
         /// <returns>The matched lines containing the search terms.</returns>
         private static List<MatchedLine> GetMatchesInMsgOftFiles(string fileName, IEnumerable<string> searchTerms, Matcher matcher)
         {
-            List<MatchedLine> matchedLines = new();
+            List<MatchedLine> matchedLines = [];
 
             using (var msg = new Storage.Message(fileName))
             {
                 string recipients = msg.GetEmailRecipients(RecipientType.To, false, false);
                 string recipientsCc = msg.GetEmailRecipients(RecipientType.Cc, false, false);
-                string headerInfo = string.Join(", ", new string[] { msg.Sender.Raw, msg.SentOn.GetValueOrDefault().ToString(), recipients, recipientsCc, msg.Subject });
+                string headerInfo = string.Join(", ", [msg.Sender.Raw, msg.SentOn.GetValueOrDefault().ToString(), recipients, recipientsCc, msg.Subject]);
 
                 matchedLines.AddRange(GetMatchesForHeader());
                 matchedLines.AddRange(GetMatchesForBody());
