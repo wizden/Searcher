@@ -9,7 +9,7 @@
     <IsTestProject>true</IsTestProject>
     <Version>$(AssemblyVersion)</Version>
     <FileVersion>$(AssemblyVersion)</FileVersion>
-    <AssemblyVersion>2.1.0</AssemblyVersion>
+    <AssemblyVersion>2.1.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

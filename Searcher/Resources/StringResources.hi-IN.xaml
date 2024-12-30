@@ -133,6 +133,8 @@
 
     <system:String x:Key="SearchedFileList">खोजे गए फ़ाइल सूची</system:String>
 
+    <system:String x:Key="SearchedFiles">खोजी गई फ़ाइलें</system:String>
+
     <system:String x:Key="Searching">खोज जारी है</system:String>
 
     <system:String x:Key="SearchMode">खोज मोड</system:String>

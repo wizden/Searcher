@@ -132,6 +132,8 @@
 
     <system:String x:Key="SearchedFileList">Searched File List</system:String>
 
+    <system:String x:Key="SearchedFiles">Searched Files</system:String>
+
     <system:String x:Key="Searching">Searching</system:String>
 
     <system:String x:Key="SearchMode">Search Mode</system:String>

@@ -133,6 +133,8 @@
 
     <system:String x:Key="SearchedFileList">List der durchsuchte (n) Datei (en)</system:String>
 
+    <system:String x:Key="SearchedFiles">Durchsuchte Dateien</system:String>
+
     <system:String x:Key="Searching">Suchen</system:String>
 
     <system:String x:Key="SearchMode">Suchmodus</system:String>
