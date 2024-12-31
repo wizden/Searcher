@@ -132,6 +132,8 @@
     <system:String x:Key="SearchComplete">Поиск завершен</system:String>
 
     <system:String x:Key="SearchedFileList">Список найденных файлов</system:String>
+    
+    <system:String x:Key="SearchedFiles">Поиск файлов</system:String>
 
     <system:String x:Key="Searching">Проверяемый файл</system:String>
 

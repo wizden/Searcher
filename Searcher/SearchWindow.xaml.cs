@@ -95,6 +95,46 @@ namespace Searcher
         private const double MinScaleValue = 0.5;
 
         /// <summary>
+        /// List of child result pop-out windows.
+        /// </summary>
+        private readonly List<ResultsPopout> childWindows = [];
+
+        /// <summary>
+        /// Private store for the list of directories that will not be searched (temporarily or always).
+        /// </summary>
+        private readonly List<string> directoriesToExclude = [];
+
+        /// <summary>
+        /// Variable to store stopwatch that calculates execution time.
+        /// </summary>
+        private readonly Stopwatch executionTime = new();
+
+        /// <summary>
+        /// Private store for the determining the progress of the files currently being searched.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, FileSearchResult> filesSearchProgress = new();
+
+        /// <summary>
+        /// Private store for the list of files that will not be searched (temporarily or always).
+        /// </summary>
+        private readonly List<string> filesToExclude = [];
+
+        /// <summary>
+        /// Private store for the matcher object used to search files.
+        /// </summary>
+        private readonly Matcher matcherObj = new();
+
+        /// <summary>
+        /// Private store for timer to determine time taken to run search.
+        /// </summary>
+        private readonly Timer searchTimer = new(1000);
+
+        /// <summary>
+        /// Private store to hide the zoom level text block.
+        /// </summary>
+        private readonly DispatcherTimer zoomLabelTimer = new();
+
+        /// <summary>
         /// Private store for the background colour of the application
         /// </summary>
         private SolidColorBrush applicationBackColour = new();
@@ -103,12 +143,6 @@ namespace Searcher
         /// Cancellation token source object to cancel file search.
         /// </summary>
         private CancellationTokenSource cancellationTokenSource = new();
-
-        /// <summary>
-        /// List of child result pop-out windows.
-        /// </summary>
-        private readonly List<ResultsPopout> childWindows = [];
-
         /// <summary>
         /// Private store for the object that pops up the content.
         /// </summary>
@@ -118,12 +152,6 @@ namespace Searcher
         /// Language used on the form.
         /// </summary>
         private string culture = "en-US";
-
-        /// <summary>
-        /// Private store for the list of directories that will not be searched (temporarily or always).
-        /// </summary>
-        private readonly List<string> directoriesToExclude = [];
-
         /// <summary>
         /// Boolean to store whether the list of files being searched have been finalised.
         /// </summary>
@@ -133,12 +161,6 @@ namespace Searcher
         /// Variable to store the path for a custom editor.
         /// </summary>
         private string editorNamePath = string.Empty;
-
-        /// <summary>
-        /// Variable to store stopwatch that calculates execution time.
-        /// </summary>
-        private readonly Stopwatch executionTime = new();
-
         /// <summary>
         /// Private store for the list of files that have already been searched.
         /// </summary>
@@ -149,16 +171,7 @@ namespace Searcher
         /// </summary>
         private int filesSearchedCounter = 0;
 
-        /// <summary>
-        /// Private store for the determining the progress of the files currently being searched.
-        /// </summary>
-        private readonly ConcurrentDictionary<string, FileSearchResult> filesSearchProgress = new();      // TODO: Use ConcurrentBag, but only .NET 5.0 has the Clear() method.
-
-        /// <summary>
-        /// Private store for the list of files that will not be searched (temporarily or always).
-        /// </summary>
-        private readonly List<string> filesToExclude = [];
-
+        // TODO: Use ConcurrentBag, but only .NET 5.0 has the Clear() method.
         /// <summary>
         /// Private store for the list of files that are being searched.
         /// </summary>
@@ -188,12 +201,6 @@ namespace Searcher
         /// Boolean indicating whether the search is case sensitive.
         /// </summary>
         private bool matchCase = false;
-
-        /// <summary>
-        /// Private store for the matcher object used to search files.
-        /// </summary>
-        private readonly Matcher matcherObj = new();
-
         /// <summary>
         /// Variable to store the number of search matches.
         /// </summary>
@@ -268,12 +275,6 @@ namespace Searcher
         /// Boolean indicating whether the search should look in sub folders.
         /// </summary>
         private bool searchSubFolders = false;
-
-        /// <summary>
-        /// Private store for timer to determine time taken to run search.
-        /// </summary>
-        private readonly Timer searchTimer = new(1000);
-
         /// <summary>
         /// Boolean indicating whether the search must contain all of the search terms.
         /// </summary>
@@ -318,12 +319,6 @@ namespace Searcher
         /// Private store for the window width.
         /// </summary>
         private double windowWidth = 0;
-
-        /// <summary>
-        /// Private store to hide the zoom level text block.
-        /// </summary>
-        private readonly DispatcherTimer zoomLabelTimer = new();
-
         #endregion Private Fields
 
         #region Public Constructors
@@ -407,6 +402,142 @@ namespace Searcher
             {
                 comboBox.Items.Add(p.Value);
             });
+        }
+
+        /// <summary>
+        /// Sets the title bar to display details of user running the application.
+        /// </summary>
+        /// <returns>String containing user name information.</returns>
+        private static string GetRunningUserInfo()
+        {
+            AssemblyTitleAttribute? assemblyTitleAttribute = (AssemblyTitleAttribute)(Attribute.GetCustomAttribute(Assembly.GetExecutingAssembly(), typeof(AssemblyTitleAttribute), false)
+                ?? new AssemblyTitleAttribute(string.Empty));
+            string programName = assemblyTitleAttribute != null
+                ? assemblyTitleAttribute.Title
+                : (Application.Current.Resources["UnknownAssemblyName"].ToString() ?? string.Empty);
+            string userName = string.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
+            WindowsPrincipal principal = new(WindowsIdentity.GetCurrent());
+
+            if (principal.IsInRole(WindowsBuiltInRole.Administrator))
+            {
+                userName += " - " + Application.Current.Resources["Administrator"].ToString();
+            }
+
+            return string.Format("{0} ({1})", programName, userName);
+        }
+
+        /// <summary>
+        /// Set the paths that will be always excluded.
+        /// </summary>
+        /// <param name="filesToAlwaysExclude">The list of file paths.</param>
+        /// <param name="directoriesToAlwaysExclude">The list of directory paths.</param>
+        private static void SavePathsToAlwaysExclude(List<string> filesToAlwaysExclude, List<string> directoriesToAlwaysExclude)
+        {
+            PreferencesHandler.GetPreference("FilesToAlwaysExcludeFromSearch").FirstOrDefault()?.RemoveAll();
+            PreferencesHandler.GetPreference("DirectoriesToAlwaysExcludeFromSearch").FirstOrDefault()?.RemoveAll();
+
+            filesToAlwaysExclude.ForEach(fae =>
+            {
+                if (File.Exists(fae))
+                {
+                    PreferencesHandler.GetPreference("FilesToAlwaysExcludeFromSearch").FirstOrDefault()?.Add(new XElement("Value", fae));
+                }
+            });
+
+            directoriesToAlwaysExclude.ForEach(fae =>
+            {
+                if (Directory.Exists(fae))
+                {
+                    PreferencesHandler.GetPreference("DirectoriesToAlwaysExcludeFromSearch").FirstOrDefault()?.Add(new XElement("Value", fae));
+                }
+            });
+        }
+
+        /// <summary>
+        /// Set a jump list for the window.
+        /// </summary>
+        private static void SetJumpList()
+        {
+            JumpTask jmpPreferences = new()
+            {
+                ApplicationPath = PreferencesHandler.PreferenceFilePath,
+                IconResourcePath = @"C:\Windows\notepad.exe",
+                Title = "Preferences",
+                Description = Application.Current.Resources["OpenPreferencesFile"].ToString(),
+                CustomCategory = "Settings"
+            };
+
+            JumpList jmpList = JumpList.GetJumpList(Application.Current);
+            jmpList.JumpItems.Add(jmpPreferences);
+            JumpList.AddToRecentCategory(jmpPreferences);
+            jmpList.Apply();
+        }
+
+        /// <summary>
+        /// Set the dates used by the application.
+        /// </summary>
+        /// <param name="datePicker">The date picker control.</param>
+        /// <param name="preferenceElement">The preference element to use.</param>
+        private static void SetSearchDate(DatePicker datePicker, string preferenceElement)
+        {
+            if (PreferencesHandler.PreferencesFile != null && PreferencesHandler.GetPreference(preferenceElement) != null)
+            {
+                string strDateToSet = PreferencesHandler.GetPreferenceValue(preferenceElement);
+
+                if (DateTime.TryParse(strDateToSet, out DateTime dateToSet))
+                {
+                    datePicker.SelectedDate = dateToSet;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the maximum lengths for the search inputs.
+        /// </summary>
+        /// <param name="comboBox">The combo box object whose input is to be restricted.</param>
+        /// <param name="maxAllowedLength">The maximum input length allowed for the combo box object.</param>
+        private static void SetSearchInputMaxLengths(ComboBox comboBox, int maxAllowedLength)
+        {
+            TextBox editableTextBox = (TextBox)comboBox.Template.FindName("PART_EditableTextBox", comboBox);
+            if (editableTextBox != null)
+            {
+                editableTextBox.MaxLength = maxAllowedLength;
+            }
+        }
+
+        /// <summary>
+        /// Show any error on attempting to read file or find matches.
+        /// </summary>
+        /// <param name="ex">The incurred exception object.</param>
+        private static void ShowError(Exception ex)
+        {
+            MessageBox.Show(ex.Message + Environment.NewLine + ex.StackTrace, Application.Current.Resources["ErrorOccurred"].ToString());
+        }
+
+        /// <summary>
+        /// Update the content of the drop down combo box.
+        /// </summary>
+        /// <param name="comboBox">The combo box control object.</param>
+        private static void UpdateDropdownListOrder(ComboBox comboBox)
+        {
+            if (comboBox.SelectedItem != null)
+            {
+                List<string> directories = [];
+                string selectedItem = comboBox.Text;
+                directories.Add(selectedItem);
+
+                foreach (var item in comboBox.Items)
+                {
+                    if (!string.IsNullOrWhiteSpace(item.ToString()) && item.ToString() != selectedItem)
+                    {
+                        directories.Add(item.ToString()!);
+                    }
+                }
+
+                comboBox.Items.Clear();
+                directories.ForEach(s => comboBox.Items.Add(s));
+                comboBox.SelectedIndex = 0;
+            }
         }
 
         /// <summary>
@@ -747,6 +878,63 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Show the files used in the search
+        /// </summary>
+        /// <param name="sender">The sender object.</param>
+        /// <param name="e">The MouseButtonEventArgs object.</param>
+        private void BtnSearchedFiles_Click(object sender, RoutedEventArgs e)
+        {
+            SearchedFileList searchedFileList;
+            List<string> filesToAlwaysExclude = [];
+            List<string> directoriesToAlwaysExclude = [];
+            this.filesToSearch ??= [];
+
+            if (PreferencesHandler.PreferencesFile != null)
+            {
+                filesToAlwaysExclude = PreferencesHandler.GetPreference("FilesToAlwaysExcludeFromSearch").Descendants("Value").Select(p => p.Value).ToList();
+                directoriesToAlwaysExclude = PreferencesHandler.GetPreference("DirectoriesToAlwaysExcludeFromSearch").Descendants("Value").Select(p => p.Value).ToList();
+
+                if (this.filesToExclude.Count > 0 || this.directoriesToExclude.Count > 0)
+                {
+                    if (filesToAlwaysExclude.Count > 0 || directoriesToAlwaysExclude.Count > 0)
+                    {
+                        List<string> tempFilesToExclude = [.. this.directoriesToExclude, .. this.filesToExclude];
+                        tempFilesToExclude.RemoveAll(tfe => filesToAlwaysExclude.Any(fae => fae == tfe));
+                        tempFilesToExclude.RemoveAll(tfe => directoriesToAlwaysExclude.Any(dae => dae == tfe));
+                        searchedFileList = new SearchedFileList(this.filesToSearch, tempFilesToExclude, filesToAlwaysExclude.Concat(directoriesToAlwaysExclude));
+                    }
+                    else
+                    {
+                        searchedFileList = new SearchedFileList(this.filesToSearch, this.filesToExclude.Concat(this.directoriesToExclude));
+                    }
+                }
+                else
+                {
+                    searchedFileList = new SearchedFileList(this.filesToSearch);
+                }
+            }
+            else
+            {
+                searchedFileList = new SearchedFileList(this.filesToSearch);
+            }
+
+            searchedFileList.Owner = this;
+            searchedFileList.ShowDialog();
+
+            if (PreferencesHandler.PreferencesFile != null)
+            {
+                if (searchedFileList.FilesToInclude.Count > 0)
+                {
+                    this.filesToExclude.RemoveAll(tfe => searchedFileList.FilesToInclude.Any(fi => File.Exists(fi) && fi == tfe));
+                    this.directoriesToExclude.RemoveAll(tde => searchedFileList.FilesToInclude.Any(fi => Directory.Exists(fi) && fi == tde));
+                    filesToAlwaysExclude.RemoveAll(fae => searchedFileList.FilesToInclude.Any(fi => File.Exists(fi) && fi == fae));
+                    directoriesToAlwaysExclude.RemoveAll(fae => searchedFileList.FilesToInclude.Any(fi => Directory.Exists(fi) && fi == fae));
+                    SavePathsToAlwaysExclude(filesToAlwaysExclude, directoriesToAlwaysExclude);
+                }
+            }
+        }
+
+        /// <summary>
         /// Determine whether the basic criteria is provided to perform a search.
         /// </summary>
         /// <returns>Boolean indicating whether the search can be performed.</returns>
@@ -952,6 +1140,8 @@ namespace Searcher
             this.CmbFilters.IsEnabled = enableControls;
             this.CmbSearchType.IsEnabled = enableControls;
 
+            bool fileSearchPerformed = ((this.distinctFilesFound && this.filesToSearch != null && this.filesToSearch.Count > 0) || this.filesToExclude.Count > 0 || this.directoriesToExclude.Count > 0);
+            this.BtnSearchedFiles.IsEnabled = enableControls && fileSearchPerformed;
             this.GrpMatchOptions.IsEnabled = enableControls;
             this.GrpSearchMode.IsEnabled = enableControls;
             this.GrpMisc.IsEnabled = enableControls;
@@ -1185,88 +1375,6 @@ namespace Searcher
             string retVal = fileName;
             retVal = this.filesSearchProgress.Where(fsr => fsr.Value.SearchStartDateTimeTicks > 0).OrderBy(fsr => fsr.Value.SearchStartDateTimeTicks).FirstOrDefault().Value?.FileNamePath ?? fileName;
             return retVal;
-        }
-
-        /// <summary>
-        /// Sets the title bar to display details of user running the application.
-        /// </summary>
-        /// <returns>String containing user name information.</returns>
-        private static string GetRunningUserInfo()
-        {
-            AssemblyTitleAttribute? assemblyTitleAttribute = (AssemblyTitleAttribute)(Attribute.GetCustomAttribute(Assembly.GetExecutingAssembly(), typeof(AssemblyTitleAttribute), false)
-                ?? new AssemblyTitleAttribute(string.Empty));
-            string programName = assemblyTitleAttribute != null
-                ? assemblyTitleAttribute.Title
-                : (Application.Current.Resources["UnknownAssemblyName"].ToString() ?? string.Empty);
-            string userName = string.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
-            WindowsPrincipal principal = new(WindowsIdentity.GetCurrent());
-
-            if (principal.IsInRole(WindowsBuiltInRole.Administrator))
-            {
-                userName += " - " + Application.Current.Resources["Administrator"].ToString();
-            }
-
-            return string.Format("{0} ({1})", programName, userName);
-        }
-
-        /// <summary>
-        /// Show the files used in the search
-        /// </summary>
-        /// <param name="sender">The sender object.</param>
-        /// <param name="e">The MouseButtonEventArgs object.</param>
-        private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if ((this.distinctFilesFound && this.filesToSearch != null && this.filesToSearch.Count > 0) || (this.filesToExclude.Count > 0 || this.directoriesToExclude.Count > 0))
-            {
-                SearchedFileList searchedFileList;
-                List<string> filesToAlwaysExclude = [];
-                List<string> directoriesToAlwaysExclude = [];
-                this.filesToSearch ??= [];
-
-                if (PreferencesHandler.PreferencesFile != null)
-                {
-                    filesToAlwaysExclude = PreferencesHandler.GetPreference("FilesToAlwaysExcludeFromSearch").Descendants("Value").Select(p => p.Value).ToList();
-                    directoriesToAlwaysExclude = PreferencesHandler.GetPreference("DirectoriesToAlwaysExcludeFromSearch").Descendants("Value").Select(p => p.Value).ToList();
-
-                    if (this.filesToExclude.Count > 0 || this.directoriesToExclude.Count > 0)
-                    {
-                        if (filesToAlwaysExclude.Count > 0 || directoriesToAlwaysExclude.Count > 0)
-                        {
-                            List<string> tempFilesToExclude = [.. this.directoriesToExclude, .. this.filesToExclude];
-                            tempFilesToExclude.RemoveAll(tfe => filesToAlwaysExclude.Any(fae => fae == tfe));
-                            tempFilesToExclude.RemoveAll(tfe => directoriesToAlwaysExclude.Any(dae => dae == tfe));
-                            searchedFileList = new SearchedFileList(this.filesToSearch, tempFilesToExclude, filesToAlwaysExclude.Concat(directoriesToAlwaysExclude));
-                        }
-                        else
-                        {
-                            searchedFileList = new SearchedFileList(this.filesToSearch, this.filesToExclude.Concat(this.directoriesToExclude));
-                        }
-                    }
-                    else
-                    {
-                        searchedFileList = new SearchedFileList(this.filesToSearch);
-                    }
-                }
-                else
-                {
-                    searchedFileList = new SearchedFileList(this.filesToSearch);
-                }
-
-                searchedFileList.Owner = this;
-                searchedFileList.ShowDialog();
-
-                if (PreferencesHandler.PreferencesFile != null)
-                {
-                    if (searchedFileList.FilesToInclude.Count > 0)
-                    {
-                        this.filesToExclude.RemoveAll(tfe => searchedFileList.FilesToInclude.Any(fi => File.Exists(fi) && fi == tfe));
-                        this.directoriesToExclude.RemoveAll(tde => searchedFileList.FilesToInclude.Any(fi => Directory.Exists(fi) && fi == tde));
-                        filesToAlwaysExclude.RemoveAll(fae => searchedFileList.FilesToInclude.Any(fi => File.Exists(fi) && fi == fae));
-                        directoriesToAlwaysExclude.RemoveAll(fae => searchedFileList.FilesToInclude.Any(fi => Directory.Exists(fi) && fi == fae));
-                        SavePathsToAlwaysExclude(filesToAlwaysExclude, directoriesToAlwaysExclude);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -1595,23 +1703,6 @@ namespace Searcher
         }
 
         /// <summary>
-        /// If filters exclusion is set, remove the files that are to be exlcuded from search.
-        /// </summary>
-        /// <param name="filtersToUse">The list of filters to exclude.</param>
-        private async Task RemoveFilesForFilterExclusion(List<string> filtersToUse)
-        {
-            await Task.Run(() =>
-            {
-                filesToSearch = filesToSearch.Distinct().ToList();
-
-                foreach (string filter in filtersToUse)
-                {
-                    filesToSearch.RemoveAll(f => Regex.Matches(f, filter.Replace("*", ".*"), RegexOptions.IgnoreCase).Count > 0);
-                }
-            });
-        }
-
-        /// <summary>
         /// Event handler for the Regex radio button.
         /// </summary>
         /// <param name="sender">The sender object.</param>
@@ -1669,6 +1760,22 @@ namespace Searcher
         }
 
         /// <summary>
+        /// If filters exclusion is set, remove the files that are to be exlcuded from search.
+        /// </summary>
+        /// <param name="filtersToUse">The list of filters to exclude.</param>
+        private async Task RemoveFilesForFilterExclusion(List<string> filtersToUse)
+        {
+            await Task.Run(() =>
+            {
+                filesToSearch = filesToSearch.Distinct().ToList();
+
+                foreach (string filter in filtersToUse)
+                {
+                    filesToSearch.RemoveAll(f => Regex.Matches(f, filter.Replace("*", ".*"), RegexOptions.IgnoreCase).Count > 0);
+                }
+            });
+        }
+        /// <summary>
         /// Reset the search progress on initiating a search.
         /// </summary>
         private void ResetSearch()
@@ -1706,34 +1813,6 @@ namespace Searcher
                 File.WriteAllText(sfd.FileName, new TextRange(this.TxtResults.Document.ContentStart, this.TxtResults.Document.ContentEnd).Text);
             }
         }
-
-        /// <summary>
-        /// Set the paths that will be always excluded.
-        /// </summary>
-        /// <param name="filesToAlwaysExclude">The list of file paths.</param>
-        /// <param name="directoriesToAlwaysExclude">The list of directory paths.</param>
-        private static void SavePathsToAlwaysExclude(List<string> filesToAlwaysExclude, List<string> directoriesToAlwaysExclude)
-        {
-            PreferencesHandler.GetPreference("FilesToAlwaysExcludeFromSearch").FirstOrDefault()?.RemoveAll();
-            PreferencesHandler.GetPreference("DirectoriesToAlwaysExcludeFromSearch").FirstOrDefault()?.RemoveAll();
-
-            filesToAlwaysExclude.ForEach(fae =>
-            {
-                if (File.Exists(fae))
-                {
-                    PreferencesHandler.GetPreference("FilesToAlwaysExcludeFromSearch").FirstOrDefault()?.Add(new XElement("Value", fae));
-                }
-            });
-
-            directoriesToAlwaysExclude.ForEach(fae =>
-            {
-                if (Directory.Exists(fae))
-                {
-                    PreferencesHandler.GetPreference("DirectoriesToAlwaysExcludeFromSearch").FirstOrDefault()?.Add(new XElement("Value", fae));
-                }
-            });
-        }
-
         /// <summary>
         /// Get the search result and display in text box.
         /// </summary>
@@ -1936,6 +2015,7 @@ namespace Searcher
             this.ChkShowMatchCount.Content = Application.Current.Resources["FileMatchCount"].ToString();
             this.BtnSearch.Content = Application.Current.Resources["Search"].ToString();
             this.BtnCancel.Content = Application.Current.Resources["Cancel"].ToString();
+            this.BtnSearchedFiles.Content = Application.Current.Resources["SearchedFiles"].ToString();
             this.CmbItemAny.Content = Application.Current.Resources["Any"].ToString();
             this.CmbItemAll.Content = Application.Current.Resources["All"].ToString();
             this.ChkExcludeFilters.Content = Application.Current.Resources["Exclude"].ToString();
@@ -1956,7 +2036,7 @@ namespace Searcher
             this.StkChangeLanguage.ToolTip = Application.Current.Resources["TooltipChangeLanguage"].ToString();
             this.StkFileCreationEndDate.ToolTip = Application.Current.Resources["TooltipFileCreateEndDate"].ToString();
             this.StkFileCreationStartDate.ToolTip = Application.Current.Resources["TooltipFileCreateStartDate"].ToString();
-            this.GrdProgressResult.ToolTip = Application.Current.Resources["TooltipOpenSearchedFileList"].ToString();
+            this.BtnSearchedFiles.ToolTip = Application.Current.Resources["TooltipOpenSearchedFileList"].ToString();
         }
 
         /// <summary>
@@ -2051,27 +2131,6 @@ namespace Searcher
             this.editorNamePath = PreferencesHandler.GetPreferenceValue("CustomEditor") ?? "notepad";
             this.TxtEditor.Text = Path.GetFileNameWithoutExtension(this.editorNamePath);
         }
-
-        /// <summary>
-        /// Set a jump list for the window.
-        /// </summary>
-        private static void SetJumpList()
-        {
-            JumpTask jmpPreferences = new()
-            {
-                ApplicationPath = PreferencesHandler.PreferenceFilePath,
-                IconResourcePath = @"C:\Windows\notepad.exe",
-                Title = "Preferences",
-                Description = Application.Current.Resources["OpenPreferencesFile"].ToString(),
-                CustomCategory = "Settings"
-            };
-
-            JumpList jmpList = JumpList.GetJumpList(Application.Current);
-            jmpList.JumpItems.Add(jmpPreferences);
-            JumpList.AddToRecentCategory(jmpPreferences);
-            jmpList.Apply();
-        }
-
         /// <summary>
         /// Set language based on culture.
         /// </summary>
@@ -2196,25 +2255,6 @@ namespace Searcher
 
             this.SetProgressInformation(progressMessage);
         }
-
-        /// <summary>
-        /// Set the dates used by the application.
-        /// </summary>
-        /// <param name="datePicker">The date picker control.</param>
-        /// <param name="preferenceElement">The preference element to use.</param>
-        private static void SetSearchDate(DatePicker datePicker, string preferenceElement)
-        {
-            if (PreferencesHandler.PreferencesFile != null && PreferencesHandler.GetPreference(preferenceElement) != null)
-            {
-                string strDateToSet = PreferencesHandler.GetPreferenceValue(preferenceElement);
-
-                if (DateTime.TryParse(strDateToSet, out DateTime dateToSet))
-                {
-                    datePicker.SelectedDate = dateToSet;
-                }
-            }
-        }
-
         /// <summary>
         /// Show any error on attempting to find matches.
         /// </summary>
@@ -2249,21 +2289,6 @@ namespace Searcher
                 }
             }
         }
-
-        /// <summary>
-        /// Sets the maximum lengths for the search inputs.
-        /// </summary>
-        /// <param name="comboBox">The combo box object whose input is to be restricted.</param>
-        /// <param name="maxAllowedLength">The maximum input length allowed for the combo box object.</param>
-        private static void SetSearchInputMaxLengths(ComboBox comboBox, int maxAllowedLength)
-        {
-            TextBox editableTextBox = (TextBox)comboBox.Template.FindName("PART_EditableTextBox", comboBox);
-            if (editableTextBox != null)
-            {
-                editableTextBox.MaxLength = maxAllowedLength;
-            }
-        }
-
         /// <summary>
         /// Set up the separator character to be used when searching.
         /// </summary>
@@ -2391,16 +2416,6 @@ namespace Searcher
             _ = int.TryParse(strPopupWindowHeight, out this.popupWindowHeight);
             _ = int.TryParse(strPopupWindowTimeoutSeconds, out this.popupWindowTimeoutSeconds);
         }
-
-        /// <summary>
-        /// Show any error on attempting to read file or find matches.
-        /// </summary>
-        /// <param name="ex">The incurred exception object.</param>
-        private static void ShowError(Exception ex)
-        {
-            MessageBox.Show(ex.Message + Environment.NewLine + ex.StackTrace, Application.Current.Resources["ErrorOccurred"].ToString());
-        }
-
         /// <summary>
         /// Show an error as a quick popup, and hide it afterwards.
         /// </summary>
@@ -2486,33 +2501,6 @@ namespace Searcher
                 }
             }
         }
-
-        /// <summary>
-        /// Update the content of the drop down combo box.
-        /// </summary>
-        /// <param name="comboBox">The combo box control object.</param>
-        private static void UpdateDropdownListOrder(ComboBox comboBox)
-        {
-            if (comboBox.SelectedItem != null)
-            {
-                List<string> directories = [];
-                string selectedItem = comboBox.Text;
-                directories.Add(selectedItem);
-
-                foreach (var item in comboBox.Items)
-                {
-                    if (!string.IsNullOrWhiteSpace(item.ToString()) && item.ToString() != selectedItem)
-                    {
-                        directories.Add(item.ToString()!);
-                    }
-                }
-
-                comboBox.Items.Clear();
-                directories.ForEach(s => comboBox.Items.Add(s));
-                comboBox.SelectedIndex = 0;
-            }
-        }
-
         /// <summary>
         /// Update the UI with results from search.
         /// </summary>

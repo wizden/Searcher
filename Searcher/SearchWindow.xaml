@@ -32,6 +32,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
             <RowDefinition Height="20" />
             <RowDefinition Height="5*" MinHeight="100" />
             <RowDefinition Height="5" Name="GrdRowErrorsGridSplitter" />
@@ -48,7 +49,6 @@
                 <RowDefinition Height="30" />
                 <RowDefinition Height="30" />
                 <RowDefinition Height="auto" />
-                <RowDefinition Height="30" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -210,20 +210,32 @@
                     </Grid>
                 </Grid>
             </Expander>
+        </Grid>
 
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <Button Grid.Row="4" Grid.Column="0" Content="Search" Name="BtnSearch" 
                     HorizontalAlignment="Left" Click="BtnSearch_Click" IsDefault="True" />
-            
-            <Button Grid.Row="4" Grid.Column="1" Content="Cancel" Name="BtnCancel" 
+
+            <Button Grid.Row="4" Grid.Column="1" Content="Searched Files" Name="BtnSearchedFiles" 
+                    HorizontalAlignment="Center" IsEnabled="False" Click="BtnSearchedFiles_Click" 
+                    Width="120"/>
+
+            <Button Grid.Row="4" Grid.Column="2" Content="Cancel" Name="BtnCancel" 
                     HorizontalAlignment="Right" IsEnabled="False" Click="BtnCancel_Click" IsCancel="True" />
         </Grid>
 
-        <Grid Grid.Row="1" Name="GrdProgressResult" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+        <Grid Grid.Row="2" Name="GrdProgressResult">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="73*" />
+                <ColumnDefinition Width="77*"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar Grid.Column="0" Minimum="0" Name="PgBarSearch" />
-            <Grid Grid.Column="1">
+            <ProgressBar Grid.Column="0" Minimum="0" Name="PgBarSearch" Grid.ColumnSpan="2" Margin="3,3,3,3" />
+            <Grid Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="*" />
@@ -235,7 +247,7 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <RichTextBox Name="TxtResults" IsReadOnly="True" IsReadOnlyCaretVisible="True" 
                          PreviewMouseWheel="TxtResults_PreviewMouseWheel" 
                          MouseDoubleClick="TxtResults_MouseDoubleClick"
@@ -247,12 +259,12 @@
             <TextBlock Name="TxtBlkScaleValue" Foreground="Gray" Visibility="Hidden" FontSize="30" HorizontalAlignment="Center" Margin="50" Text="{Binding Scale, StringFormat={}{0:P0}}" />
         </Grid>
 
-        <GridSplitter Grid.Row="3" Name="SplitterErrors" HorizontalAlignment="Stretch" 
+        <GridSplitter Grid.Row="4" Name="SplitterErrors" HorizontalAlignment="Stretch" 
                       ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" Visibility="Collapsed" />
 
-        <Border Grid.Row="4" Name="BrdrErrors" Visibility="Collapsed">
+        <Border Grid.Row="5" Name="BrdrErrors" Visibility="Collapsed">
             <TextBox Grid.Row="3" Name="TxtErrors" IsReadOnly="True" IsReadOnlyCaretVisible="True" Foreground="Red" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" />
         </Border>
     </Grid>
-    
+
 </Window>
