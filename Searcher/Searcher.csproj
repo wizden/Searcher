@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
 	<UseWindowsForms>true</UseWindowsForms>
 	<ApplicationIcon>Searcher.ico</ApplicationIcon>
-	<AssemblyVersion>2.1.1</AssemblyVersion>
+	<AssemblyVersion>2.1.2</AssemblyVersion>
 	<FileVersion>$(AssemblyVersion)</FileVersion>
 	<Version>$(AssemblyVersion)</Version>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
@@ -50,7 +50,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Octokit" Version="10.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Octokit" Version="14.0.0" />
   </ItemGroup>
 
   <ItemGroup>

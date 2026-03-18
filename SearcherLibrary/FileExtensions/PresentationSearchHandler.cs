@@ -172,7 +172,7 @@ namespace SearcherLibrary.FileExtensions
                 {
                     var slide = presentation.SlideIdList.Where(s => ((SlideId)s).RelationshipId == presentationPart.GetIdOfPart(slidePart)).FirstOrDefault();
 
-                    if (slide != null)
+                    if (slide != null && slidePart.Slide != null)
                     {
                         var index = presentation.SlideIdList.ToList().IndexOf(slide);
                         relationshipId = ((SlideId)presentation.SlideIdList.ChildElements[index]).RelationshipId;
