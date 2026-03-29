@@ -3,36 +3,32 @@
 // </copyright>
 // <author>Dennis Joseph</author>
 
+/*
+ * Searcher - Utility to search file content
+ * Copyright (C) 2018  Dennis Joseph
+ * 
+ * This file is part of Searcher.
+
+ * Searcher is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Searcher is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using SharpCompress.Archives;
+using SharpCompress.Common;
+using System.IO.Compression;
+
 namespace SearcherLibrary.FileExtensions
 {
-    /*
-     * Searcher - Utility to search file content
-     * Copyright (C) 2018  Dennis Joseph
-     * 
-     * This file is part of Searcher.
-
-     * Searcher is free software: you can redistribute it and/or modify
-     * it under the terms of the GNU General Public License as published by
-     * the Free Software Foundation, either version 3 of the License, or
-     * (at your option) any later version.
-     * 
-     * Searcher is distributed in the hope that it will be useful,
-     * but WITHOUT ANY WARRANTY; without even the implied warranty of
-     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     * GNU General Public License for more details.
-     * 
-     * You should have received a copy of the GNU General Public License
-     * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
-     */
-
-    using SharpCompress.Common;
-    using SharpCompress.Readers;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.IO.Compression;
-    using System.Linq;
-
     /// <summary>
     /// Class to search archive files.
     /// </summary>
@@ -61,30 +57,30 @@ namespace SearcherLibrary.FileExtensions
             List<MatchedLine> matchedLines = [];
             string tempDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + TempExtractDirectoryName);
             Directory.CreateDirectory(tempDirPath);
-            SharpCompress.Archives.IArchive? archive = null;
+            IArchive? archive = null;
 
             try
             {
 
                 if (fileName.ToUpper().EndsWith(".GZ") && SharpCompress.Archives.GZip.GZipArchive.IsGZipFile(fileName))
                 {
-                    archive = SharpCompress.Archives.GZip.GZipArchive.Open(fileName);
+                    archive = SharpCompress.Archives.GZip.GZipArchive.OpenArchive(fileName);
                 }
                 else if (fileName.ToUpper().EndsWith(".RAR") && SharpCompress.Archives.Rar.RarArchive.IsRarFile(fileName))
                 {
-                    archive = SharpCompress.Archives.Rar.RarArchive.Open(fileName);
+                    archive = SharpCompress.Archives.Rar.RarArchive.OpenArchive(fileName);
                 }
                 else if (fileName.ToUpper().EndsWith(".7Z") && SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(fileName))
                 {
-                    archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fileName);
+                    archive = SharpCompress.Archives.SevenZip.SevenZipArchive.OpenArchive(fileName);
                 }
                 else if (fileName.ToUpper().EndsWith(".TAR") && SharpCompress.Archives.Tar.TarArchive.IsTarFile(fileName))
                 {
-                    archive = SharpCompress.Archives.Tar.TarArchive.Open(fileName);
+                    archive = SharpCompress.Archives.ArchiveFactory.OpenArchive(fileName);
                 }
                 else if (fileName.ToUpper().EndsWith(".ZIP") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
                 {
-                    archive = SharpCompress.Archives.Zip.ZipArchive.Open(fileName);
+                    archive = SharpCompress.Archives.Zip.ZipArchive.OpenArchive(fileName);
                 }
 
                 if (archive != null)
@@ -146,24 +142,23 @@ namespace SearcherLibrary.FileExtensions
         /// <param name="archive">The archive to be searched.</param>
         /// <param name="matcher">The matcher object to determine search criteria.</param>
         /// <returns>The matched lines containing the search terms.</returns>
-        private static List<MatchedLine> GetMatchedLinesInZipArchive(string fileName, IEnumerable<string> searchTerms, string tempDirPath, SharpCompress.Archives.IArchive archive, Matcher matcher)
+        private static List<MatchedLine> GetMatchedLinesInZipArchive(string fileName, IEnumerable<string> searchTerms, string tempDirPath, IArchive archive, Matcher matcher)
         {
             List<MatchedLine> matchedLines = [];
 
             try
             {
-                IReader reader = archive.ExtractAllEntries();
-                while (reader.MoveToNextEntry())
+                foreach (IArchiveEntry entry in archive.Entries)
                 {
-                    if (!reader.Entry.IsDirectory)
+                    if (!entry.IsDirectory)
                     {
                         // Ignore symbolic links as these are captured by the original target.
-                        if (string.IsNullOrWhiteSpace(reader.Entry.LinkTarget) && !reader.Entry.Key.Any(c => DisallowedCharactersByOperatingSystem.Any(dc => dc == c)))
+                        if (string.IsNullOrWhiteSpace(entry.LinkTarget) && entry.Key != null && !entry.Key.Any(c => DisallowedCharactersByOperatingSystem.Any(dc => dc == c)))
                         {
                             try
                             {
-                                reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                                string fullFilePath = Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
+                                entry.WriteToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                string fullFilePath = Path.Combine(tempDirPath, entry.Key.Replace(@"/", @"\"));
                                 matchedLines!.AddRange(FileSearchHandlerFactory.Search(fullFilePath, searchTerms, matcher));
 
                                 if (matchedLines != null && matchedLines.Count > 0)
@@ -176,7 +171,7 @@ namespace SearcherLibrary.FileExtensions
                             }
                             catch (PathTooLongException ptlex)
                             {
-                                throw new PathTooLongException(string.Format("{0} {1} {2} {3} - {4}", Resources.Strings.ErrorAccessingEntry, reader.Entry.Key, Resources.Strings.InArchive, fileName, ptlex.Message));
+                                throw new PathTooLongException(string.Format("{0} {1} {2} {3} - {4}", Resources.Strings.ErrorAccessingEntry, entry.Key, Resources.Strings.InArchive, fileName, ptlex.Message));
                             }
                         }
                     }

@@ -3,37 +3,33 @@
 // </copyright>
 // <author>Dennis Joseph</author>
 
+/*
+ * Searcher - Utility to search file content
+ * Copyright (C) 2018  Dennis Joseph
+ * 
+ * This file is part of Searcher.
+
+ * Searcher is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Searcher is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using SharpCompress.Archives;
+using SharpCompress.Common;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
+
 namespace SearcherLibrary.FileExtensions
 {
-    /*
-     * Searcher - Utility to search file content
-     * Copyright (C) 2018  Dennis Joseph
-     * 
-     * This file is part of Searcher.
-
-     * Searcher is free software: you can redistribute it and/or modify
-     * it under the terms of the GNU General Public License as published by
-     * the Free Software Foundation, either version 3 of the License, or
-     * (at your option) any later version.
-     * 
-     * Searcher is distributed in the hope that it will be useful,
-     * but WITHOUT ANY WARRANTY; without even the implied warranty of
-     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     * GNU General Public License for more details.
-     * 
-     * You should have received a copy of the GNU General Public License
-     * along with Searcher.  If not, see <https://www.gnu.org/licenses/>.
-     */
-
-    using SharpCompress.Common;
-    using SharpCompress.Readers;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using System.Xml.Linq;
-
     /// <summary>
     /// Class to search ODS files.
     /// </summary>
@@ -65,32 +61,31 @@ namespace SearcherLibrary.FileExtensions
             try
             {
                 Directory.CreateDirectory(tempDirPath);
-                SharpCompress.Archives.Zip.ZipArchive? archive = null;
+                IArchive? archive = null;
 
                 if (fileName.ToUpper().EndsWith(".ODS") && SharpCompress.Archives.Zip.ZipArchive.IsZipFile(fileName))
                 {
-                    archive = SharpCompress.Archives.Zip.ZipArchive.Open(fileName);
+                    archive = ArchiveFactory.OpenArchive(fileName);
                 }
 
                 if (archive != null)
                 {
-                    IReader reader = archive.ExtractAllEntries();
-                    while (reader.MoveToNextEntry())
+                    foreach (IArchiveEntry entry in archive.Entries)
                     {
-                        if (!reader.Entry.IsDirectory && reader.Entry.Key == "content.xml")
+                        if (!entry.IsDirectory && entry.Key == "content.xml")
                         {
                             // Ignore symbolic links as these are captured by the original target.
-                            if (string.IsNullOrWhiteSpace(reader.Entry.LinkTarget) && !reader.Entry.Key.Any(c => DisallowedCharactersByOperatingSystem.Any(dc => dc == c)))
+                            if (string.IsNullOrWhiteSpace(entry.LinkTarget) && !entry.Key.Any(c => DisallowedCharactersByOperatingSystem.Any(dc => dc == c)))
                             {
                                 try
                                 {
-                                    reader.WriteEntryToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                                    string fullFilePath = System.IO.Path.Combine(tempDirPath, reader.Entry.Key.Replace(@"/", @"\"));
+                                    entry.WriteToDirectory(tempDirPath, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                    string fullFilePath = Path.Combine(tempDirPath, entry.Key.Replace(@"/", @"\"));
                                     matchedLines = GetMatchesFromOdsContentXml(fileName, fullFilePath, searchTerms, matcher);
                                 }
                                 catch (PathTooLongException ptlex)
                                 {
-                                    throw new PathTooLongException(string.Format("{0} {1} {2} {3} - {4}", Resources.Strings.ErrorAccessingEntry, reader.Entry.Key, Resources.Strings.InArchive, fileName, ptlex.Message));
+                                    throw new PathTooLongException(string.Format("{0} {1} {2} {3} - {4}", Resources.Strings.ErrorAccessingEntry, entry.Key, Resources.Strings.InArchive, fileName, ptlex.Message));
                                 }
                             }
                         }

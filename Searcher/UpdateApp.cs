@@ -379,7 +379,7 @@ namespace Searcher
                     if (output.Contains(desktopRuntimeName))
                     {
                         short appNetRuntimeVersion = 8;     // .NET 8 minimum version must be installed.
-                        var desktopRuntimes = output.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                        var desktopRuntimes = output.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
                             .Where(rt => rt.Contains(desktopRuntimeName));
                         var versions = desktopRuntimes.Select(rt =>
                             Version.Parse(rt[desktopRuntimeName.Length..rt.IndexOf('[')].Trim()));
