@@ -305,6 +305,18 @@ namespace Searcher
             windowWidth = this.Width;
         }
 
-        #endregion Private Methods  
+        /// <summary>
+        /// Set up controls on window load.
+        /// </summary>
+        /// <param name="sender">The parameter is not used.</param>
+        /// <param name="e">The parameter is not used.</param>
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.LstAlwaysExcluded.Background = this.Background;
+            this.LstFileList.Background = this.Background;
+            this.LstTemporarilyExcluded.Background = this.Background;
+        }
+
+        #endregion Private Methods          
     }
 }

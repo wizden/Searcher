@@ -26,6 +26,7 @@
         mc:Ignorable="d" ShowInTaskbar="False" ShowActivated="True"
         WindowStyle="ToolWindow" ResizeMode="CanResize" Name="ContentPopupWindow"
         MouseEnter="ContentPopupWindow_MouseEnter" MouseLeave="ContentPopup_MouseLeave"
+        Loaded="ContentPopupWindow_Loaded"
         Title="ContentPopup" Height="300" Width="500"
         MinHeight="200" MinWidth="400"
         MaxHeight="600" MaxWidth="800">
