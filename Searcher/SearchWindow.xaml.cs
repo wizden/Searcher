@@ -919,6 +919,7 @@ namespace Searcher
             }
 
             searchedFileList.Owner = this;
+            searchedFileList.Background = this.applicationBackColour;
             searchedFileList.ShowDialog();
 
             if (PreferencesHandler.PreferencesFile != null)
@@ -1161,7 +1162,8 @@ namespace Searcher
                 DirectoryExclude dirExcludeWindow = new(fullFilePath)
                 {
                     PreferenceFileExists = PreferencesHandler.PreferencesFile != null,
-                    Owner = this
+                    Owner = this,
+                    Background = this.applicationBackColour,
                 };
 
                 if (dirExcludeWindow.ShowDialog() == true)
@@ -2451,6 +2453,7 @@ namespace Searcher
                     {
                         this.contentPopup = new ContentPopup(file, lineNo)
                         {
+                            Background = this.applicationBackColour,
                             Width = this.popupWindowWidth,
                             Height = this.popupWindowHeight,
                             WindowCloseTimeoutSeconds = (this.popupWindowTimeoutSeconds < 2 || this.popupWindowTimeoutSeconds > 20)

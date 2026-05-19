@@ -210,6 +210,16 @@ namespace Searcher
         }
 
         /// <summary>
+        /// Event fired after the window is loaded.
+        /// </summary>
+        /// <param name="sender">The parameter is not used.</param>
+        /// <param name="e">The parameter is not used.</param>
+        private void ContentPopupWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.TxtContent.Background = this.Background;
+        }
+
+        /// <summary>
         /// Close popup after mouse leaves control.
         /// </summary>
         /// <param name="sender">The parameter is not used.</param>

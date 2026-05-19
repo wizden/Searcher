@@ -23,6 +23,7 @@
         Title="Searched File List" Height="400" Width="600" 
         ShowInTaskbar="False" WindowStyle="ToolWindow"
         MinHeight="300" MinWidth="500"
+        Loaded="Window_Loaded"
         KeyDown="SearchedFileList_KeyDown" Closed="Window_Closed">
     <Grid>
         <Grid.RowDefinitions>

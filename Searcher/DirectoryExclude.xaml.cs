@@ -166,6 +166,7 @@ namespace Searcher
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.GrdExclusionType.Visibility = this.PreferenceFileExists ? Visibility.Visible : Visibility.Collapsed;
+            this.TvDirectoryStructure.Background = this.Background;
             this.TvDirectoryStructure.Focus();
         }
     }
